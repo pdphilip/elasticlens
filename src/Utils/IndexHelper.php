@@ -2,8 +2,8 @@
 
 namespace PDPhilip\ElasticLens\Utils;
 
-use PDPhilip\Elasticsearch\Schema\Schema;
 use PDPhilip\ElasticLens\Index\LensIndex;
+use PDPhilip\Elasticsearch\Schema\Schema;
 
 class IndexHelper extends LensIndex
 {

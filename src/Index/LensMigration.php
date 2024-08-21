@@ -3,10 +3,10 @@
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
-use PDPhilip\Elasticsearch\Schema\Schema;
 use PDPhilip\ElasticLens\Models\IndexableBuildState;
 use PDPhilip\ElasticLens\Traits\Timer;
+use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+use PDPhilip\Elasticsearch\Schema\Schema;
 
 class LensMigration extends LensIndex
 {
@@ -73,6 +73,7 @@ class LensMigration extends LensIndex
         } catch (Exception $e) {
 
         }
+
         return false;
     }
 }

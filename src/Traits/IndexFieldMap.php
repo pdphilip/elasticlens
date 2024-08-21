@@ -2,10 +2,11 @@
 
 namespace PDPhilip\ElasticLens\Traits;
 
+use Exception;
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
 use PDPhilip\ElasticLens\Index\BuildResult;
 use PDPhilip\ElasticLens\Index\LensBuilder;
-use Exception;
+
 trait IndexFieldMap
 {
     //----------------------------------------------------------------------

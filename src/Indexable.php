@@ -3,9 +3,9 @@
 namespace PDPhilip\ElasticLens;
 
 use Exception;
+use PDPhilip\ElasticLens\Observers\ObserverRegistry;
 use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\Model;
-use PDPhilip\ElasticLens\Observers\ObserverRegistry;
 
 trait Indexable
 {

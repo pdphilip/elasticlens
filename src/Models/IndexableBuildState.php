@@ -3,10 +3,10 @@
 namespace PDPhilip\ElasticLens\Models;
 
 use Illuminate\Support\Carbon;
-use PDPhilip\Elasticsearch\Eloquent\Model;
-use PDPhilip\Elasticsearch\Schema\Schema;
 use PDPhilip\ElasticLens\Enums\IndexableStateType;
 use PDPhilip\ElasticLens\Index\BuildResult;
+use PDPhilip\Elasticsearch\Eloquent\Model;
+use PDPhilip\Elasticsearch\Schema\Schema;
 
 /**
  * App\Models\IndexableLog
@@ -27,7 +27,6 @@ use PDPhilip\ElasticLens\Index\BuildResult;
  ******Attributes*******
  * @property-read string $state_name
  * @property-read string $state_color
- *
  */
 class IndexableBuildState extends Model
 {

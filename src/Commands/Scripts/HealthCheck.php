@@ -110,7 +110,7 @@ final class HealthCheck
         }
     }
 
-    public static function buildTriggerChain($embed, &$chain) : void
+    public static function buildTriggerChain($embed, &$chain): void
     {
         $chain[] = class_basename($embed['model']);
         if (! empty($embed['upstream'])) {

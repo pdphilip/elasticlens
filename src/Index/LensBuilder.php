@@ -269,7 +269,6 @@ class LensBuilder extends LensIndex
     // Dispatchers
     //----------------------------------------------------------------------
 
-
     public function dispatchBuild($modelId, $observedModel)
     {
         IndexBuildJob::dispatch($this->indexModel, $modelId, $observedModel);

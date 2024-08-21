@@ -3,8 +3,8 @@
 namespace PDPhilip\ElasticLens\Commands\Scripts;
 
 use Exception;
-use PDPhilip\Elasticsearch\Schema\Schema;
 use PDPhilip\ElasticLens\Models\IndexableBuildState;
+use PDPhilip\Elasticsearch\Schema\Schema;
 
 final class ConfigCheck
 {

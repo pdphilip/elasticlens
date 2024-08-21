@@ -4,8 +4,8 @@ namespace PDPhilip\ElasticLens;
 
 use PDPhilip\Elasticsearch\Eloquent\Model;
 
-class Lens {
-
+class Lens
+{
     //----------------------------------------------------------------------
     // Indexes
     //----------------------------------------------------------------------
@@ -50,5 +50,4 @@ class Lens {
 
         return false;
     }
-
 }

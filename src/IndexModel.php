@@ -3,10 +3,10 @@
 namespace PDPhilip\ElasticLens;
 
 use Illuminate\Support\Collection;
-use PDPhilip\Elasticsearch\Eloquent\Model;
 use PDPhilip\ElasticLens\Traits\IndexBaseModel;
 use PDPhilip\ElasticLens\Traits\IndexFieldMap;
 use PDPhilip\ElasticLens\Traits\IndexMigrationMap;
+use PDPhilip\Elasticsearch\Eloquent\Model;
 use RuntimeException;
 
 /** @phpstan-consistent-constructor */
