@@ -1,6 +1,6 @@
 <div>
     @include('elasticlens::cli.partials.title',[
-                    'title' => 'OmniLens Status',
+                    'title' => 'ElasticLens Status',
                 'color' => 'teal',
     ])
     @include('elasticlens::cli.partials.new-line')

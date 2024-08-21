@@ -38,8 +38,7 @@
     },
     "autoload": {
         "psr-4": {
-            "PDPhilip\\ElasticLens\\": "src/",
-            "PDPhilip\\ElasticLens\\Database\\Factories\\": "database/factories/"
+            "PDPhilip\\ElasticLens\\": "src/"
         }
     },
     "autoload-dev": {

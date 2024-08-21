@@ -121,7 +121,7 @@ final class ConfigCheck
         if (! $hasIndex) {
             $output['indexable_state_connect']['status'] = 'error';
             $output['indexable_state_connect']['help'] = [
-                'Indexable State Tracking index not found. Run: php artisan ElasticLens:migrate',
+                'Indexable State Tracking index not found. Run: php artisan lens:install',
             ];
         }
         $output['indexable_state_log_trim'] = [

@@ -1,16 +1,11 @@
 <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/omnilens/logo-2.png"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/logo.png"
       alt="ElasticLens"
-      height="64"
+      height="256"
     />
-  <h1>
-    <b>
-      ElasticLens for Laravel
-    </b>
-  </h1>
   <h4>
-    Search your models with the convenience of Eloquent and the power of Elasticsearch
+    Search your <strong>Laravel Models</strong> with the convenience of Eloquent and the power of Elasticsearch
   </h4>
   <p>
 
@@ -455,7 +450,6 @@ Docs for Migrations: https://elasticsearch.pdphilip.com/migrations
 The version is captured in the `IndexableState` model when built
 
 To run the migration: `php artisan lens:build User` - which will delete the entire index, run the migration and rebuild all the records
-
 
 
 ---

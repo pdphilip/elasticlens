@@ -23,7 +23,7 @@ class ElasticLensServiceProvider extends PackageServiceProvider
             ->name('elasticlens')
             ->hasConfigFile()
             ->hasViews('elasticlens')
-            ->hasMigration('create_elasticlens_build_states_index')
+            ->hasMigration('create_indexable_build_states_index')
             ->runsMigrations()
             ->hasCommand(LensHealthCommand::class)
             ->hasCommand(LensStatusCommand::class)
@@ -31,6 +31,7 @@ class ElasticLensServiceProvider extends PackageServiceProvider
             ->hasCommand(LensMakeCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
+                    ->setName('lens:install')
                     ->publishConfigFile()
                     ->publishMigrations()
                     ->askToRunMigrations()

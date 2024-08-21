@@ -15,7 +15,7 @@ use function Termwind\render;
 
 class LensBuildCommand extends Command
 {
-    public $signature = 'ElasticLens:build {model} {--force}';
+    public $signature = 'lens:build {model} {--force}';
 
     public $description = 'Builds the index for the specified model';
 
