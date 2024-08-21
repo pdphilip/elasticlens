@@ -1,5 +1,5 @@
 <?php
 
-use PDPhilip\Omnilens\Tests\TestCase;
+use PDPhilip\ElasticLens\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

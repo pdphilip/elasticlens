@@ -18,7 +18,7 @@ ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index
 </div>
 <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/omnilens/omnilens-build.gif"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-build.gif"
       alt="ElasticLens Build"
     />
 </div>

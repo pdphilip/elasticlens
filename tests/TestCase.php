@@ -1,10 +1,10 @@
 <?php
 
-namespace PDPhilip\Omnilens\Tests;
+namespace PDPhilip\ElasticLens\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use PDPhilip\Omnilens\OmnilensServiceProvider;
+use PDPhilip\ElasticLens\ElasticLensServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -20,7 +20,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            OmnilensServiceProvider::class,
+            ElasticLensServiceProvider::class,
         ];
     }
 
