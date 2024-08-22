@@ -1,30 +1,30 @@
-<div align="center">
+ <div align="center">
   <img
       src="https://cdn.snipform.io/pdphilip/elasticlens/logo.png"
       alt="ElasticLens"
-      height="256"
     />
-  <h4>
-    Search your <strong>Laravel Models</strong> with the convenience of Eloquent and the power of Elasticsearch
-  </h4>
+
   <p>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/elasticlens.svg?style=flat-square)](https://packagist.org/packages/pdphilip/elasticlens) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) [![Total Downloads](https://img.shields.io/packagist/dt/pdphilip/elasticlens.svg?style=flat-square)](https://packagist.org/packages/pdphilip/elasticlens)
 
   </p>
+    <h3>
+    Search your <strong>Laravel Models</strong> with the convenience of Eloquent and the power of Elasticsearch
+  </h3>
   <p>
 ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index of your Eloquent models.
   </p>
 </div>
 <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-build.gif"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-build.gif"
       alt="ElasticLens Build"
     />
 </div>
 
 ```php
-User::viaIndex()->phrase('loves dogs')->where('age', '>=', 18)->where('status','active')->search();
+User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
 ```
 
 --- 
