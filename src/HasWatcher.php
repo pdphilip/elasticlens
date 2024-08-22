@@ -4,9 +4,9 @@ namespace PDPhilip\ElasticLens;
 
 use PDPhilip\ElasticLens\Observers\ObserverRegistry;
 
-trait hasWatcher
+trait HasWatcher
 {
-    public static function bootHasWatcher()
+    public static function bootHasWatcher(): void
     {
         $watchers = config('elasticlens.watchers');
         if (isset($watchers[static::class])) {
