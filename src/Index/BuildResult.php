@@ -60,6 +60,13 @@ class BuildResult
         return $this;
     }
 
+    public function attachMigrationVersion($version): static
+    {
+        $this->migration_version = $version;
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [

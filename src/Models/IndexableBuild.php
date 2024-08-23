@@ -3,7 +3,7 @@
 namespace PDPhilip\ElasticLens\Models;
 
 use Illuminate\Support\Carbon;
-use PDPhilip\ElasticLens\Enums\IndexableStateType;
+use PDPhilip\ElasticLens\Enums\IndexableBuildState;
 use PDPhilip\ElasticLens\Index\BuildResult;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 use PDPhilip\Elasticsearch\Schema\Schema;
@@ -18,7 +18,7 @@ use PDPhilip\Elasticsearch\Schema\Schema;
  * @property string $model_id
  * @property string $index_model
  * @property string $last_source
- * @property IndexableStateType $state
+ * @property IndexableBuildState $state
  * @property array $state_data
  * @property array $logs
  * @property Carbon|null $created_at
@@ -28,10 +28,8 @@ use PDPhilip\Elasticsearch\Schema\Schema;
  * @property-read string $state_name
  * @property-read string $state_color
  */
-class IndexableBuildState extends Model
+class IndexableBuild extends Model
 {
-    protected int $logTrim = 2;
-
     public $connection = 'elasticsearch';
 
     protected $appends = [
@@ -40,13 +38,18 @@ class IndexableBuildState extends Model
     ];
 
     protected $casts = [
-        'state' => IndexableStateType::class,
+        'state' => IndexableBuildState::class,
     ];
 
     public function __construct()
     {
         parent::__construct();
         $this->setConnection(self::getConnectionName());
+    }
+
+    public static function isEnabled()
+    {
+        return config('elasticlens.index_build_state.enabled', true);
     }
 
     public function getStateNameAttribute(): string
@@ -59,21 +62,21 @@ class IndexableBuildState extends Model
         return $this->state->color();
     }
 
-    public static function returnState($model, $modelId, $indexModel): ?IndexableBuildState
+    public static function returnState($model, $modelId, $indexModel): ?IndexableBuild
     {
-        return IndexableBuildState::where('model', $model)->where('model_id', $modelId)->where('index_model', $indexModel)->first();
+        return IndexableBuild::where('model', $model)->where('model_id', $modelId)->where('index_model', $indexModel)->first();
     }
 
-    public static function writeState($model, $modelId, $indexModel, BuildResult $buildResult, $observerModel): ?IndexableBuildState
+    public static function writeState($model, $modelId, $indexModel, BuildResult $buildResult, $observerModel): ?IndexableBuild
     {
-        if (empty(config('elasticlens.index_build_state.enabled'))) {
+        if (! self::isEnabled()) {
             return null;
         }
         $stateData = $buildResult->toArray();
         unset($stateData['model']);
-        $state = IndexableStateType::FAILED;
+        $state = IndexableBuildState::FAILED;
         if ($buildResult->success) {
-            $state = IndexableStateType::SUCCESS;
+            $state = IndexableBuildState::SUCCESS;
             unset($stateData['msg']);
             unset($stateData['details']);
             unset($stateData['map']);
@@ -82,7 +85,7 @@ class IndexableBuildState extends Model
         $source = $observerModel;
         $stateModel = self::returnState($model, $modelId, $indexModel);
         if (! $stateModel) {
-            $stateModel = new IndexableBuildState;
+            $stateModel = new IndexableBuild;
             $stateModel->model = $model;
             $stateModel->model_id = $modelId;
             $stateModel->index_model = $indexModel;
@@ -99,23 +102,23 @@ class IndexableBuildState extends Model
 
     public static function countModelErrors($indexModel): int
     {
-        return IndexableBuildState::where('index_model', $indexModel)->where('state', IndexableStateType::FAILED)->count();
+        return IndexableBuild::where('index_model', $indexModel)->where('state', IndexableBuildState::FAILED)->count();
     }
 
     public static function countModelRecords($indexModel): int
     {
-        return IndexableBuildState::where('index_model', $indexModel)->count();
+        return IndexableBuild::where('index_model', $indexModel)->count();
     }
 
     public static function deleteState($model, $modelId, $indexModel): void
     {
-        $stateModel = IndexableBuildState::returnState($model, $modelId, $indexModel);
+        $stateModel = IndexableBuild::returnState($model, $modelId, $indexModel);
         $stateModel?->delete();
     }
 
     public static function deleteStateModel($indexModel): void
     {
-        IndexableBuildState::where('index_model', $indexModel)->delete();
+        IndexableBuild::where('index_model', $indexModel)->delete();
 
     }
 
@@ -125,7 +128,7 @@ class IndexableBuildState extends Model
 
     public function _prepLogs($stateData, $source): array
     {
-        $trim = config('elasticlens.index_build_state.log_trim') ?? $this->logTrim;
+        $trim = config('elasticlens.index_build_state.log_trim', 2);
         if (! $trim) {
             return [];
         }
@@ -149,13 +152,13 @@ class IndexableBuildState extends Model
 
     public static function connectionName(): string
     {
-        return config('elasticlens.database') ?? 'elasticsearch';
+        return config('elasticlens.database', 'elasticsearch');
     }
 
     public static function checkHasIndex(): bool
     {
         $connectionName = self::connectionName();
 
-        return Schema::on($connectionName)->hasIndex('indexable_build_states');
+        return Schema::on($connectionName)->hasIndex('indexable_builds');
     }
 }

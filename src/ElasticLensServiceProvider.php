@@ -23,7 +23,7 @@ class ElasticLensServiceProvider extends PackageServiceProvider
             ->name('elasticlens')
             ->hasConfigFile()
             ->hasViews('elasticlens')
-            ->hasMigration('create_indexable_build_states_index')
+            ->hasMigrations(['create_indexable_build_index', 'create_indexable_migration_logs_index'])
             ->runsMigrations()
             ->hasCommand(LensHealthCommand::class)
             ->hasCommand(LensStatusCommand::class)

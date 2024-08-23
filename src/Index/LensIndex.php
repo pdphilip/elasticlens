@@ -3,6 +3,7 @@
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
+use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 
 abstract class LensIndex
 {
@@ -34,7 +35,7 @@ abstract class LensIndex
 
     public array $relationships = [];
 
-    public array $indexMigration = [];
+    public array $indexMigration;
 
     /**
      * @throws Exception
@@ -52,7 +53,7 @@ abstract class LensIndex
         $this->fieldMap = $this->indexModelInstance->getFieldSet();
         $this->observers = $this->indexModelInstance->getObserverSet();
         $this->relationships = $this->indexModelInstance->getRelationships();
-        $this->indexMigration = $this->indexModelInstance->migrationMap();
+        $this->indexMigration = $this->indexModelInstance->getMigrationSettings();
         $this->baseModelDefined = $this->indexModelInstance->isBaseModelDefined();
         $baseModel = $this->indexModelInstance->getBaseModel();
         if ($baseModel) {
@@ -69,5 +70,15 @@ abstract class LensIndex
             }
         }
 
+    }
+
+    public function getCurrentMigrationVersion(): string
+    {
+        $version = IndexableMigrationLog::getLatestVersion($this->indexModelName);
+        if (! $version) {
+            $version = 'v'.$this->indexMigration['version'].'.0';
+        }
+
+        return $version;
     }
 }

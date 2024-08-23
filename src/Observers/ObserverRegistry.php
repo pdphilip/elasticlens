@@ -7,14 +7,16 @@ use PDPhilip\ElasticLens\Watchers\EmbeddedModelTrigger;
 
 class ObserverRegistry
 {
-    public static function register($baseModel)
+    public static function register($baseModel): void
     {
+
         $indexModel = Lens::fetchIndexModelClass($baseModel);
 
         if (! class_exists($indexModel)) {
             return;
         }
         $observers = (new $indexModel)->getObserverSet();
+
         if (! empty($observers['base'])) {
             $baseModel::observe(new BaseModelObserver);
         }

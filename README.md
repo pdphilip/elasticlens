@@ -33,7 +33,7 @@ User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
 
 Yes, but mostly no.
 
-ElasticLens is built from the ground to fully leverage Elasticsearch's capabilities. It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, creating a dedicated `Index Model` that is automatically synced with your `Base Model`.
+ElasticLens is built from the ground up to fully leverage Elasticsearch's capabilities. It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, creating a dedicated `Index Model` that is automatically synced with your `Base Model`.
 
 The `Index Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index Model`, ElasticLens offers tools for mapping fields (with embedding relationships) during the build process, and managing index migrations.
 
@@ -112,7 +112,7 @@ User::viaIndex()->term('running')->orTerm('swimming')->search();
 
 ## Step 3: Create a field Map
 
-You can define the `fieldMap()` method in your Index Model to control how the index is built during synchronization.
+You can define the `fieldMap()` method in your `Index Model` to control how the index is built during synchronization.
 
 ```php
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
@@ -139,7 +139,7 @@ class IndexedUser extends IndexModel
 ### Notes:
 
 - The `IndexedUser` records will contain only the fields defined in the `fieldMap()`. The value of `$user->id` will correspond to `$indexedUser->_id`.
-- Fields can also be derived from attributes in the `Base Model`. For example, `$field->bool('is_active')` could be derived from a custom attribute:
+- Fields can also be derived from attributes in the `Base Model`. For example, `$field->bool('is_active')` could be derived from a custom attribute in the `Base Model`:
   ```php
     public function getIsActiveAttribute(): bool
     {
@@ -302,7 +302,7 @@ class IndexedUser extends IndexModel
     }
 ```
 
-5. If a `User`  has Many `UserLog`s and you only want to embed the last 10:
+5. If a `User`  has Many `UserLogs` and you only want to embed the last 10:
 
 ```php
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
@@ -359,14 +359,18 @@ class IndexedUser extends IndexModel
 - `array($field)`
 - `bool($field)`
 - `type($field, $type)` - Set own type (like Enums)
-- `embedsMany($field, $relation, $whereRelatedField = null, $equalsLocalField = null, $query = null)`
-- `embedsBelongTo($field, $relation, $whereRelatedField = null, $equalsLocalField = null, $query = null)`
-- `embedsOne($field, $relation, $whereRelatedField = null, $equalsLocalField = null, $query = null)`
+- `embedsMany($field, $relatedModelClass, $whereRelatedField, $equalsLocalField, $query)`
+- `embedsBelongTo($field, $relatedModelClass, $whereRelatedField, $equalsLocalField, $query)`
+- `embedsOne($field, $relatedModelClass, $whereRelatedField, $equalsLocalField, $query)`
+
+**Note**: For embeds the `$whereRelatedField`, `$equalsLocalField`, `$query` parameters are optional.
+- `$whereRelatedField` is the `foreignKey` & `$equalsLocalField` is the `localKey` and they will be inferred from the relationship if not provided.
+- `$query` is a closure that allows you to customize the query for the related model.
 
 ### Embedded Relationship Builder Methods:
 
 - `embedMap(function (IndexField $field) {})` - Define the mapping for the embedded relationship
-- `dontObserve()` - Don't observe changes in the related model
+- `dontObserve()` - Don't observe changes in the `$relatedModelClass`
 
 ---
 

@@ -28,15 +28,21 @@ abstract class IndexModel extends Model
             $this->baseModelDefined = false;
         }
         $this->setConnection(config('elasticlens.database') ?? 'elasticsearch');
+        Collection::macro('asModel', function () {
+            return $this->map(function ($value) {
+                return $value->base;
+            });
+        });
+    }
+
+    public function base()
+    {
+        return $this->belongsTo($this->baseModel, '_id');
     }
 
     public function asModel()
     {
-        if (! empty($this->_id)) {
-            return $this->baseModel::find($this->_id);
-        }
-
-        return null;
+        return $this->base;
 
     }
 

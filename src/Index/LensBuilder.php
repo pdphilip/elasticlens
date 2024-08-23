@@ -5,7 +5,7 @@ namespace PDPhilip\ElasticLens\Index;
 use Exception;
 use PDPhilip\ElasticLens\Jobs\IndexBuildJob;
 use PDPhilip\ElasticLens\Jobs\IndexDeletedJob;
-use PDPhilip\ElasticLens\Models\IndexableBuildState;
+use PDPhilip\ElasticLens\Models\IndexableBuild;
 use PDPhilip\ElasticLens\Traits\Timer;
 
 class LensBuilder extends LensIndex
@@ -27,15 +27,19 @@ class LensBuilder extends LensIndex
         if ($passed) {
             $this->buildResult->successful('Custom Build Passed');
         }
-        IndexableBuildState::writeState($this->baseModelName, $id, $this->indexModelName, $this->buildResult, $source);
+        IndexableBuild::writeState($this->baseModelName, $id, $this->indexModelName, $this->buildResult, $source);
 
         return $this->buildResult;
     }
 
-    public function buildIndex($id, $source): BuildResult
+    public function buildIndex($id, $source, $migrationVersion = null): BuildResult
     {
+        if (! $migrationVersion) {
+            $migrationVersion = $this->getCurrentMigrationVersion();
+        }
         $this->buildProcess($id);
-        IndexableBuildState::writeState($this->baseModelName, $id, $this->indexModelName, $this->buildResult, $source);
+        $this->buildResult->attachMigrationVersion($migrationVersion);
+        IndexableBuild::writeState($this->baseModelName, $id, $this->indexModelName, $this->buildResult, $source);
 
         return $this->buildResult;
     }
@@ -83,7 +87,7 @@ class LensBuilder extends LensIndex
 
     private function _buildInit($id): void
     {
-        $this->buildResult = new BuildResult($id, $this->baseModel, $this->indexModelInstance->getIndexMigrationVersion() ?? 0);
+        $this->buildResult = new BuildResult($id, $this->baseModel, 0);
     }
 
     //----------------------------------------------------------------------
@@ -255,12 +259,12 @@ class LensBuilder extends LensIndex
     }
 
     //----------------------------------------------------------------------
-    // Delete Index (And State)
+    // Delete Index (And Build)
     //----------------------------------------------------------------------
 
     public function processDelete($id)
     {
-        IndexableBuildState::deleteState($this->baseModelName, $id, $this->indexModelName);
+        IndexableBuild::deleteState($this->baseModelName, $id, $this->indexModelName);
         $index = $this->indexModelInstance::find($id);
         $index->delete();
     }

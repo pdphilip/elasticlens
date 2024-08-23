@@ -4,7 +4,7 @@ namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
 use Illuminate\Support\Str;
-use PDPhilip\ElasticLens\Models\IndexableBuildState;
+use PDPhilip\ElasticLens\Models\IndexableBuild;
 
 class LensState extends LensIndex
 {
@@ -57,9 +57,9 @@ class LensState extends LensIndex
         $builds = [];
         $builds['success'] = 0;
         $builds['errors'] = 0;
-        $builds['total'] = IndexableBuildState::countModelRecords($this->indexModelName);
+        $builds['total'] = IndexableBuild::countModelRecords($this->indexModelName);
         if ($builds['total'] > 0) {
-            $builds['errors'] = IndexableBuildState::countModelErrors($this->indexModelName);
+            $builds['errors'] = IndexableBuild::countModelErrors($this->indexModelName);
             $builds['success'] = $builds['total'] - $builds['errors'];
         }
         $status = $this->_buildStatus($indexData, $modelData, $builds);
@@ -80,9 +80,8 @@ class LensState extends LensIndex
             'base_model' => $this->baseModelDefined,
             'field_map' => ! empty($this->fieldMap),
             'migration' => [
-                'has' => $this->indexModelInstance->hasIndexMigration(),
-                'version' => $this->indexModelInstance->getIndexMigrationVersion(),
-                'blueprint_set' => $this->indexModelInstance->validateIndexMigrationBlueprint(),
+                'has' => $this->indexMigration['blueprint'] !== null,
+                'version' => $this->getCurrentMigrationVersion(),
             ],
             'observers' => $this->getObservedModelNames(),
             'status' => [],

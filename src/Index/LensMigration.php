@@ -3,7 +3,9 @@
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
-use PDPhilip\ElasticLens\Models\IndexableBuildState;
+use PDPhilip\ElasticLens\Enums\IndexableMigrationLogState;
+use PDPhilip\ElasticLens\Models\IndexableBuild;
+use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\ElasticLens\Traits\Timer;
 use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
 use PDPhilip\Elasticsearch\Schema\Schema;
@@ -43,8 +45,8 @@ class LensMigration extends LensIndex
                 $this->_state['state']['base_count'] = $this->baseModelInstance::count();
             }
 
-            $this->_state['state']['has_blueprint'] = $this->indexModelInstance->validateIndexMigrationBlueprint();
-            $this->_state['state']['migration_version'] = $this->indexModelInstance->getIndexMigrationVersion();
+            $this->_state['state']['has_blueprint'] = $this->indexModelInstance->migrationMap() !== null;
+            $this->_state['state']['migration_version'] = $this->getCurrentMigrationVersion();
 
         } catch (Exception $e) {
             $this->_state['error'] = true;
@@ -57,23 +59,38 @@ class LensMigration extends LensIndex
     public function runMigration(): bool
     {
         try {
-            IndexableBuildState::deleteStateModel($this->indexModelName);
+            IndexableBuild::deleteStateModel($this->indexModelName);
             $tableName = $this->indexModelTable;
             $blueprint = $this->indexMigration['blueprint'] ?? null;
             Schema::deleteIfExists($tableName);
             if (! $blueprint) {
-                Schema::create($tableName, function (IndexBlueprint $index) {
+                $map = Schema::create($tableName, function (IndexBlueprint $index) {
                     $index->date('created_at');
                 });
+                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::UNDEFINED, $map);
             } else {
-                Schema::create($tableName, $blueprint);
+                $map = Schema::create($tableName, $blueprint);
+                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::SUCCESS, $map);
             }
 
             return true;
         } catch (Exception $e) {
-
+            $map = ['error' => $e->getMessage()];
+            IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::FAILED, $map);
         }
 
         return false;
+    }
+
+    public function validateMigration(): array
+    {
+
+        $test = new MigrationValidator(
+            $this->getCurrentMigrationVersion(),
+            $this->indexModelInstance->migrationMap(),
+            $this->indexModelTable
+        );
+
+        return $test->testMigration();
     }
 }

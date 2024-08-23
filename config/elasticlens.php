@@ -16,6 +16,10 @@ return [
         'log_trim' => 2, //If null, the logs field will be empty
     ],
 
+    'index_migration_logs' => [
+        'enabled' => true, //Recommended to keep this enabled
+    ],
+
     'namespaces' => [
         'models' => 'App\Models',
         'indexes' => 'App\Models\Indexes',

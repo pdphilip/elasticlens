@@ -3,7 +3,7 @@
 namespace PDPhilip\ElasticLens\Commands\Scripts;
 
 use Exception;
-use PDPhilip\ElasticLens\Models\IndexableBuildState;
+use PDPhilip\ElasticLens\Models\IndexableBuild;
 use PDPhilip\Elasticsearch\Schema\Schema;
 
 final class ConfigCheck
@@ -117,7 +117,7 @@ final class ConfigCheck
             'extra' => '',
             'status' => 'ok',
         ];
-        $hasIndex = IndexableBuildState::checkHasIndex();
+        $hasIndex = IndexableBuild::checkHasIndex();
         if (! $hasIndex) {
             $output['indexable_state_connect']['status'] = 'error';
             $output['indexable_state_connect']['help'] = [

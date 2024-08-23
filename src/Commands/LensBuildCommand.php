@@ -198,11 +198,11 @@ class LensBuildCommand extends Command
             'current' => 0,
             'max' => $this->buildData['total'],
         ]));
-
-        $builder->baseModel::chunk(100, function ($records) use ($builder, $live) {
+        $migrationVersion = $builder->getCurrentMigrationVersion();
+        $builder->baseModel::chunk(100, function ($records) use ($builder, $live, $migrationVersion) {
             foreach ($records as $record) {
                 $id = $record->{$builder->baseModelPrimaryKey};
-                $build = $builder->buildIndex($id, 'Index Rebuild');
+                $build = $builder->buildIndex($id, 'Index Rebuild', $migrationVersion);
                 $this->buildData['processed']++;
                 if (! empty($build->success)) {
                     $this->buildData['success']++;
