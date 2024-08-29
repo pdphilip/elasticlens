@@ -120,8 +120,8 @@ Perform quick and easy full-text searches:
 
 ```php
 User::search('loves espressos');
-//Search for the phrase `loves espressos` across all fields and return the base User models
 ```
+> Search for the phrase `loves espressos` across all fields and return the base User models
 
 Cute. But that's not why we're here...
 
@@ -144,17 +144,16 @@ BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
 User::viaIndex()->term('pizza')->orderByDesc('created_at')->limit(3)->search();
 ```
 
-This searches all fields for the term 'pizza' and returns the 3 newest results.
-- https://elasticsearch.pdphilip.com/full-text-search#term-search-term
+> This searches all fields for the term 'pizza' and returns the 3 newest results.
+> - https://elasticsearch.pdphilip.com/full-text-search#term-search-term
 
 #### 2. Phrase Search:
 
 ```php
 User::viaIndex()->phrase('Ice bathing')->orderByDesc('created_at')->limit(3)->search();
 ```
-
-Searches all fields for the phrase 'Ice bathing' and returns the 3 newest results. Phrases match exact words in order.
-- https://elasticsearch.pdphilip.com/full-text-search#phrase-search-phrase
+> Searches all fields for the phrase 'Ice bathing' and returns the 3 newest results. Phrases match exact words in order.
+> - https://elasticsearch.pdphilip.com/full-text-search#phrase-search-phrase
 
 ####  3. Boosting Terms and Minimum Score:
 
@@ -162,9 +161,9 @@ Searches all fields for the phrase 'Ice bathing' and returns the 3 newest result
 User::viaIndex()->term('David')->field('first_name', 3)->field('last_name', 2)->field('bio')->minScore(2.1)->search();
 ```
 
-Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Returns results with a minimum score of 2.1, ordered by the highest score.
-- https://elasticsearch.pdphilip.com/full-text-search#boosting-terms
-- https://elasticsearch.pdphilip.com/full-text-search#minimum-score
+> Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Returns results with a minimum score of 2.1, ordered by the highest score.
+> - https://elasticsearch.pdphilip.com/full-text-search#boosting-terms
+> - https://elasticsearch.pdphilip.com/full-text-search#minimum-score
 
 #### 4. Geolocation Filtering:
 ```php
@@ -174,9 +173,9 @@ User::viaIndex()->where('status', 'active')
     ->get();
 ```
 
-Finds all active users within a 5km radius from the coordinates [0, 0], ordering them from closest to farthest.
-- https://elasticsearch.pdphilip.com/es-specific#geo-point
-- https://elasticsearch.pdphilip.com/ordering-and-pagination#order-by-geo-distance
+> Finds all active users within a 5km radius from the coordinates [0, 0], ordering them from closest to farthest.
+> - https://elasticsearch.pdphilip.com/es-specific#geo-point
+> - https://elasticsearch.pdphilip.com/ordering-and-pagination#order-by-geo-distance
 
 #### 5. Regex Search:
 
@@ -184,16 +183,16 @@ Finds all active users within a 5km radius from the coordinates [0, 0], ordering
 User::viaIndex()->whereRegex('favourite_color', 'bl(ue)?(ack)?')->get();
 ```
 
-Finds all users whose favourite color is blue or black.
-- https://elasticsearch.pdphilip.com/full-text-search#regular-expressions
+> Finds all users whose favourite color is blue or black.
+> - https://elasticsearch.pdphilip.com/full-text-search#regular-expressions
 
 #### 6. Pagination:
 
 ```php
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
 ```
-Paginate search results.
-- https://elasticsearch.pdphilip.com/ordering-and-pagination
+> Paginate search results.
+> - https://elasticsearch.pdphilip.com/ordering-and-pagination
 
 #### 7. Nested Object Search:
 ```php
@@ -201,32 +200,33 @@ User::viaIndex()->whereNestedObject('user_logs', function (Builder $query) {
     $query->where('user_logs.country', 'Norway')->where('user_logs.created_at', '>=',Carbon::now()->modify('-1 week'));
 })->get();
 ```
-Searches nested user_logs for users who logged in from Norway within the last week. Whoa.
-- https://elasticsearch.pdphilip.com/nested-queries
+> Searches nested user_logs for users who logged in from Norway within the last week. Whoa.
+> - https://elasticsearch.pdphilip.com/nested-queries
 
 #### 8. Fuzzy Search:
 
 ```php
 User::viaIndex()->fuzzyTerm('quikc')->orFuzzyTerm('brwn')->andFuzzyTerm('foks')->search();
 ```
-No spell, no problem. Search Fuzzy.
-- https://elasticsearch.pdphilip.com/full-text-search
+> No spell, no problem. Search Fuzzy.
+> - https://elasticsearch.pdphilip.com/full-text-search
 
 #### 9. Highlighting Search Results:
 ```php
 User::viaIndex()->term('espresso')->highlight()->search();
 
 ```
-Searches for 'espresso' across all fields and highlights where it was found.
-- https://elasticsearch.pdphilip.com/full-text-search#highlighting
+> Searches for 'espresso' across all fields and highlights where it was found.
+> - https://elasticsearch.pdphilip.com/full-text-search#highlighting
 
----
 
-### Note on IndexModel Results
+### Note on `Index Model` vs `Base Model` Results
 
 Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model. This can be useful for display purposes, such as highlighting embedded fields.
 
-However, if you need the **original base model instances**, chain `->asModel()` at the end of your query:
+###  However, in most cases you'll need to return and work with the `Base Model`
+To get the results as base models simply chain `->asModel()` at the end of your query:
+
 
 ```php
 User::viaIndex()->term('david')->orderByDesc('created_at')->limit(3)->search()->asModel();
