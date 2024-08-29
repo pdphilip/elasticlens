@@ -175,9 +175,8 @@ User::viaIndex()->where('status', 'active')
 ```
 
 Finds all active users within a 5km radius from the coordinates [0, 0], ordering them from closest to farthest.
-
-https://elasticsearch.pdphilip.com/es-specific#geo-point
-https://elasticsearch.pdphilip.com/ordering-and-pagination#order-by-geo-distance
+- https://elasticsearch.pdphilip.com/es-specific#geo-point
+- https://elasticsearch.pdphilip.com/ordering-and-pagination#order-by-geo-distance
 
 #### 5. Regex Search:
 
