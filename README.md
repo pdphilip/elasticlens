@@ -27,10 +27,6 @@ ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index
 User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
 ```
 
-## 🚧 Alpha Notice
-
-ElasticLens is currently in alpha and under active development. Please wait for the first stable release before using it in production.
-
 --- 
 
 ### Wait, isn't this what Laravel Scout does?
