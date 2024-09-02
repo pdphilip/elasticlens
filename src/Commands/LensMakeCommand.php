@@ -2,10 +2,11 @@
 
 namespace PDPhilip\ElasticLens\Commands;
 
+use Exception;
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
 use ReflectionClass;
-use ReflectionException;
+use RuntimeException;
 
 use function Termwind\render;
 
@@ -95,7 +96,7 @@ class LensMakeCommand extends GeneratorCommand
         $stubPath = __DIR__.'/../../resources/stubs/IndexedBase.php.stub';
 
         if (! file_exists($stubPath)) {
-            throw new \RuntimeException('Stub file not found: '.$stubPath);
+            throw new RuntimeException('Stub file not found: '.$stubPath);
         }
 
         return $stubPath;
@@ -118,7 +119,7 @@ class LensMakeCommand extends GeneratorCommand
             $reflectionClass = new ReflectionClass($class_name);
 
             return $reflectionClass->getName() === $class_name;
-        } catch (ReflectionException $e) {
+        } catch (Exception $e) {
             // Class doesn't exist or couldn't be autoloaded
             return false;
         }

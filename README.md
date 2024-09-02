@@ -648,12 +648,25 @@ php artisan lens:status
 
 Displays the overall status of all your indexes and the ElasticLens configuration.
 
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-status.png"
+      alt="ElasticLens Build"
+    />
+</div>
+
 2. Check Index Health:
 
 ```bash
 php artisan lens:health User
 ```
 
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-health.png"
+      alt="ElasticLens Build"
+    />
+</div>
 Provides a comprehensive state of a specific index, in this case, for the `User` model.
 
 3. Migrate and Build/Rebuild an Index:
@@ -664,13 +677,27 @@ php artisan lens:build User
 
 Deletes the existing User index, runs the migration, and rebuilds all records.
 
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-build.gif"
+      alt="ElasticLens Build"
+    />
+</div>
+
 4. Create a New `Index Model` for a `Base Model`:
 
 ```bash
-php artisan lens:make Company
+php artisan lens:make Profile
 ```
 
-Generates a new index for the `Company` model.
+Generates a new index for the `Profile` model.
+
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-make.png"
+      alt="ElasticLens Build"
+    />
+</div>
 
 ---
 
