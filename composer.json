@@ -77,7 +77,7 @@
         "laravel": {
             "providers": [
                 "PDPhilip\\ElasticLens\\ElasticLensServiceProvider"
-            ],
+            ]
         }
     },
     "minimum-stability": "dev",
