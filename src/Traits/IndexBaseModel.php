@@ -7,8 +7,6 @@ use Illuminate\Support\Str;
 
 trait IndexBaseModel
 {
-    protected bool $baseModelDefined = true;
-
     public function guessBaseModelName()
     {
         $baseTable = $this->getTable();
@@ -36,6 +34,6 @@ trait IndexBaseModel
 
     public function isBaseModelDefined()
     {
-        return $this->baseModelDefined;
+        return ! empty($this->baseModel);
     }
 }

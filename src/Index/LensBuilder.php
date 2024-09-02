@@ -35,7 +35,7 @@ class LensBuilder extends LensIndex
     public function buildIndex($id, $source, $migrationVersion = null): BuildResult
     {
         if (! $migrationVersion) {
-            $migrationVersion = $this->getCurrentMigrationVersion();
+            $migrationVersion = $this->fetchCurrentMigrationVersion();
         }
         $this->buildProcess($id);
         $this->buildResult->attachMigrationVersion($migrationVersion);

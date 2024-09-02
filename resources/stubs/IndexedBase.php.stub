@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models\Indexes;
+
+use App\Models\{{ model }};
+use PDPhilip\ElasticLens\Builder\IndexBuilder;
+use PDPhilip\ElasticLens\Builder\IndexField;
+use PDPhilip\ElasticLens\IndexModel;
+use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+
+class Indexed{{ model }} extends IndexModel
+{
+    protected $baseModel = {{ model }}::class;
+
+    public function fieldMap(): IndexBuilder
+    {
+        return IndexBuilder::map({{ model }}::class, function (IndexField $field) {});
+    }
+
+    //    public static function migrationMap(): callable
+    //    {
+    //        return function (IndexBlueprint $index) {};
+    //    }
+}

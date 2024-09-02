@@ -3,7 +3,6 @@
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
-use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 
 abstract class LensIndex
 {
@@ -35,7 +34,9 @@ abstract class LensIndex
 
     public array $relationships = [];
 
-    public array $indexMigration;
+    public mixed $indexMigration;
+
+    public string $indexMigrationVersion = 'v1.0';
 
     /**
      * @throws Exception
@@ -45,15 +46,15 @@ abstract class LensIndex
         if (! class_exists($indexModel)) {
             throw new Exception($indexModel.' does not exist');
         }
-
         $this->indexModel = $indexModel;
         $this->indexModelInstance = (new $indexModel);
+        $migrationSettings = $this->indexModelInstance->getMigrationSettings();
         $this->indexModelName = class_basename($indexModel);
         $this->indexModelTable = $this->indexModelInstance->getTable();
         $this->fieldMap = $this->indexModelInstance->getFieldSet();
         $this->observers = $this->indexModelInstance->getObserverSet();
         $this->relationships = $this->indexModelInstance->getRelationships();
-        $this->indexMigration = $this->indexModelInstance->getMigrationSettings();
+        $this->indexMigration = $migrationSettings;
         $this->baseModelDefined = $this->indexModelInstance->isBaseModelDefined();
         $baseModel = $this->indexModelInstance->getBaseModel();
         if ($baseModel) {
@@ -72,13 +73,10 @@ abstract class LensIndex
 
     }
 
-    public function getCurrentMigrationVersion(): string
+    public function fetchCurrentMigrationVersion(): string
     {
-        $version = IndexableMigrationLog::getLatestVersion($this->indexModelName);
-        if (! $version) {
-            $version = 'v'.$this->indexMigration['version'].'.0';
-        }
+        $this->indexMigrationVersion = $this->indexModelInstance->getCurrentMigrationVersion();
 
-        return $version;
+        return $this->indexMigrationVersion;
     }
 }

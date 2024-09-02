@@ -2,9 +2,8 @@
 
 namespace PDPhilip\ElasticLens\Traits;
 
-use Exception;
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
-use PDPhilip\Elasticsearch\Schema\Schema;
+use PDPhilip\ElasticLens\Index\MigrationValidator;
+use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 
 trait IndexMigrationMap
 {
@@ -18,56 +17,29 @@ trait IndexMigrationMap
     public function getMigrationSettings(): array
     {
         return [
-            'version' => $this->migrationMajorVersion,
+            'majorVersion' => $this->migrationMajorVersion,
             'blueprint' => $this->migrationMap(),
         ];
     }
 
-    public function hasIndexMigration(): bool
+    public function getCurrentMigrationVersion(): string
     {
-        $version = $this->migrationMap()['version'] ?? null;
-        $blueprint = $this->migrationMap()['blueprint'] ?? null;
-        if ($blueprint) {
-            dd($this->validateIndexMigrationBlueprint());
-            //test it
-            $test = $blueprint((new IndexBlueprint));
-            dd($test);
+        $version = IndexableMigrationLog::getLatestVersion(class_basename($this));
+        if (! $version) {
+            $version = 'v'.$this->migrationMajorVersion.'.0';
         }
 
-        return ! empty($this->migrationMap()['blueprint']) && ! empty($this->migrationMap()['version']);
+        return $version;
     }
 
-    public function getIndexMigrationVersion()
+    public static function validateIndexMigrationBlueprint(): array
     {
-        return $this->migrationMap()['version'] ?? null;
-    }
+        $indexModel = new static;
+        $version = $indexModel->getCurrentMigrationVersion();
+        $blueprint = $indexModel->migrationMap();
+        $indexModelTable = $indexModel->getTable();
+        $validator = new MigrationValidator($version, $blueprint, $indexModelTable);
 
-    public function validateIndexMigrationVersion()
-    {
-        $migration = $this->migrationMap();
-
-        return ! empty($migration['version']);
-    }
-
-    public function validateIndexMigrationBlueprint()
-    {
-        $migration = $this->migrationMap();
-        $blueprint = $migration['blueprint'] ?? null;
-        if (is_callable($blueprint)) {
-
-            Schema::deleteIfExists($testName);
-            try {
-                Schema::create($testName, $blueprint);
-                Schema::deleteIfExists($testName);
-
-                return true;
-            } catch (Exception $e) {
-
-            }
-            Schema::deleteIfExists($testName);
-
-        }
-
-        return false;
+        return $validator->testMigration();
     }
 }

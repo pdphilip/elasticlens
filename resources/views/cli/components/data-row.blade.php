@@ -1,6 +1,5 @@
 <?php
 
-
 switch ($status) {
     case 'disabled':
         $statusValue = 'DISABLED';
@@ -24,7 +23,7 @@ switch ($status) {
 
 }
 $extraText = null;
-if (!empty($extra)) {
+if (! empty($extra)) {
     $extraText = $extra;
 }
 
@@ -42,7 +41,7 @@ if (!empty($extra)) {
     </div>
     @if(!empty($help))
         @foreach ($help as $helperRow)
-            @include('elasticlens::cli.partials.data-row-help',['value' => $helperRow])
+            @include('elasticlens::cli.components.data-row-help',['value' => $helperRow])
         @endforeach
     @endif
 </div>

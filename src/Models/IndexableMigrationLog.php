@@ -2,6 +2,7 @@
 
 namespace PDPhilip\ElasticLens\Models;
 
+use Exception;
 use Illuminate\Support\Carbon;
 use PDPhilip\ElasticLens\Enums\IndexableMigrationLogState;
 use PDPhilip\Elasticsearch\Eloquent\Model;
@@ -53,6 +54,9 @@ class IndexableMigrationLog extends Model
 
     public static function getLatestVersion($indexModel): ?string
     {
+        if (! self::isEnabled()) {
+            return null;
+        }
         $latest = self::getLatestMigration($indexModel);
 
         return $latest?->version;
@@ -60,7 +64,14 @@ class IndexableMigrationLog extends Model
 
     public static function getLatestMigration($indexModel): ?IndexableMigrationLog
     {
-        return self::where('index_model', $indexModel)->orderBy('version_major', 'desc')->orderBy('version_minor', 'desc')->first();
+        $log = null;
+        try {
+            $log = self::where('index_model', $indexModel)->orderBy('version_major', 'desc')->orderBy('version_minor', 'desc')->first();
+        } catch (Exception $e) {
+
+        }
+
+        return $log;
     }
 
     public static function saveMigrationLog($indexModel, $majorVersion, $state, $map)

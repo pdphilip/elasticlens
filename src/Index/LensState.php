@@ -81,7 +81,7 @@ class LensState extends LensIndex
             'field_map' => ! empty($this->fieldMap),
             'migration' => [
                 'has' => $this->indexMigration['blueprint'] !== null,
-                'version' => $this->getCurrentMigrationVersion(),
+                'version' => $this->fetchCurrentMigrationVersion(),
             ],
             'observers' => $this->getObservedModelNames(),
             'status' => [],

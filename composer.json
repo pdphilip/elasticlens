@@ -78,9 +78,6 @@
             "providers": [
                 "PDPhilip\\ElasticLens\\ElasticLensServiceProvider"
             ],
-            "aliases": {
-                "ElasticLens": "PDPhilip\\ElasticLens\\Facades\\ElasticLens"
-            }
         }
     },
     "minimum-stability": "dev",

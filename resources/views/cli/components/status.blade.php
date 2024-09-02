@@ -12,6 +12,10 @@ switch ($status) {
         $class = 'bg-rose-500 text-rose-200';
         $color = 'text-rose-500';
         break;
+    case 'info':
+        $class = 'bg-sky-500 text-sky-200';
+        $color = 'text-sky-500';
+        break;
     case 'enabled':
         $class = 'bg-emerald-500 text-emerald-100';
         $color = 'text-emerald-500';
@@ -22,21 +26,21 @@ switch ($status) {
 
 }
 $extraText = null;
-if (!empty($extra)) {
+if (! empty($extra)) {
     $extraText = $extra;
 }
 
 ?>
 <div>
-    @include('elasticlens::cli.partials.hr',['color' => $color])
+    @include('elasticlens::cli.components.hr',['color' => $color])
     <div class="flex space-x-1 mx-1">
         <span class="{{$class}} px-1 ml-1">{{$name}}</span>
-        <span class="flex-1">{{$title}}</span>
+        <span class="flex-1">{!! $title !!}</span>
         @if(!empty($help))
             @foreach ($help as $helperRow)
-                @include('elasticlens::cli.partials.status-help',['value' => $helperRow])
+                @include('elasticlens::cli.components.status-help',['value' => $helperRow])
             @endforeach
         @endif
     </div>
-    @include('elasticlens::cli.partials.hr',['color' => $color])
+    @include('elasticlens::cli.components.hr',['color' => $color])
 </div>

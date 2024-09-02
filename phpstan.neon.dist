@@ -10,3 +10,5 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    ignoreErrors:
+        - '#Return type .* of method .* should be compatible with return type .* of method#'

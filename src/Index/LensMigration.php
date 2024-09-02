@@ -46,7 +46,7 @@ class LensMigration extends LensIndex
             }
 
             $this->_state['state']['has_blueprint'] = $this->indexModelInstance->migrationMap() !== null;
-            $this->_state['state']['migration_version'] = $this->getCurrentMigrationVersion();
+            $this->_state['state']['migration_version'] = $this->fetchCurrentMigrationVersion();
 
         } catch (Exception $e) {
             $this->_state['error'] = true;
@@ -58,25 +58,31 @@ class LensMigration extends LensIndex
 
     public function runMigration(): bool
     {
+        $validBlueprint = false;
+        $tableName = $this->indexModelTable;
+        $blueprint = $this->indexMigration['blueprint'] ?? null;
+        $version = $this->indexMigration['majorVersion'] ?? null;
+        if ($blueprint) {
+            $validBlueprint = $this->validateMigration()['validated'];
+        }
         try {
             IndexableBuild::deleteStateModel($this->indexModelName);
-            $tableName = $this->indexModelTable;
-            $blueprint = $this->indexMigration['blueprint'] ?? null;
+
             Schema::deleteIfExists($tableName);
-            if (! $blueprint) {
+            if (! $validBlueprint) {
                 $map = Schema::create($tableName, function (IndexBlueprint $index) {
                     $index->date('created_at');
                 });
-                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::UNDEFINED, $map);
+                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $version, IndexableMigrationLogState::UNDEFINED, $map);
             } else {
                 $map = Schema::create($tableName, $blueprint);
-                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::SUCCESS, $map);
+                IndexableMigrationLog::saveMigrationLog($this->indexModelName, $version, IndexableMigrationLogState::SUCCESS, $map);
             }
 
             return true;
         } catch (Exception $e) {
             $map = ['error' => $e->getMessage()];
-            IndexableMigrationLog::saveMigrationLog($this->indexModelName, $this->indexMigration['version'], IndexableMigrationLogState::FAILED, $map);
+            IndexableMigrationLog::saveMigrationLog($this->indexModelName, $version, IndexableMigrationLogState::FAILED, $map);
         }
 
         return false;
@@ -86,7 +92,7 @@ class LensMigration extends LensIndex
     {
 
         $test = new MigrationValidator(
-            $this->getCurrentMigrationVersion(),
+            $this->fetchCurrentMigrationVersion(),
             $this->indexModelInstance->migrationMap(),
             $this->indexModelTable
         );

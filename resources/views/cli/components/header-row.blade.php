@@ -1,8 +1,7 @@
 <?php
 
-
 $extraText = null;
-if (!empty($extra)) {
+if (! empty($extra)) {
     $extraText = $extra;
 }
 
@@ -17,5 +16,5 @@ if (!empty($extra)) {
         @endif
         <span class="text-gray font-bold  text-right ">{{$value}}</span>
     </div>
-    @include('elasticlens::cli.partials.hr')
+    @include('elasticlens::cli.components.hr')
 </div>

@@ -21,7 +21,7 @@ class LensHealthCommand extends Command
         $loadError = HealthCheck::loadErrorCheck($model);
         if ($loadError) {
             $this->newLine();
-            render(view('elasticlens::cli.partials.status', [
+            render(view('elasticlens::cli.components.status', [
                 'name' => $loadError['name'],
                 'status' => $loadError['status'],
                 'title' => $loadError['title'],

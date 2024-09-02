@@ -17,7 +17,7 @@ final class MigrationValidator
 
     protected ?string $indexModelTable;
 
-    protected ?string $message;
+    protected string $message = '';
 
     protected array $indexMap = [];
 
@@ -46,7 +46,8 @@ final class MigrationValidator
         $tempIndex = 'elasticlens_test_index_for_'.$this->indexModelTable;
         Schema::deleteIfExists($tempIndex);
         try {
-            $this->indexMap = Schema::create($tempIndex, $this->blueprint);
+            Schema::create($tempIndex, $this->blueprint);
+            $this->indexMap = Schema::getMappings($tempIndex);
             Schema::deleteIfExists($tempIndex);
             $this->validated = true;
             $this->state = 'Validated';

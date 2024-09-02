@@ -51,7 +51,7 @@ class LensBuildCommand extends Command
         if ($loadError) {
             $this->newLine();
 
-            render(view('elasticlens::cli.partials.status', [
+            render(view('elasticlens::cli.components.status', [
                 'name' => $loadError['name'],
                 'status' => $loadError['status'],
                 'title' => $loadError['title'],
@@ -62,10 +62,26 @@ class LensBuildCommand extends Command
 
             return self::FAILURE;
         }
+        $check = HealthCheck::check($model);
+        if (! empty($check['configStatusHelp']['critical'])) {
+            foreach ($check['configStatusHelp']['critical'] as $critical) {
+                $this->newLine();
+                render(view('elasticlens::cli.components.status', [
+                    'name' => 'ERROR',
+                    'status' => 'error',
+                    'title' => $critical['name'],
+                    'help' => $critical['help'],
+                ]));
+            }
+            $this->newLine();
+
+            return self::FAILURE;
+        }
+
         $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($model);
         $this->newLine();
-        render(view('elasticlens::cli.partials.title', ['title' => 'Rebuild '.class_basename($this->indexModel), 'color' => 'sky']));
+        render(view('elasticlens::cli.components.title', ['title' => 'Rebuild '.class_basename($this->indexModel), 'color' => 'sky']));
         $this->newLine();
         $this->migrate = $force ? 'yes' : null;
         $this->build = $force ? 'yes' : null;
@@ -86,14 +102,14 @@ class LensBuildCommand extends Command
     public function migrationStep(): void
     {
         while (! in_array($this->migrate, ['yes', 'no', 'y', 'n'])) {
-            $this->migrate = ask(view('elasticlens::cli.partials.question', ['question' => 'Migrate index?', 'options' => ['yes', 'no']]), ['yes', 'no']);
+            $this->migrate = ask(view('elasticlens::cli.components.question', ['question' => 'Migrate index?', 'options' => ['yes', 'no']]), ['yes', 'no']);
         }
         if (in_array($this->migrate, ['yes', 'y'])) {
             $this->migrationPassed = $this->processMigration($this->indexModel);
         } else {
             $this->migrationPassed = true;
 
-            render(view('elasticlens::cli.partials.info', ['message' => 'Index migration skipped']));
+            render(view('elasticlens::cli.components.info', ['message' => 'Index migration skipped']));
         }
     }
 
@@ -118,19 +134,19 @@ class LensBuildCommand extends Command
                 ];
             }
         });
-        $async->withFailOver(view('elasticlens::cli.partials.loader', [
+        $async->withFailOver(view('elasticlens::cli.components.loader', [
             'state' => 'failover',
             'message' => 'Migrating Index',
             'i' => 1,
         ]));
         $result = $async->run(function () use ($async) {
-            $async->render(view('elasticlens::cli.partials.loader', [
+            $async->render(view('elasticlens::cli.components.loader', [
                 'state' => 'running',
                 'message' => 'Migrating Index',
                 'i' => $async->getInterval(),
             ]));
         });
-        $async->render(view('elasticlens::cli.partials.loader', [
+        $async->render(view('elasticlens::cli.components.loader', [
             'state' => $result['state'],
             'message' => $result['message'],
             'details' => $result['details'],
@@ -153,12 +169,12 @@ class LensBuildCommand extends Command
             $question = 'Migration Failed. Build Anyway?';
         }
         while (! in_array($this->build, ['yes', 'no', 'y', 'n'])) {
-            $this->build = ask(view('elasticlens::cli.partials.question', ['question' => $question, 'options' => ['yes', 'no']]), ['yes', 'no']);
+            $this->build = ask(view('elasticlens::cli.components.question', ['question' => $question, 'options' => ['yes', 'no']]), ['yes', 'no']);
         }
         if (in_array($this->build, ['yes', 'y'])) {
             $this->buildPassed = $this->processBuild($this->indexModel);
         } else {
-            render(view('elasticlens::cli.partials.info', ['message' => 'Build Cancelled']));
+            render(view('elasticlens::cli.components.info', ['message' => 'Build Cancelled']));
 
             $this->buildPassed = false;
         }
@@ -170,7 +186,7 @@ class LensBuildCommand extends Command
             $builder = new LensBuilder($indexModel);
             $recordsCount = $builder->baseModel::count();
         } catch (Exception $e) {
-            render(view('elasticlens::cli.partials.status', [
+            render(view('elasticlens::cli.components.status', [
                 'status' => 'error',
                 'name' => 'ERROR',
                 'title' => 'Base Model not found',
@@ -182,7 +198,7 @@ class LensBuildCommand extends Command
             return false;
         }
         if (! $recordsCount) {
-            render(view('elasticlens::cli.partials.status', [
+            render(view('elasticlens::cli.components.status', [
                 'status' => 'warning',
                 'name' => 'BUILD SKIPPED',
                 'title' => 'No records found for '.$builder->baseModel,
@@ -193,12 +209,12 @@ class LensBuildCommand extends Command
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
         $live = LensTerm::liveRender();
-        $live->reRender(view('elasticlens::cli.partials.progress', [
+        $live->reRender(view('elasticlens::cli.components.progress', [
             'screenWidth' => $live->getScreenWidth(),
             'current' => 0,
             'max' => $this->buildData['total'],
         ]));
-        $migrationVersion = $builder->getCurrentMigrationVersion();
+        $migrationVersion = $builder->fetchCurrentMigrationVersion();
         $builder->baseModel::chunk(100, function ($records) use ($builder, $live, $migrationVersion) {
             foreach ($records as $record) {
                 $id = $record->{$builder->baseModelPrimaryKey};
@@ -210,14 +226,14 @@ class LensBuildCommand extends Command
                     $this->buildData['failed']++;
                 }
 
-                $live->reRender(view('elasticlens::cli.partials.progress', [
+                $live->reRender(view('elasticlens::cli.components.progress', [
                     'screenWidth' => $live->getScreenWidth(),
                     'current' => $this->buildData['processed'],
                     'max' => $this->buildData['total'],
                 ]));
             }
         });
-        $live->reRender(view('elasticlens::cli.partials.progress', [
+        $live->reRender(view('elasticlens::cli.components.progress', [
             'screenWidth' => $live->getScreenWidth(),
             'current' => $this->buildData['total'],
             'max' => $this->buildData['total'],
@@ -239,12 +255,12 @@ class LensBuildCommand extends Command
     private function showStatus(): void
     {
         if ($this->buildData['didRun']) {
-            render(view('elasticlens::cli.partials.header-row', ['name' => 'Build Data', 'extra' => null, 'value' => 'Value']));
-            render(view('elasticlens::cli.partials.data-row-value', ['key' => 'Success', 'value' => $this->buildData['success']]));
-            render(view('elasticlens::cli.partials.data-row-value', ['key' => 'Failed', 'value' => $this->buildData['failed']]));
-            render(view('elasticlens::cli.partials.data-row-value', ['key' => 'Total', 'value' => $this->buildData['total']]));
+            render(view('elasticlens::cli.components.header-row', ['name' => 'Build Data', 'extra' => null, 'value' => 'Value']));
+            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Success', 'value' => $this->buildData['success']]));
+            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Failed', 'value' => $this->buildData['failed']]));
+            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Total', 'value' => $this->buildData['total']]));
             $this->newLine();
-            render(view('elasticlens::cli.partials.status', [
+            render(view('elasticlens::cli.components.status', [
                 'status' => $this->buildData['state'],
                 'title' => 'Build Status',
                 'name' => $this->buildData['message'],
