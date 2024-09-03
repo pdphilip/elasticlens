@@ -141,7 +141,7 @@ BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
 User::viaIndex()->term('nara')->orderByDesc('created_at')->limit(3)->search();
 ```
 
-> This searches all fields for the term 'pizza' and returns the 3 newest results.
+> This searches all fields for the term 'nara' and returns the 3 newest results.
 > - https://elasticsearch.pdphilip.com/full-text-search#term-search-term
 
 #### 2. Phrase Search:
