@@ -625,7 +625,7 @@ class IndexedUser extends IndexModel
 - **Running the Migration**: To execute the migration and rebuild all your indexed, use the following command:
 
 ```bash
-php artisan lens:migrate User
+php artisan lens:build User
 ```
 
 This command will delete the existing index, run the migration, and rebuild all records.
