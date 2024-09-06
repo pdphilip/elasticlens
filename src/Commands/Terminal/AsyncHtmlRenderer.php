@@ -57,20 +57,20 @@ final class AsyncHtmlRenderer
         $this->failOverHtml = $html;
     }
 
-    public function run(callable $render, int $ms = 10): mixed
+    public function run(callable $render, int $si = 1000): mixed
     {
         if ($this->requiresSync) {
             return $this->executeSync($render);
         }
 
-        return $this->executeAsync($render, $ms);
+        return $this->executeAsync($render, $si);
     }
 
     //----------------------------------------------------------------------
     // Sync Fail Over
     //----------------------------------------------------------------------
 
-    public function executeSync(callable $render): mixed
+    private function executeSync(callable $render): mixed
     {
         $this->isRunning = true;
         //Render first time
@@ -100,7 +100,7 @@ final class AsyncHtmlRenderer
     // Async Fork methods
     //----------------------------------------------------------------------
 
-    private function executeAsync(callable $render, int $ms = 1000): mixed
+    private function executeAsync(callable $render, int $si = 1000): mixed
     {
         $this->isRunning = true;
 
@@ -109,7 +109,7 @@ final class AsyncHtmlRenderer
         while (! $forkedTask->isFinished()) {
             $render();
             $this->interval++;
-            usleep($ms);
+            usleep($si);
         }
         $this->isRunning = false;
         // Render one last time - in case the user needs getIsRunning() to be false

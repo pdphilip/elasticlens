@@ -32,6 +32,17 @@ class LensBuilder extends LensIndex
         return $this->buildResult;
     }
 
+    public function prepareMap($id)
+    {
+        $this->_buildInit($id);
+        $passedMapping = $this->_buildMap();
+        if (! $passedMapping) {
+            return false;
+        }
+
+        return $this->buildResult;
+    }
+
     public function buildIndex($id, $source, $migrationVersion = null): BuildResult
     {
         if (! $migrationVersion) {
@@ -47,7 +58,7 @@ class LensBuilder extends LensIndex
     public function dryRun($id): BuildResult
     {
         $this->_buildInit($id);
-        $passedSetup = $this->_checkSetup();
+        $passedSetup = $this->checkSetup();
         if (! $passedSetup) {
             return $this->buildResult->failed();
         }
@@ -63,7 +74,7 @@ class LensBuilder extends LensIndex
     protected function buildProcess($id): BuildResult
     {
         $this->_buildInit($id);
-        $passedSetup = $this->_checkSetup();
+        $passedSetup = $this->checkSetup();
         if (! $passedSetup) {
             return $this->buildResult->failed();
         }
@@ -94,7 +105,7 @@ class LensBuilder extends LensIndex
     // Setup Check
     //----------------------------------------------------------------------
 
-    private function _checkSetup(): bool
+    public function checkSetup(): bool
     {
 
         if (! $this->baseModel) {
@@ -160,6 +171,7 @@ class LensBuilder extends LensIndex
 
     private function mapRecordsToFields($fields, $modelData): array
     {
+
         $data = [];
         if ($fields) {
             foreach ($fields as $field => $type) {
@@ -169,10 +181,12 @@ class LensBuilder extends LensIndex
 
                     continue;
                 }
+
                 $value = $modelData->{$field} ?? null;
                 if ($value) {
                     $value = $this->setType($value, $type);
                 }
+
                 $data[$field] = $value;
 
             }
