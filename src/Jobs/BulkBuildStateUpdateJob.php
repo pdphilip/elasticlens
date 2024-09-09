@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Jobs;
 
 use Illuminate\Bus\Queueable;

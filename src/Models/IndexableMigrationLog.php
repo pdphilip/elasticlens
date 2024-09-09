@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Models;
 
 use Exception;
@@ -62,7 +64,7 @@ class IndexableMigrationLog extends Model
         return $latest?->version;
     }
 
-    public static function getLatestMigration($indexModel): ?IndexableMigrationLog
+    public static function getLatestMigration($indexModel): mixed
     {
         $log = null;
         try {

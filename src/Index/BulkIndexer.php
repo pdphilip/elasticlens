@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
@@ -11,23 +13,19 @@ class BulkIndexer
 {
     use Timer;
 
-    protected $baseModel;
+    protected mixed $baseModel;
 
-    protected $indexModel;
+    protected mixed $indexModel;
 
-    protected $builder;
+    protected mixed $builder;
 
-    protected $setupOk;
+    protected mixed $migrationVersion;
 
-    protected $migrationVersion;
+    protected mixed $buildMaps;
 
-    protected $buildMaps;
+    protected mixed $took;
 
-    protected $indexableBuildRecords;
-
-    protected $took;
-
-    protected $result;
+    protected mixed $result;
 
     /**
      * @throws Exception
@@ -48,7 +46,7 @@ class BulkIndexer
         $this->migrationVersion = $this->builder->fetchCurrentMigrationVersion();
     }
 
-    public function setRecords($records)
+    public function setRecords($records): static
     {
         $this->clearActivity();
         $builds = [];
@@ -68,7 +66,7 @@ class BulkIndexer
         return $this;
     }
 
-    public function build()
+    public function build(): static
     {
         $values = [];
         if ($this->buildMaps) {
@@ -86,7 +84,7 @@ class BulkIndexer
         return $this;
     }
 
-    public function updateAnyErrors()
+    public function updateAnyErrors(): void
     {
         if ($this->result) {
             if (! empty($this->result['error'])) {
@@ -103,7 +101,7 @@ class BulkIndexer
         }
     }
 
-    public function getResult()
+    public function getResult(): array
     {
         return [
             'took' => $this->took,
@@ -111,7 +109,7 @@ class BulkIndexer
         ];
     }
 
-    public function clearActivity()
+    public function clearActivity(): void
     {
         $this->buildMaps = [];
         $this->startTimer();

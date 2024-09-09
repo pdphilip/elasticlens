@@ -1,12 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Observers;
 
+use Exception;
 use PDPhilip\ElasticLens\Lens;
 use PDPhilip\ElasticLens\Watchers\EmbeddedModelTrigger;
 
 class ObserverRegistry
 {
+    /**
+     * @throws Exception
+     */
     public static function register($baseModel): void
     {
 
@@ -32,7 +38,10 @@ class ObserverRegistry
         }
     }
 
-    public static function registerWatcher($watchedModel, $indexModel)
+    /**
+     * @throws Exception
+     */
+    public static function registerWatcher($watchedModel, $indexModel): void
     {
         $indexModelInstance = new $indexModel;
         $observers = $indexModelInstance->getObserverSet();
@@ -47,7 +56,10 @@ class ObserverRegistry
         }
     }
 
-    private static function watchEmbedded($watchedModel, $settings, $baseModel)
+    /**
+     * @throws Exception
+     */
+    private static function watchEmbedded($watchedModel, $settings, $baseModel): void
     {
         $watchedModel::saved(function ($model) use ($settings, $baseModel) {
             $watcher = new EmbeddedModelTrigger($model, $baseModel, $settings);

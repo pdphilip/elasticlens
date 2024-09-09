@@ -9,6 +9,6 @@ phpstan.neon
 testbench.yaml
 vendor
 node_modules
-_DEL/*
+/_BACK/*
 /src/Commands/LensTestCommand.php
 /resources/views/cli/tests/*

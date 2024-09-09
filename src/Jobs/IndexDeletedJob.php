@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,7 +24,7 @@ class IndexDeletedJob implements ShouldQueue
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle(): void
     {

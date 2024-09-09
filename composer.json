@@ -60,10 +60,17 @@
       "@composer run build",
       "@php vendor/bin/testbench serve"
     ],
-    "analyse": "vendor/bin/phpstan analyse",
-    "test": "vendor/bin/pest",
-    "test-coverage": "vendor/bin/pest --coverage",
-    "format": "vendor/bin/pint"
+    "types": "phpstan analyse --ansi --memory-limit=2G",
+    "format": "pint -v",
+    "test-coverage": "pest --coverage",
+    "test:lint": "pint --test -v",
+    "test:types": "@types",
+    "test:unit": "pest --colors=always",
+    "test": [
+      "@test:lint",
+      "@test:types",
+      "@test:unit"
+    ]
   },
   "config": {
     "sort-packages": true,
@@ -80,15 +87,7 @@
       ]
     }
   },
-  "lint": "pint -v",
-  "test:lint": "pint --test -v",
-  "test:types": "phpstan analyse --ansi",
-  "test:unit": "pest --colors=always",
-  "test": [
-    "@test:lint",
-    "@test:types",
-    "@test:unit"
-  ],
+
   "minimum-stability": "dev",
   "prefer-stable": true
 }

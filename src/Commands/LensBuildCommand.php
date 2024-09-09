@@ -1,27 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use PDPhilip\ElasticLens\Commands\Scripts\HealthCheck;
+use Illuminate\Support\Str;
 use PDPhilip\ElasticLens\Commands\Terminal\LensTerm;
-use PDPhilip\ElasticLens\Index\LensBuilder;
-use PDPhilip\ElasticLens\Index\LensMigration;
+use PDPhilip\ElasticLens\Index\BulkIndexer;
+use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
+use PDPhilip\ElasticLens\Traits\Timer;
 
-use function Termwind\ask;
 use function Termwind\render;
 
 class LensBuildCommand extends Command
 {
-    public $signature = 'lens:build {model} {--force}';
+    use LensCommands, Timer;
 
-    public $description = 'Builds the index for the specified model';
+    public $signature = 'lens:build {model}';
+
+    public $description = 'Rebuilds all index records for the specified model';
 
     protected mixed $indexModel = null;
 
     protected mixed $model = null;
+
+    protected mixed $baseModel = null;
 
     protected mixed $migrate = null;
 
@@ -29,164 +35,68 @@ class LensBuildCommand extends Command
 
     protected mixed $build = null;
 
-    protected array $buildData = [
-        'didRun' => false,
-        'processed' => 0,
-        'success' => 0,
-        'failed' => 0,
-        'total' => 0,
-        'state' => 'error',
-        'message' => '',
-    ];
+    protected int $chunkRate = 1000;
 
-    protected bool $buildPassed = false;
+    protected int $total = 0;
 
+    protected int $created = 0;
+
+    protected int $modified = 0;
+
+    protected int $failed = 0;
+
+    /**
+     * @throws Exception
+     */
     public function handle(): int
     {
 
-        $model = $this->argument('model');
-        $force = $this->option('force');
-
-        $loadError = HealthCheck::loadErrorCheck($model);
-        if ($loadError) {
-            $this->newLine();
-
-            render(view('elasticlens::cli.components.status', [
-                'name' => $loadError['name'],
-                'status' => $loadError['status'],
-                'title' => $loadError['title'],
-                'help' => $loadError['help'],
-            ]));
-
-            $this->newLine();
-
-            return self::FAILURE;
-        }
-        $check = HealthCheck::check($model);
-        if (! empty($check['configStatusHelp']['critical'])) {
-            foreach ($check['configStatusHelp']['critical'] as $critical) {
-                $this->newLine();
-                render(view('elasticlens::cli.components.status', [
-                    'name' => 'ERROR',
-                    'status' => 'error',
-                    'title' => $critical['name'],
-                    'help' => $critical['help'],
-                ]));
-            }
-            $this->newLine();
-
+        $this->model = $this->argument('model');
+        $ok = $this->checkModel($this->model);
+        if (! $ok) {
             return self::FAILURE;
         }
 
-        $this->model = $model;
-        $this->indexModel = Lens::fetchIndexModelClass($model);
+        $this->indexModel = Lens::fetchIndexModelClass($this->model);
         $this->newLine();
-        render(view('elasticlens::cli.components.title', ['title' => 'Rebuild '.class_basename($this->indexModel), 'color' => 'sky']));
+        render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.class_basename($this->indexModel), 'color' => 'cyan']));
         $this->newLine();
-        $this->migrate = $force ? 'yes' : null;
-        $this->build = $force ? 'yes' : null;
-        $this->migrationStep();
-        $this->newLine();
-        $this->buildStep();
-        $this->newLine();
-        $this->showStatus();
-        $this->newLine();
-
-        return $this->buildPassed ? self::SUCCESS : self::FAILURE;
-    }
-
-    //----------------------------------------------------------------------
-    // Migrations
-    //----------------------------------------------------------------------
-
-    public function migrationStep(): void
-    {
-        while (! in_array($this->migrate, ['yes', 'no', 'y', 'n'])) {
-            $this->migrate = ask(view('elasticlens::cli.components.question', ['question' => 'Migrate index?', 'options' => ['yes', 'no']]), ['yes', 'no']);
+        $health = new LensState($this->indexModel);
+        $this->baseModel = $health->baseModel;
+        if (! $health->indexExists) {
+            render((string) view('elasticlens::cli.components.warning', ['message' => $health->indexModelTable.' index not found']));
+            $this->migrate = null;
+            $this->migrationStep();
         }
-        if (in_array($this->migrate, ['yes', 'y'])) {
-            $this->migrationPassed = $this->processMigration($this->indexModel);
-        } else {
-            $this->migrationPassed = true;
+        $health = new LensState($this->indexModel);
 
-            render(view('elasticlens::cli.components.info', ['message' => 'Index migration skipped']));
-        }
-    }
-
-    private function processMigration($indexModel): bool
-    {
-
-        $async = LensTerm::asyncFunction(function () use ($indexModel) {
-            try {
-                $migration = new LensMigration($indexModel);
-                $migration->runMigration();
-
-                return [
-                    'state' => 'success',
-                    'message' => 'Migration Successful',
-                    'details' => '',
-                ];
-            } catch (Exception $e) {
-                return [
-                    'state' => 'error',
-                    'message' => 'Migration Failed',
-                    'details' => $e->getMessage(),
-                ];
-            }
-        });
-        $async->withFailOver(view('elasticlens::cli.components.loader', [
-            'state' => 'failover',
-            'message' => 'Migrating Index',
-            'i' => 1,
-        ]));
-        $result = $async->run(function () use ($async) {
-            $async->render(view('elasticlens::cli.components.loader', [
-                'state' => 'running',
-                'message' => 'Migrating Index',
-                'i' => $async->getInterval(),
+        if (! $health->indexExists) {
+            render((string) view('elasticlens::cli.components.status', [
+                'status' => 'error',
+                'name' => 'ERROR',
+                'title' => 'Index required',
+                'help' => [
+                    'Migrate to create the "'.$health->indexModelTable.'" index',
+                ],
             ]));
-        });
-        $async->render(view('elasticlens::cli.components.loader', [
-            'state' => $result['state'],
-            'message' => $result['message'],
-            'details' => $result['details'],
-            'i' => 0,
-        ]));
-        $this->newLine();
 
-        return $result['state'] === 'success';
+            return self::FAILURE;
+        }
+        $this->setChunkRate($health);
+        $built = $this->processAsyncBuild($health, $this->model);
 
+        return $built ? self::SUCCESS : self::FAILURE;
     }
 
-    //----------------------------------------------------------------------
-    // Builds
-    //----------------------------------------------------------------------
-
-    public function buildStep(): void
-    {
-        $question = 'Rebuild Indexes?';
-        if (! $this->migrationPassed) {
-            $question = 'Migration Failed. Build Anyway?';
-        }
-        while (! in_array($this->build, ['yes', 'no', 'y', 'n'])) {
-            $this->build = ask(view('elasticlens::cli.components.question', ['question' => $question, 'options' => ['yes', 'no']]), ['yes', 'no']);
-        }
-        if (in_array($this->build, ['yes', 'y'])) {
-            $this->buildPassed = $this->processBuild($this->indexModel);
-        } else {
-            render(view('elasticlens::cli.components.info', ['message' => 'Build Cancelled']));
-
-            $this->buildPassed = false;
-        }
-    }
-
-    private function processBuild($indexModel): bool
+    /**
+     * @throws Exception
+     */
+    private function processAsyncBuild($health, $model): bool
     {
         try {
-            $builder = new LensBuilder($indexModel);
-            $recordsCount = $builder->baseModel::count();
+            $recordsCount = $health->baseModel::count();
         } catch (Exception $e) {
-            render(view('elasticlens::cli.components.status', [
+            render((string) view('elasticlens::cli.components.status', [
                 'status' => 'error',
                 'name' => 'ERROR',
                 'title' => 'Base Model not found',
@@ -198,74 +108,102 @@ class LensBuildCommand extends Command
             return false;
         }
         if (! $recordsCount) {
-            render(view('elasticlens::cli.components.status', [
+            render((string) view('elasticlens::cli.components.status', [
                 'status' => 'warning',
                 'name' => 'BUILD SKIPPED',
-                'title' => 'No records found for '.$builder->baseModel,
+                'title' => 'No records found for '.$health->baseModel,
             ]));
 
             return false;
         }
-        $this->buildData['didRun'] = true;
-        $this->buildData['total'] = $recordsCount;
-        $live = LensTerm::liveRender();
-        $live->reRender(view('elasticlens::cli.components.progress', [
-            'screenWidth' => $live->getScreenWidth(),
-            'current' => 0,
-            'max' => $this->buildData['total'],
-        ]));
-        $migrationVersion = $builder->fetchCurrentMigrationVersion();
-        $builder->baseModel::chunk(100, function ($records) use ($builder, $live, $migrationVersion) {
-            foreach ($records as $record) {
-                $id = $record->{$builder->baseModelPrimaryKey};
-                $build = $builder->buildIndex($id, 'Index Rebuild', $migrationVersion);
-                $this->buildData['processed']++;
-                if (! empty($build->success)) {
-                    $this->buildData['success']++;
-                } else {
-                    $this->buildData['failed']++;
-                }
+        $this->startTimer();
 
-                $live->reRender(view('elasticlens::cli.components.progress', [
-                    'screenWidth' => $live->getScreenWidth(),
-                    'current' => $this->buildData['processed'],
-                    'max' => $this->buildData['total'],
-                ]));
-            }
-        });
-        $live->reRender(view('elasticlens::cli.components.progress', [
-            'screenWidth' => $live->getScreenWidth(),
-            'current' => $this->buildData['total'],
-            'max' => $this->buildData['total'],
+        $async = LensTerm::asyncFunction(function () {});
+        $async->render((string) view('elasticlens::cli.bulk', [
+            'screenWidth' => $async->getScreenWidth(),
+            'model' => $this->model,
+            'i' => $async->getInterval(),
+            'created' => $this->created,
+            'updated' => $this->modified,
+            'failed' => $this->failed,
+            'completed' => false,
+            'took' => false,
         ]));
-        $this->buildData['state'] = 'success';
-        $this->buildData['message'] = 'Indexes Synced';
-        if ($this->buildData['failed']) {
-            $this->buildData['state'] = 'warning';
-            $this->buildData['message'] = 'Some Build Errors';
-            if ($this->buildData['failed'] === $this->buildData['processed']) {
-                $this->buildData['state'] = 'error';
-                $this->buildData['message'] = 'All Builds Failed';
-            }
+        $this->baseModel::chunk($this->chunkRate, function ($records) use ($async) {
+            $result = $async->withTask(function () use ($records) {
+                return $this->bulkInsertTask($records);
+            })->run(function () use ($async) {
+                $async->render((string) view('elasticlens::cli.bulk', [
+                    'screenWidth' => $async->getScreenWidth(),
+                    'model' => $this->model,
+                    'i' => $async->getInterval(),
+                    'created' => $this->created,
+                    'updated' => $this->modified,
+                    'failed' => $this->failed,
+                    'completed' => false,
+                    'took' => false,
+                ]));
+            });
+            $this->created += $result['created'];
+            $this->modified += $result['modified'];
+            $this->failed += $result['failed'];
+        });
+
+        $async->render((string) view('elasticlens::cli.bulk', [
+            'screenWidth' => $async->getScreenWidth(),
+            'model' => $model,
+            'i' => $async->getInterval(),
+            'created' => $this->created,
+            'updated' => $this->modified,
+            'failed' => $this->failed,
+            'completed' => true,
+        ]));
+
+        $this->newLine();
+        $name = Str::plural($model);
+        $total = $this->created + $this->modified;
+        $time = $this->getTime();
+        if ($total > 0) {
+            render((string) view('elasticlens::cli.components.info', ['message' => 'Indexed '.$total.' '.$name.' in '.$time['sec'].' seconds']));
+        } else {
+            render((string) view('elasticlens::cli.components.error', ['message' => 'All indexes failed to build']));
         }
+
+        $this->newLine();
 
         return true;
     }
 
-    private function showStatus(): void
+    /**
+     * @throws Exception
+     */
+    public function bulkInsertTask($records): array
     {
-        if ($this->buildData['didRun']) {
-            render(view('elasticlens::cli.components.header-row', ['name' => 'Build Data', 'extra' => null, 'value' => 'Value']));
-            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Success', 'value' => $this->buildData['success']]));
-            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Failed', 'value' => $this->buildData['failed']]));
-            render(view('elasticlens::cli.components.data-row-value', ['key' => 'Total', 'value' => $this->buildData['total']]));
-            $this->newLine();
-            render(view('elasticlens::cli.components.status', [
-                'status' => $this->buildData['state'],
-                'title' => 'Build Status',
-                'name' => $this->buildData['message'],
-            ]));
-            $this->newLine();
+        $bulk = new BulkIndexer($this->baseModel);
+        $bulk->setRecords($records)->build();
+        $result = $bulk->getResult();
+
+        return [
+            'total' => $result['results']['total'],
+            'created' => $result['results']['created'],
+            'modified' => $result['results']['modified'],
+            'failed' => $result['results']['failed'],
+        ];
+    }
+
+    public function setChunkRate(LensState $health): void
+    {
+        $chunk = $this->chunkRate;
+        $relationships = count($health->indexModelInstance->getRelationships());
+        if ($relationships > 3) {
+            $chunk = 750;
         }
+        if ($relationships > 6) {
+            $chunk = 500;
+        }
+        if ($relationships > 9) {
+            $chunk = 250;
+        }
+        $this->chunkRate = $chunk;
     }
 }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use PDPhilip\ElasticLens\Commands\Scripts\HealthCheck;
 
@@ -13,15 +16,18 @@ class LensHealthCommand extends Command
 
     public $description = 'Full health check of the model & model index';
 
+    /**
+     * @throws Exception
+     */
     public function handle(): int
     {
 
         $model = $this->argument('model');
 
         $loadError = HealthCheck::loadErrorCheck($model);
+        $this->newLine();
         if ($loadError) {
-            $this->newLine();
-            render(view('elasticlens::cli.components.status', [
+            render((string) view('elasticlens::cli.components.status', [
                 'name' => $loadError['name'],
                 'status' => $loadError['status'],
                 'title' => $loadError['title'],
@@ -31,8 +37,7 @@ class LensHealthCommand extends Command
 
             return self::FAILURE;
         }
-        $this->newLine();
-        render(view('elasticlens::cli.health', [
+        render((string) view('elasticlens::cli.health', [
             'health' => HealthCheck::check($model),
         ]));
 

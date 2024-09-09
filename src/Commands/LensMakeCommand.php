@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
@@ -27,7 +29,7 @@ class LensMakeCommand extends GeneratorCommand
         $modelCheck = config('elasticlens.namespaces.models', 'App\Models').'\\'.$model;
         if (! $this->class_exists_case_sensitive($modelCheck)) {
 
-            render(view('elasticlens::cli.components.status', [
+            render((string) view('elasticlens::cli.components.status', [
                 'name' => 'ERROR',
                 'status' => 'error',
                 'title' => 'Base Model ('.$model.') was not found at: '.$modelCheck,
@@ -43,7 +45,7 @@ class LensMakeCommand extends GeneratorCommand
         $indexedModel = config('elasticlens.namespaces.indexes', 'App\Models\Indexes').'\\Indexed'.$model;
         if ($this->class_exists_case_sensitive($indexedModel)) {
 
-            render(view('elasticlens::cli.components.status', [
+            render((string) view('elasticlens::cli.components.status', [
                 'name' => 'ERROR',
                 'status' => 'error',
                 'title' => 'Indexed Model (for '.$model.' Model) already exists at: '.$indexedModel,
@@ -72,12 +74,12 @@ class LensMakeCommand extends GeneratorCommand
         // Write the file to disk
         $this->files->put($path, $stub);
 
-        render(view('elasticlens::cli.components.status', [
+        render((string) view('elasticlens::cli.components.status', [
             'name' => 'SUCCESS',
             'status' => 'success',
             'title' => 'Indexed Model (for '.$model.' Model) created at: '.$indexedModel,
         ]));
-        render(view('elasticlens::cli.components.code-trait', [
+        render((string) view('elasticlens::cli.components.code-trait', [
             'model' => $model,
         ]));
 

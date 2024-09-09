@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,9 +15,13 @@ use PDPhilip\Elasticsearch\Eloquent\Model;
 
 /**
  * Class IndexModel
+ *
+ * @property string $_id
+ *
+ * @mixin Model
+ *
+ * @phpstan-consistent-constructor
  */
-
-/** @phpstan-consistent-constructor */
 abstract class IndexModel extends Model
 {
     use IndexBaseModel, IndexFieldMap, IndexMigrationMap;

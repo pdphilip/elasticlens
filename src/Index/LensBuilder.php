@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Index;
 
+use Carbon\Carbon;
 use Exception;
 use PDPhilip\ElasticLens\Jobs\IndexBuildJob;
 use PDPhilip\ElasticLens\Jobs\IndexDeletedJob;
@@ -148,6 +151,7 @@ class LensBuilder extends LensIndex
             return false;
         }
         $data = $data + $dataMap;
+
         $this->buildResult->setMap($data);
 
         return true;
@@ -257,11 +261,13 @@ class LensBuilder extends LensIndex
             if (! $index) {
                 $index = new $this->indexModelInstance;
             }
+            //@phpstan-ignore-next-line
             $index->_id = $modelId;
 
             foreach ($this->buildResult->map as $field => $value) {
                 $index->{$field} = $value;
             }
+            //@phpstan-ignore-next-line
             $index->saveWithoutRefresh();
         } catch (Exception $e) {
             $this->buildResult->setMessage('Index build Error', $e->getMessage());
@@ -303,6 +309,9 @@ class LensBuilder extends LensIndex
 
     private function setType($value, $type)
     {
+        if ($type == Carbon::class) {
+            return Carbon::create($value);
+        }
         if (enum_exists($type)) {
             $value = $value->value ?? $value;
             $type = 'string';

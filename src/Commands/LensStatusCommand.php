@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Commands;
 
 use Illuminate\Console\Command;
@@ -17,7 +19,7 @@ class LensStatusCommand extends Command
     public function handle(): int
     {
         $this->newLine();
-        render(view('elasticlens::cli.status', [
+        render((string) view('elasticlens::cli.status', [
             'checks' => ConfigCheck::check(),
             'indexes' => IndexCheck::get(),
         ]));

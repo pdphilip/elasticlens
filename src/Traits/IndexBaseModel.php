@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Traits;
 
 use Illuminate\Support\Facades\DB;
@@ -7,7 +9,7 @@ use Illuminate\Support\Str;
 
 trait IndexBaseModel
 {
-    public function guessBaseModelName()
+    public function guessBaseModelName(): string
     {
         $baseTable = $this->getTable();
         $prefix = DB::connection(config('elasticlens.database'))->getConfig('index_prefix');
@@ -32,7 +34,7 @@ trait IndexBaseModel
         return $this->baseModel;
     }
 
-    public function isBaseModelDefined()
+    public function isBaseModelDefined(): bool
     {
         return ! empty($this->baseModel);
     }

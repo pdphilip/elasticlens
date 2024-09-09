@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Builder;
+
+use Carbon\Carbon;
 
 class IndexField
 {
@@ -33,6 +37,11 @@ class IndexField
     public function bool($field): IndexField|static
     {
         return $this->addField($field, 'bool');
+    }
+
+    public function carbon($field): IndexField|static
+    {
+        return $this->addField($field, Carbon::class);
     }
 
     public function type($field, $type): IndexField|static

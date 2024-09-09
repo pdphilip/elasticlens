@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Models;
 
 use Illuminate\Support\Carbon;
@@ -27,6 +29,8 @@ use PDPhilip\Elasticsearch\Schema\Schema;
  ******Attributes*******
  * @property-read string $state_name
  * @property-read string $state_color
+ *
+ * @mixin Model
  */
 class IndexableBuild extends Model
 {
@@ -62,9 +66,9 @@ class IndexableBuild extends Model
         return $this->state->color();
     }
 
-    public static function returnState($model, $modelId, $indexModel): ?IndexableBuild
+    public static function returnState($model, $modelId, $indexModel): mixed
     {
-        return IndexableBuild::where('model', $model)->where('model_id', $modelId)->where('index_model', $indexModel)->first();
+        return self::where('model', $model)->where('model_id', $modelId)->where('index_model', $indexModel)->first();
     }
 
     public static function writeState($model, $modelId, $indexModel, BuildResult $buildResult, $observerModel): ?IndexableBuild

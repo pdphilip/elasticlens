@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Observers;
 
 use Exception;
@@ -9,7 +11,7 @@ use PDPhilip\ElasticLens\Lens;
 
 class BaseModelObserver
 {
-    public function saved($model)
+    public function saved($model): void
     {
         $indexModel = Lens::fetchIndexModelClass($model);
         Log::info($indexModel);
@@ -21,7 +23,7 @@ class BaseModelObserver
         }
     }
 
-    public function deleting($model)
+    public function deleting($model): void
     {
         $modelId = $model->{$model->getKeyName()};
         $indexModel = Lens::fetchIndexModelClass($model);

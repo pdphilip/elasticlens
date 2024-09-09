@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens\Commands\Terminal;
 use Closure;
 use PDPhilip\ElasticLens\Commands\Terminal\Async\Connection;
 use PDPhilip\ElasticLens\Commands\Terminal\Async\Task;
+use PDPhilip\ElasticLens\Commands\Terminal\Async\TaskException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class AsyncHtmlRenderer
@@ -18,6 +19,8 @@ final class AsyncHtmlRenderer
     private string $failOverHtml = '';
 
     private int $interval = 0;
+
+    private int $us = 1000;
 
     private bool $isRunning = false;
 
@@ -57,13 +60,23 @@ final class AsyncHtmlRenderer
         $this->failOverHtml = $html;
     }
 
-    public function run(callable $render, int $si = 1000): mixed
+    public function withTask(callable $task): self
     {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    public function run(callable $render, ?int $us = null): mixed
+    {
+        if ($us) {
+            $this->us = $us;
+        }
         if ($this->requiresSync) {
             return $this->executeSync($render);
         }
 
-        return $this->executeAsync($render, $si);
+        return $this->executeAsync($render);
     }
 
     //----------------------------------------------------------------------
@@ -100,16 +113,18 @@ final class AsyncHtmlRenderer
     // Async Fork methods
     //----------------------------------------------------------------------
 
-    private function executeAsync(callable $render, int $si = 1000): mixed
+    /**
+     * @throws TaskException
+     */
+    private function executeAsync(callable $render): mixed
     {
         $this->isRunning = true;
-
         $task = Task::set($this->task);
         $forkedTask = $this->forkTask($task);
         while (! $forkedTask->isFinished()) {
             $render();
             $this->interval++;
-            usleep($si);
+            usleep($this->us);
         }
         $this->isRunning = false;
         // Render one last time - in case the user needs getIsRunning() to be false

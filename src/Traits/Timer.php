@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Traits;
 
 trait Timer
 {
     private array $timer = [];
 
-    public function startTimer()
+    public function startTimer(): array
     {
         $this->timer['start'] = microtime(true);
 
         return $this->timer;
     }
 
-    private function _endTimer()
+    private function _endTimer(): array
     {
         if (! empty($this->timer['start'])) {
             $this->timer['end'] = microtime(true);

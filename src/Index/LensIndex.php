@@ -1,18 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PDPhilip\ElasticLens\Index;
 
 use Exception;
+use PDPhilip\ElasticLens\IndexModel;
 
 abstract class LensIndex
 {
     public string $indexModel;
 
-    public mixed $indexModelInstance;
+    public IndexModel $indexModelInstance;
 
     public string $indexModelName;
 
     public string $indexModelTable;
+
+    public bool $indexExists = false;
 
     public mixed $baseModel = null;
 
@@ -46,17 +51,22 @@ abstract class LensIndex
         if (! class_exists($indexModel)) {
             throw new Exception($indexModel.' does not exist');
         }
+        $instance = (new $indexModel);
+        if (! $instance instanceof IndexModel) {
+            throw new Exception($indexModel.' is not an IndexModel');
+        }
         $this->indexModel = $indexModel;
-        $this->indexModelInstance = (new $indexModel);
-        $migrationSettings = $this->indexModelInstance->getMigrationSettings();
+        $this->indexModelInstance = $instance;
+        $migrationSettings = $instance->getMigrationSettings();
         $this->indexModelName = class_basename($indexModel);
-        $this->indexModelTable = $this->indexModelInstance->getTable();
-        $this->fieldMap = $this->indexModelInstance->getFieldSet();
-        $this->observers = $this->indexModelInstance->getObserverSet();
-        $this->relationships = $this->indexModelInstance->getRelationships();
+        $this->indexModelTable = $instance->getIndex();
+        $this->indexExists = $instance::indexExists();
+        $this->fieldMap = $instance->getFieldSet();
+        $this->observers = $instance->getObserverSet();
+        $this->relationships = $instance->getRelationships();
         $this->indexMigration = $migrationSettings;
-        $this->baseModelDefined = $this->indexModelInstance->isBaseModelDefined();
-        $baseModel = $this->indexModelInstance->getBaseModel();
+        $this->baseModelDefined = $instance->isBaseModelDefined();
+        $baseModel = $instance->getBaseModel();
         if ($baseModel) {
             $this->baseModel = $baseModel;
             $this->baseModelInstance = (new $baseModel);
@@ -66,8 +76,8 @@ abstract class LensIndex
             try {
                 $baseModel::indexModel();
                 $this->baseModelIndexable = true;
-            } catch (Exception $e) {
-
+            } catch (Exception) {
+                $this->baseModelIndexable = false;
             }
         }
 
