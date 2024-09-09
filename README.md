@@ -18,8 +18,8 @@ ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index
 </div>
 <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-build.gif"
-      alt="ElasticLens Build"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-migrate.gif"
+      alt="ElasticLens Migrate"
     />
 </div>
 
@@ -50,6 +50,7 @@ For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` M
 - [Manage Elasticsearch Migrations](#step-6-define-your-index-models-migrationmap): Define a required blueprint for your index migrations.
 - [Comprehensive CLI Tools](#step-7-monitor-and-administer-all-your-indexes-with-artisan-commands): Manage index health, migrate/rebuild indexes, and more with Artisan commands.
 - [Built-in IndexableBuildState model](#step-8-optionally-access-the-built-in-indexablebuildstate-model-to-track-index-build-states): Track the build states of your indexes.
+- [Built-in Migration Logs](#step-9-optionally-access-the-built-in-indexablemigrationlog-model-for-index-migration-status): Track the build states of your indexes.
 
 # Requirements
 
@@ -70,13 +71,15 @@ Publish config file and run the migrations with:
 php artisan lens:install
 ```
 
-# Usage (Walkthrough)
+# Usage 
+
+The Walkthrough Steps below will show all the features by way of eaxmple
 
 ## Step 1: Zero config setup
 
 1. Add the Indexable Trait to Your Base Model:
 
-Include the `Indexable` trait in your base model to enable automatic indexing.
+- Include the `Indexable` trait in your base model to enable automatic indexing.
 
 ```php
 use PDPhilip\ElasticLens\Indexable;
@@ -88,11 +91,9 @@ class User extends Eloquent implements Authenticatable, CanResetPassword
 
 2. Create an Index Model for Your Base Model:
 
-Define a corresponding Index Model that extends `IndexModel`. This model will sync and manage the Elasticsearch index for your `Base Model`.
-
-By default, ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory. For example:
-
-`App\Models\Indexes\IndexedUser.php`
+- Define a corresponding Index Model that extends `IndexModel`. This model will sync and manage the Elasticsearch index for your `Base Model`.
+- By default, ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory. 
+- For example: `App\Models\Indexes\IndexedUser.php`
 
 ```php
 namespace App\Models\Indexes;
@@ -100,9 +101,11 @@ namespace App\Models\Indexes;
 use PDPhilip\ElasticLens\IndexModel;
 
 class IndexedUser extends IndexModel{}
+
 ```
 
-That's it! Your User model will now automatically sync with the IndexedUser model whenever changes occur. You can search your User model effortlessly, like:
+- That's it! Your User model will now automatically sync with the IndexedUser model whenever changes occur. You can search your User model effortlessly, like:
+
 
 ```php
 User::viaIndex()->term('running')->orTerm('swimming')->search();
@@ -172,7 +175,7 @@ User::viaIndex()->where('status', 'active')
     ->get();
 ```
 
-> Finds all active users within a 5km radius from the coordinates [0, 0], ordering them from closest to farthest.
+> Finds all active users within a 5km radius from the coordinates [0, 0], ordering them from closest to farthest. Not kidding.
 > - https://elasticsearch.pdphilip.com/es-specific#geo-point
 > - https://elasticsearch.pdphilip.com/ordering-and-pagination#order-by-geo-distance
 
@@ -218,19 +221,21 @@ User::viaIndex()->fuzzyTerm('quikc')->orFuzzyTerm('brwn')->andFuzzyTerm('foks')-
 
 ```php
 User::viaIndex()->term('espresso')->highlight()->search();
-
 ```
 
 > Searches for 'espresso' across all fields and highlights where it was found.
 > - https://elasticsearch.pdphilip.com/full-text-search#highlighting
 
+
 ### Note on `Index Model` vs `Base Model` Results
 
-Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model. This can be useful for display purposes, such as highlighting embedded fields.
+- Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model. 
+- This can be useful for display purposes, such as highlighting embedded fields.
+- **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
 
-### However, in most cases you'll need to return and work with the `Base Model`
+### To search and return results as `Base Models` use `asModel()`
 
-To get the results as base models simply chain `->asModel()` at the end of your query:
+- Simply chain `->asModel()` at the end of your query:
 
 ```php
 User::viaIndex()->term('david')->orderByDesc('created_at')->limit(3)->search()->asModel();
@@ -238,23 +243,21 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asModel(
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asModel();
 ```
 
-### For Pagination: `paginateModels()`
+### To search and paginate results as `Base Models` use: `paginateModels()`
 
-- Direct Pagination (no paginator):
+- Complete the query string with `->paginateModels()`
 
 ```php
+// Returns a pagination instance of Users ✔️:
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateModels(10);
+
+// Returns a pagination instance of IndexedUsers:
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
+
+// Will not paginate ❌ (but will at least return a collection of 10 Users):
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10)->asModel();
 ```
 
-This will return the 10 results as models but without a paginator.
-
-- Paginate and Return Base Models use `paginateModels()`:
-
-```php
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateModels(10);
-```
-
-This will paginate the results from Elasticsearch and return the original base models.
 
 
 ---
@@ -668,15 +671,15 @@ Provides a comprehensive state of a specific index, in this case, for the `User`
 3. Migrate and Build/Rebuild an Index:
 
 ```bash
-php artisan lens:build User
+php artisan lens:migrate User
 ```
 
 Deletes the existing User index, runs the migration, and rebuilds all records.
 
 <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-build.gif"
-      alt="ElasticLens Build"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-migrate.gif"
+      alt="ElasticLens Migrate"
     />
 </div>
 
@@ -691,6 +694,21 @@ Generates a new index for the `Profile` model.
 <div align="center">
   <img
       src="https://cdn.snipform.io/pdphilip/elasticlens/lens-make.png"
+      alt="ElasticLens Build"
+    />
+</div>
+
+5. Bulk (Re)Build Indexes for a `Base Model`:
+
+```bash
+php artisan lens:build Profile
+```
+
+Rebuilds all the `IndexedProfile` records for the `Profile` model.
+
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-build-v2.gif"
       alt="ElasticLens Build"
     />
 </div>
@@ -726,8 +744,39 @@ IndexableBuildState::countModelErrors($indexModel);
 IndexableBuildState::countModelRecords($indexModel);
 ```
 
-**Note**: While you can query the `IndexableBuildState` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be
-used for reading purposes only to ensure accurate monitoring and reporting.
+**Note**: While you can query the `IndexableBuildState` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be used for reading purposes only to ensure accurate monitoring and reporting.
+
+---
+
+## Step 9: Optionally Access the Built-in `IndexableMigrationLog` Model for Index Migration Status
+
+ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and tracking the state of index migrations. This model logs each migration related to an `Index Model`.
+
+### Model Fields:
+
+- string `$index_model`: The migrated Index Model.
+- IndexableMigrationLogState `$state`: State of the migration
+- array `$map`: Migration map that was passed to Elasticsearch.
+- int `$version_major`: Major version of the indexing process.
+- int `$version_minor`: Minor version of the indexing process.
+- Carbon `$created_at`: Timestamp of when the migration was created.
+
+### Attributes:
+
+- @property-read string `$version`: Parsed version ex v2.03
+- @property-read string `$state_name`: Current state name.
+- @property-read string `$state_color`: Color representing the current state.
+
+Built-in methods include:
+
+```php
+IndexableMigrationLog::getLatestVersion($indexModel);
+IndexableMigrationLog::getLatestMigration($indexModel);
+```
+
+**Note**: While you can query the `IndexableMigrationLog` model directly, avoid writing or deleting records within it manually, as this can interfere with versioing of the migrations. The model should be used for reading purposes only to ensure accuracy.
+
+---
 
 ## Credits
 

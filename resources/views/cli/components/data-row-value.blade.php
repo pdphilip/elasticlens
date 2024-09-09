@@ -16,6 +16,8 @@ if ($value === false) {
 
 if ($value === 0) {
     $class = 'text-stone-600';
+} elseif (is_int($value)) {
+    $value = number_format($value);
 }
 if (empty($class)) {
     $class = '';

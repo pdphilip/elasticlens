@@ -62,7 +62,7 @@ final class AsyncHtmlRenderer
 
     public function withTask(callable $task): self
     {
-        $this->task = $task;
+        $this->task = $task(...);
 
         return $this;
     }

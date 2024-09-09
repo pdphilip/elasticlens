@@ -59,7 +59,8 @@ class LensBuildCommand extends Command
 
         $this->indexModel = Lens::fetchIndexModelClass($this->model);
         $this->newLine();
-        render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.class_basename($this->indexModel), 'color' => 'cyan']));
+        $name = Str::plural($this->model);
+        render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.$name, 'color' => 'cyan']));
         $this->newLine();
         $health = new LensState($this->indexModel);
         $this->baseModel = $health->baseModel;
@@ -164,6 +165,7 @@ class LensBuildCommand extends Command
         $total = $this->created + $this->modified;
         $time = $this->getTime();
         if ($total > 0) {
+            $total = number_format($total);
             render((string) view('elasticlens::cli.components.info', ['message' => 'Indexed '.$total.' '.$name.' in '.$time['sec'].' seconds']));
         } else {
             render((string) view('elasticlens::cli.components.error', ['message' => 'All indexes failed to build']));
