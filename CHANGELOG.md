@@ -2,6 +2,40 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v1.1.0 - 2024-09-09
+
+### New Feature
+
+Bulk index (re)builder with:
+
+```bash
+php artisan lens:build {model}
+
+```
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-build-v2.gif"
+      alt="ElasticLens Build"
+    />
+</div>
+### Changes
+
+The previous `lens:build` command is now `lens:migrate`, which better describes the feature.
+
+```bash
+php artisan lens:migrate {model}
+
+```
+<div align="center">
+  <img
+      src="https://cdn.snipform.io/pdphilip/elasticlens/lens-migrate.gif"
+      alt="ElasticLens Migrate"
+    />
+</div>
+See changelog for other minor updates:
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.1.0...v1.1.0
+
 ## v1.0.0 - 2024-09-02
 
 ### ElasticLens v1.0.0
@@ -27,11 +61,13 @@ You can install ElasticLens via Composer:
 ```bash
 composer require pdphilip/elasticlens
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 ```
 #### Documentation
