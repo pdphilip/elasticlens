@@ -65,7 +65,7 @@ You can install the package via composer:
 composer require pdphilip/elasticlens
 ```
 
-Publish config file and run the migrations with:
+Publish the config file and run the migrations with:
 
 ```bash
 php artisan lens:install
@@ -73,7 +73,7 @@ php artisan lens:install
 
 # Usage 
 
-The Walkthrough Steps below will show all the features by way of eaxmple
+The Walkthrough Steps below will show all the features by way of examples
 
 ## Step 1: Zero config setup
 
