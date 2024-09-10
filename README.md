@@ -29,17 +29,26 @@ User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
 
 --- 
 
-### Wait, isn't this what Laravel Scout does?
+## Wait, isn't this what Laravel Scout does?
 
 Yes, but mostly no.
 
-ElasticLens is built from the ground up to fully leverage Elasticsearch's capabilities. It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, creating a dedicated `Index Model`
-that is automatically synced with your `Base Model`.
+**ElasticLens is built from the ground up around Elasticsearch**. 
 
-The `Index Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index Model`, ElasticLens offers tools for
+It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package (Elasticsearch using Eloquent), creating a dedicated `Index Model` that is fully accessible and automatically synced with your `Base Model`.
+
+<details>
+<summary> How? </summary>
+
+
+> The `Index Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index Model`, ElasticLens offers tools for
 mapping fields (with embedding relationships) during the build process, and managing index migrations.
 
-For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` Model that provides all the features from [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) to search your `Base Model`.
+> For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` Model that provides all the features from [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) to search your `Base Model`.
+  
+</details>
+
+--- 
 
 # Features
 
@@ -73,13 +82,13 @@ php artisan lens:install
 
 # Usage 
 
-The Walkthrough Steps below will show all the features by way of examples
+The Walkthrough below will demonstrate all the features by way of an example.
+
+In this example, we'll index a `User` model.
 
 ## Step 1: Zero config setup
 
-1. Add the Indexable Trait to Your Base Model:
-
-- Include the `Indexable` trait in your base model to enable automatic indexing.
+### 1. Add the `Indexable` Trait to Your Base Model:
 
 ```php
 use PDPhilip\ElasticLens\Indexable;
@@ -89,23 +98,22 @@ class User extends Eloquent implements Authenticatable, CanResetPassword
     use Indexable;
 ```
 
-2. Create an Index Model for Your Base Model:
-
-- Define a corresponding Index Model that extends `IndexModel`. This model will sync and manage the Elasticsearch index for your `Base Model`.
-- By default, ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory. 
-- For example: `App\Models\Indexes\IndexedUser.php`
-
+### 2. Create an Index Model for Your Base Model:
+- ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory. 
 ```php
+/**
+ * Create: App\Models\Indexes\IndexedUser.php
+ */
 namespace App\Models\Indexes;
 
 use PDPhilip\ElasticLens\IndexModel;
 
 class IndexedUser extends IndexModel{}
 
+
+
 ```
-
 - That's it! Your User model will now automatically sync with the IndexedUser model whenever changes occur. You can search your User model effortlessly, like:
-
 
 ```php
 User::viaIndex()->term('running')->orTerm('swimming')->search();
@@ -121,7 +129,7 @@ Perform quick and easy full-text searches:
 User::search('loves espressos');
 ```
 
-> Search for the phrase `loves espressos` across all fields and return the base User models
+> Search for the phrase `loves espressos` across all fields and return the base `User` models
 
 Cute. But that's not why we're here...
 
@@ -141,16 +149,20 @@ BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
 #### 1. Basic Term Search:
 
 ```php
-User::viaIndex()->term('nara')->orderByDesc('created_at')->limit(3)->search();
+User::viaIndex()->term('nara')
+    ->where('state','active')
+    ->limit(3)->search();
 ```
 
-> This searches all fields for the term 'nara' and returns the 3 newest results.
+> This searches all users who are `active` for the term 'nara' across all fields and return the top 3 results.
 > - https://elasticsearch.pdphilip.com/full-text-search#term-search-term
 
 #### 2. Phrase Search:
 
 ```php
-User::viaIndex()->phrase('Ice bathing')->orderByDesc('created_at')->limit(3)->search();
+User::viaIndex()->phrase('Ice bathing')
+    ->orderByDesc('created_at')
+    ->limit(5)->search();
 ```
 
 > Searches all fields for the phrase 'Ice bathing' and returns the 3 newest results. Phrases match exact words in order.
@@ -159,7 +171,11 @@ User::viaIndex()->phrase('Ice bathing')->orderByDesc('created_at')->limit(3)->se
 #### 3. Boosting Terms and Minimum Score:
 
 ```php
-User::viaIndex()->term('David')->field('first_name', 3)->field('last_name', 2)->field('bio')->minScore(2.1)->search();
+User::viaIndex()->term('David')
+    ->field('first_name', 3)
+    ->field('last_name', 2)
+    ->field('bio')
+    ->minScore(2.1)->search();
 ```
 
 > Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Returns results with a minimum score of 2.1, ordered by the highest score.
@@ -201,7 +217,8 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
 
 ```php
 User::viaIndex()->whereNestedObject('user_logs', function (Builder $query) {
-    $query->where('user_logs.country', 'Norway')->where('user_logs.created_at', '>=',Carbon::now()->modify('-1 week'));
+    $query->where('user_logs.country', 'Norway')
+        ->where('user_logs.created_at', '>=',Carbon::now()->modify('-1 week'));
 })->get();
 ```
 
@@ -628,7 +645,7 @@ class IndexedUser extends IndexModel
 - **Running the Migration**: To execute the migration and rebuild all your indexed, use the following command:
 
 ```bash
-php artisan lens:build User
+php artisan lens:migrate User
 ```
 
 This command will delete the existing index, run the migration, and rebuild all records.
@@ -719,6 +736,9 @@ Rebuilds all the `IndexedProfile` records for the `Profile` model.
 
 ElasticLens includes a built-in `IndexableBuildState` model that allows you to monitor and track the state of your index builds. This model records the status of each index build, providing you with insights into the indexing process.
 
+<details>
+<summary> Fields </summary>
+
 ### Model Fields:
 
 - string `$model`: The base model being indexed.
@@ -735,6 +755,9 @@ ElasticLens includes a built-in `IndexableBuildState` model that allows you to m
 
 - @property-read string `$state_name`: The name of the current state.
 - @property-read string `$state_color`: The color associated with the current state.
+  
+</details>
+
 
 Built-in methods include:
 
@@ -752,7 +775,8 @@ IndexableBuildState::countModelRecords($indexModel);
 
 ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and tracking the state of index migrations. This model logs each migration related to an `Index Model`.
 
-### Model Fields:
+<details>
+<summary>  Fields </summary>
 
 - string `$index_model`: The migrated Index Model.
 - IndexableMigrationLogState `$state`: State of the migration
@@ -766,6 +790,9 @@ ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and
 - @property-read string `$version`: Parsed version ex v2.03
 - @property-read string `$state_name`: Current state name.
 - @property-read string `$state_color`: Color representing the current state.
+  
+</details>
+
 
 Built-in methods include:
 
