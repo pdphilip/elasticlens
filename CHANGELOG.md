@@ -2,6 +2,12 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v1.2.0 - 2024-09-16
+
+Dependency update to use [laravel-elasticsearch v4.2](https://github.com/pdphilip/laravel-elasticsearch/releases/tag/v4.2.0)
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.1.0...v1.2.0
+
 ## v1.1.0 - 2024-09-09
 
 ### New Feature
@@ -11,6 +17,7 @@ Bulk index (re)builder with:
 ```bash
 php artisan lens:build {model}
 
+
 ```
 <div align="center">
   <img
@@ -19,11 +26,11 @@ php artisan lens:build {model}
     />
 </div>
 ### Changes
-
 The previous `lens:build` command is now `lens:migrate`, which better describes the feature.
 
 ```bash
 php artisan lens:migrate {model}
+
 
 ```
 <div align="center">
@@ -33,7 +40,6 @@ php artisan lens:migrate {model}
     />
 </div>
 See changelog for other minor updates:
-
 **Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.1.0...v1.1.0
 
 ## v1.0.0 - 2024-09-02
@@ -62,11 +68,13 @@ You can install ElasticLens via Composer:
 composer require pdphilip/elasticlens
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 ```
