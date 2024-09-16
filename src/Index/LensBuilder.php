@@ -261,13 +261,11 @@ class LensBuilder extends LensIndex
             if (! $index) {
                 $index = new $this->indexModelInstance;
             }
-            //@phpstan-ignore-next-line
             $index->_id = $modelId;
 
             foreach ($this->buildResult->map as $field => $value) {
                 $index->{$field} = $value;
             }
-            //@phpstan-ignore-next-line
             $index->saveWithoutRefresh();
         } catch (Exception $e) {
             $this->buildResult->setMessage('Index build Error', $e->getMessage());

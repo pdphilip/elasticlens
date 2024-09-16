@@ -24,7 +24,7 @@ ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index
 </div>
 
 ```php
-User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
+User::viaIndex()->searchPhrase('loves dogs')->where('status','active')->get();
 ```
 
 --- 
@@ -33,19 +33,20 @@ User::viaIndex()->phrase('loves dogs')->where('status','active')->search();
 
 Yes, but mostly no.
 
-**ElasticLens is built from the ground up around Elasticsearch**. 
+**ElasticLens is built from the ground up around Elasticsearch**.
 
-It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package (Elasticsearch using Eloquent), creating a dedicated `Index Model` that is fully accessible and automatically synced with your `Base Model`.
+It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package (Elasticsearch using Eloquent), creating a dedicated `Index Model` that is fully accessible and automatically synced with
+your `Base Model`.
 
 <details>
 <summary> How? </summary>
 
 
 > The `Index Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index Model`, ElasticLens offers tools for
-mapping fields (with embedding relationships) during the build process, and managing index migrations.
+> mapping fields (with embedding relationships) during the build process, and managing index migrations.
 
 > For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` Model that provides all the features from [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) to search your `Base Model`.
-  
+
 </details>
 
 --- 
@@ -80,7 +81,7 @@ Publish the config file and run the migrations with:
 php artisan lens:install
 ```
 
-# Usage 
+# Usage
 
 The Walkthrough below will demonstrate all the features by way of an example.
 
@@ -99,7 +100,9 @@ class User extends Eloquent implements Authenticatable, CanResetPassword
 ```
 
 ### 2. Create an Index Model for Your Base Model:
-- ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory. 
+
+- ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory.
+
 ```php
 /**
  * Create: App\Models\Indexes\IndexedUser.php
@@ -113,10 +116,11 @@ class IndexedUser extends IndexModel{}
 
 
 ```
+
 - That's it! Your User model will now automatically sync with the IndexedUser model whenever changes occur. You can search your User model effortlessly, like:
 
 ```php
-User::viaIndex()->term('running')->orTerm('swimming')->search();
+User::viaIndex()->searchTerm('running')->orSearchTerm('swimming')->get();
 ```
 
 ---
@@ -138,8 +142,8 @@ To truly harness the power of [Laravel-Elasticsearch](https://github.com/pdphili
 ```php
 BaseModel::viaIndex()->{build your ES Eloquent query}->first();
 BaseModel::viaIndex()->{build your ES Eloquent query}->get();
-BaseModel::viaIndex()->{build your ES Eloquent query}->search();
-BaseModel::viaIndex()->{build your ES Eloquent query}->avg();
+BaseModel::viaIndex()->{build your ES Eloquent query}->paginate();
+BaseModel::viaIndex()->{build your ES Eloquent query}->avg('orders');
 BaseModel::viaIndex()->{build your ES Eloquent query}->distinct();
 BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
 ```
@@ -149,9 +153,9 @@ BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
 #### 1. Basic Term Search:
 
 ```php
-User::viaIndex()->term('nara')
+User::viaIndex()->searchTerm('nara')
     ->where('state','active')
-    ->limit(3)->search();
+    ->limit(3)->get();
 ```
 
 > This searches all users who are `active` for the term 'nara' across all fields and return the top 3 results.
@@ -160,25 +164,21 @@ User::viaIndex()->term('nara')
 #### 2. Phrase Search:
 
 ```php
-User::viaIndex()->phrase('Ice bathing')
+User::viaIndex()->searchPhrase('Ice bathing')
     ->orderByDesc('created_at')
-    ->limit(5)->search();
+    ->limit(5)->get();
 ```
 
 > Searches all fields for the phrase 'Ice bathing' and returns the 3 newest results. Phrases match exact words in order.
 > - https://elasticsearch.pdphilip.com/full-text-search#phrase-search-phrase
 
-#### 3. Boosting Terms and Minimum Score:
+#### 3. Boosting Terms fields:
 
 ```php
-User::viaIndex()->term('David')
-    ->field('first_name', 3)
-    ->field('last_name', 2)
-    ->field('bio')
-    ->minScore(2.1)->search();
+User::viaIndex()->searchTerm('David',['first_name^3', 'last_name^2', 'bio'])->get();
 ```
 
-> Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Returns results with a minimum score of 2.1, ordered by the highest score.
+> Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Results are ordered by score.
 > - https://elasticsearch.pdphilip.com/full-text-search#boosting-terms
 > - https://elasticsearch.pdphilip.com/full-text-search#minimum-score
 
@@ -228,7 +228,10 @@ User::viaIndex()->whereNestedObject('user_logs', function (Builder $query) {
 #### 8. Fuzzy Search:
 
 ```php
-User::viaIndex()->fuzzyTerm('quikc')->orFuzzyTerm('brwn')->andFuzzyTerm('foks')->search();
+User::viaIndex()->searchTerm('quikc')->asFuzzy()
+    ->orSearchTerm('brwn')->asFuzzy()
+    ->orSearchTerm('foks')->asFuzzy()
+    ->get();
 ```
 
 > No spell, no problem. Search Fuzzy.
@@ -237,16 +240,24 @@ User::viaIndex()->fuzzyTerm('quikc')->orFuzzyTerm('brwn')->andFuzzyTerm('foks')-
 #### 9. Highlighting Search Results:
 
 ```php
-User::viaIndex()->term('espresso')->highlight()->search();
+User::viaIndex()->searchTerm('espresso')->withHighlights()->get();
 ```
 
 > Searches for 'espresso' across all fields and highlights where it was found.
 > - https://elasticsearch.pdphilip.com/full-text-search#highlighting
 
+#### 10. Phrase prefix search:
+
+```php
+User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
+```
+
+> Searches for the phrase prefix 'loves espr' across all fields and highlights where it was found.
+> - https://elasticsearch.pdphilip.com/full-text-search#highlighting
 
 ### Note on `Index Model` vs `Base Model` Results
 
-- Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model. 
+- Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model.
 - This can be useful for display purposes, such as highlighting embedded fields.
 - **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
 
@@ -255,7 +266,7 @@ User::viaIndex()->term('espresso')->highlight()->search();
 - Simply chain `->asModel()` at the end of your query:
 
 ```php
-User::viaIndex()->term('david')->orderByDesc('created_at')->limit(3)->search()->asModel();
+User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->get()->asModel();
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asModel();
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asModel();
 ```
@@ -274,8 +285,6 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
 // Will not paginate ❌ (but will at least return a collection of 10 Users):
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10)->asModel();
 ```
-
-
 
 ---
 
@@ -755,7 +764,7 @@ ElasticLens includes a built-in `IndexableBuildState` model that allows you to m
 
 - @property-read string `$state_name`: The name of the current state.
 - @property-read string `$state_color`: The color associated with the current state.
-  
+
 </details>
 
 
@@ -767,7 +776,8 @@ IndexableBuildState::countModelErrors($indexModel);
 IndexableBuildState::countModelRecords($indexModel);
 ```
 
-**Note**: While you can query the `IndexableBuildState` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be used for reading purposes only to ensure accurate monitoring and reporting.
+**Note**: While you can query the `IndexableBuildState` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be
+used for reading purposes only to ensure accurate monitoring and reporting.
 
 ---
 
@@ -790,7 +800,7 @@ ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and
 - @property-read string `$version`: Parsed version ex v2.03
 - @property-read string `$state_name`: Current state name.
 - @property-read string `$state_color`: Color representing the current state.
-  
+
 </details>
 
 
@@ -801,7 +811,8 @@ IndexableMigrationLog::getLatestVersion($indexModel);
 IndexableMigrationLog::getLatestMigration($indexModel);
 ```
 
-**Note**: While you can query the `IndexableMigrationLog` model directly, avoid writing or deleting records within it manually, as this can interfere with versioing of the migrations. The model should be used for reading purposes only to ensure accuracy.
+**Note**: While you can query the `IndexableMigrationLog` model directly, avoid writing or deleting records within it manually, as this can interfere with versioing of the migrations. The model should be used for reading purposes only to
+ensure accuracy.
 
 ---
 
