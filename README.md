@@ -1,6 +1,6 @@
  <div align="center">
   <img
-      src="https://cdn.snipform.io/pdphilip/elasticlens/logo.png"
+      src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-logo.png"
       alt="ElasticLens"
     />
 
