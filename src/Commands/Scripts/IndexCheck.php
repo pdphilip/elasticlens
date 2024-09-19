@@ -154,7 +154,7 @@ final class IndexCheck
         ];
         if ($status['status'] !== 'ok') {
             $checks['config']['help'] = [
-                'For details, run: php artisan lens:health '.$index['state']['index']['modelName'],
+                'For details, run: php artisan lens:health '.$index['state']['model']['modelName'],
             ];
         }
     }

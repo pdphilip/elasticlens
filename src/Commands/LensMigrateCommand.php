@@ -6,16 +6,15 @@ namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use PDPhilip\ElasticLens\Commands\Terminal\LensTerm;
+use OmniTerm\OmniTerm;
 use PDPhilip\ElasticLens\Index\LensBuilder;
 use PDPhilip\ElasticLens\Lens;
 
-use function Termwind\ask;
-use function Termwind\render;
+use function OmniTerm\render;
 
 class LensMigrateCommand extends Command
 {
-    use LensCommands;
+    use LensCommands, OmniTerm;
 
     public $signature = 'lens:migrate {model} {--force}';
 
@@ -55,7 +54,6 @@ class LensMigrateCommand extends Command
 
         $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($model);
-
         $this->newLine();
         render((string) view('elasticlens::cli.components.title', ['title' => 'Migrate and Build '.class_basename($this->indexModel), 'color' => 'sky']));
         $this->newLine();
@@ -82,13 +80,12 @@ class LensMigrateCommand extends Command
             $question = 'Migration Failed. Build Anyway?';
         }
         while (! in_array($this->build, ['yes', 'no', 'y', 'n'])) {
-            $this->build = ask((string) view('elasticlens::cli.components.question', ['question' => $question, 'options' => ['yes', 'no']]), ['yes', 'no']);
+            $this->build = $this->omni->ask($question, ['yes', 'no']);
         }
         if (in_array($this->build, ['yes', 'y'])) {
             $this->buildPassed = $this->processBuild($this->indexModel);
         } else {
-            render((string) view('elasticlens::cli.components.info', ['message' => 'Build Cancelled']));
-
+            $this->omni->info('Build Cancelled');
             $this->buildPassed = false;
         }
     }
@@ -99,36 +96,20 @@ class LensMigrateCommand extends Command
             $builder = new LensBuilder($indexModel);
             $recordsCount = $builder->baseModel::count();
         } catch (Exception $e) {
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => 'error',
-                'name' => 'ERROR',
-                'title' => 'Base Model not found',
-                'help' => [
-                    $e->getMessage(),
-                ],
-            ]));
+            $this->omni->statusError('ERROR', 'Base Model not found', [$e->getMessage()]);
 
             return false;
         }
         if (! $recordsCount) {
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => 'warning',
-                'name' => 'BUILD SKIPPED',
-                'title' => 'No records found for '.$builder->baseModel,
-            ]));
+            $this->omni->statusWarning('BUILD SKIPPED', 'No records found for '.$builder->baseModel);
 
             return false;
         }
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
-        $live = LensTerm::liveRender();
-        $live->reRender((string) view('elasticlens::cli.components.progress', [
-            'screenWidth' => $live->getScreenWidth(),
-            'current' => 0,
-            'max' => $this->buildData['total'],
-        ]));
+        $this->omni->createProgressBar($this->buildData['total']);
         $migrationVersion = $builder->fetchCurrentMigrationVersion();
-        $builder->baseModel::chunk(100, function ($records) use ($builder, $live, $migrationVersion) {
+        $builder->baseModel::chunk(100, function ($records) use ($builder, $migrationVersion) {
             foreach ($records as $record) {
                 $id = $record->{$builder->baseModelPrimaryKey};
                 $build = $builder->buildIndex($id, 'Index Rebuild', $migrationVersion);
@@ -138,19 +119,10 @@ class LensMigrateCommand extends Command
                 } else {
                     $this->buildData['failed']++;
                 }
-
-                $live->reRender((string) view('elasticlens::cli.components.progress', [
-                    'screenWidth' => $live->getScreenWidth(),
-                    'current' => $this->buildData['processed'],
-                    'max' => $this->buildData['total'],
-                ]));
+                $this->omni->progressAdvance();
             }
         });
-        $live->reRender((string) view('elasticlens::cli.components.progress', [
-            'screenWidth' => $live->getScreenWidth(),
-            'current' => $this->buildData['total'],
-            'max' => $this->buildData['total'],
-        ]));
+        $this->omni->progressFinish();
         $this->buildData['state'] = 'success';
         $this->buildData['message'] = 'Indexes Synced';
         if ($this->buildData['failed']) {
@@ -168,16 +140,12 @@ class LensMigrateCommand extends Command
     private function showStatus(): void
     {
         if ($this->buildData['didRun']) {
-            render((string) view('elasticlens::cli.components.header-row', ['name' => 'Build Data', 'extra' => null, 'value' => 'Value']));
-            render((string) view('elasticlens::cli.components.data-row-value', ['key' => 'Success', 'value' => $this->buildData['success']]));
-            render((string) view('elasticlens::cli.components.data-row-value', ['key' => 'Failed', 'value' => $this->buildData['failed']]));
-            render((string) view('elasticlens::cli.components.data-row-value', ['key' => 'Total', 'value' => $this->buildData['total']]));
+            $this->omni->header('Build Data', 'Value');
+            $this->omni->row('Success', $this->buildData['success'], null, 'text-emerald-500');
+            $this->omni->row('Failed', $this->buildData['failed'], null, 'text-rose-500');
+            $this->omni->row('Total', $this->buildData['total'], null, 'text-emerald-500');
             $this->newLine();
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => $this->buildData['state'],
-                'title' => 'Build Status',
-                'name' => $this->buildData['message'],
-            ]));
+            $this->omni->status($this->buildData['state'], 'Build Status', $this->buildData['message']);
             $this->newLine();
         }
     }

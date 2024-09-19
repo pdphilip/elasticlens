@@ -68,7 +68,7 @@ class IndexableBuild extends Model
 
     public static function returnState($model, $modelId, $indexModel): mixed
     {
-        return self::where('model', $model)->where('model_id', $modelId)->where('index_model', $indexModel)->first();
+        return self::where('model', strtolower($model))->where('model_id', $modelId)->where('index_model', strtolower($indexModel))->first();
     }
 
     public static function writeState($model, $modelId, $indexModel, BuildResult $buildResult, $observerModel): ?IndexableBuild
@@ -76,6 +76,8 @@ class IndexableBuild extends Model
         if (! self::isEnabled()) {
             return null;
         }
+        $model = strtolower($model);
+        $indexModel = strtolower($indexModel);
         $stateData = $buildResult->toArray();
         unset($stateData['model']);
         $state = IndexableBuildState::FAILED;
@@ -106,23 +108,23 @@ class IndexableBuild extends Model
 
     public static function countModelErrors($indexModel): int
     {
-        return IndexableBuild::where('index_model', $indexModel)->where('state', IndexableBuildState::FAILED)->count();
+        return IndexableBuild::where('index_model', strtolower($indexModel))->where('state', IndexableBuildState::FAILED)->count();
     }
 
     public static function countModelRecords($indexModel): int
     {
-        return IndexableBuild::where('index_model', $indexModel)->count();
+        return IndexableBuild::where('index_model', strtolower($indexModel))->count();
     }
 
     public static function deleteState($model, $modelId, $indexModel): void
     {
-        $stateModel = IndexableBuild::returnState($model, $modelId, $indexModel);
+        $stateModel = IndexableBuild::returnState(strtolower($model), $modelId, strtolower($indexModel));
         $stateModel?->delete();
     }
 
     public static function deleteStateModel($indexModel): void
     {
-        IndexableBuild::where('index_model', $indexModel)->delete();
+        IndexableBuild::where('index_model', strtolower($indexModel))->delete();
 
     }
 

@@ -7,17 +7,18 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use PDPhilip\ElasticLens\Commands\Terminal\LensTerm;
+use OmniTerm\OmniTerm;
 use PDPhilip\ElasticLens\Index\BulkIndexer;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
 use PDPhilip\ElasticLens\Traits\Timer;
 
-use function Termwind\render;
+use function OmniTerm\asyncFunction;
+use function OmniTerm\render;
 
 class LensBuildCommand extends Command
 {
-    use LensCommands, Timer;
+    use LensCommands, OmniTerm, Timer;
 
     public $signature = 'lens:build {model}';
 
@@ -65,21 +66,17 @@ class LensBuildCommand extends Command
         $health = new LensState($this->indexModel);
         $this->baseModel = $health->baseModel;
         if (! $health->indexExists) {
-            render((string) view('elasticlens::cli.components.warning', ['message' => $health->indexModelTable.' index not found']));
+            $this->omni->statusError('ERROR', $health->indexModelTable.' index not found');
+
             $this->migrate = null;
             $this->migrationStep();
         }
         $health = new LensState($this->indexModel);
 
         if (! $health->indexExists) {
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => 'error',
-                'name' => 'ERROR',
-                'title' => 'Index required',
-                'help' => [
-                    'Migrate to create the "'.$health->indexModelTable.'" index',
-                ],
-            ]));
+            $this->omni->statusError('ERROR', 'Index required', [
+                'Migrate to create the "'.$health->indexModelTable.'" index',
+            ]);
 
             return self::FAILURE;
         }
@@ -97,29 +94,20 @@ class LensBuildCommand extends Command
         try {
             $recordsCount = $health->baseModel::count();
         } catch (Exception $e) {
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => 'error',
-                'name' => 'ERROR',
-                'title' => 'Base Model not found',
-                'help' => [
-                    $e->getMessage(),
-                ],
-            ]));
+            $this->omni->statusError('ERROR', 'Base Model not found', [
+                $e->getMessage(),
+            ]);
 
             return false;
         }
         if (! $recordsCount) {
-            render((string) view('elasticlens::cli.components.status', [
-                'status' => 'warning',
-                'name' => 'BUILD SKIPPED',
-                'title' => 'No records found for '.$health->baseModel,
-            ]));
+            $this->omni->statusWarning('BUILD SKIPPED', 'No records found for '.$health->baseModel);
 
             return false;
         }
         $this->startTimer();
 
-        $async = LensTerm::asyncFunction(function () {});
+        $async = asyncFunction(function () {});
         $async->render((string) view('elasticlens::cli.bulk', [
             'screenWidth' => $async->getScreenWidth(),
             'model' => $this->model,
@@ -166,9 +154,9 @@ class LensBuildCommand extends Command
         $time = $this->getTime();
         if ($total > 0) {
             $total = number_format($total);
-            render((string) view('elasticlens::cli.components.info', ['message' => 'Indexed '.$total.' '.$name.' in '.$time['sec'].' seconds']));
+            $this->omni->info('Indexed '.$total.' '.$name.' in '.$time['sec'].' seconds');
         } else {
-            render((string) view('elasticlens::cli.components.error', ['message' => 'All indexes failed to build']));
+            $this->omni->error('All indexes failed to build');
         }
 
         $this->newLine();

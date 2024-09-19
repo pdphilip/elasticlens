@@ -56,6 +56,7 @@ class IndexableMigrationLog extends Model
 
     public static function getLatestVersion($indexModel): ?string
     {
+        $indexModel = strtolower($indexModel);
         if (! self::isEnabled()) {
             return null;
         }
@@ -66,6 +67,7 @@ class IndexableMigrationLog extends Model
 
     public static function getLatestMigration($indexModel): mixed
     {
+        $indexModel = strtolower($indexModel);
         $log = null;
         try {
             $log = self::where('index_model', $indexModel)->orderBy('version_major', 'desc')->orderBy('version_minor', 'desc')->first();
@@ -78,6 +80,8 @@ class IndexableMigrationLog extends Model
 
     public static function saveMigrationLog($indexModel, $majorVersion, $state, $map)
     {
+        $indexModel = strtolower($indexModel);
+
         $minor = self::calculateNextMinorVersion($indexModel, $majorVersion);
         $log = new self;
         $log->index_model = $indexModel;
@@ -90,6 +94,7 @@ class IndexableMigrationLog extends Model
 
     public static function calculateNextMinorVersion($indexModel, $majorVersion): int
     {
+        $indexModel = strtolower($indexModel);
         $lastMigration = self::getLatestMigration($indexModel);
         if ($lastMigration) {
             if ($lastMigration->version_major == $majorVersion) {

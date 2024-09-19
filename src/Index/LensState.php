@@ -135,7 +135,6 @@ class LensState extends LensIndex
         return [
             'status' => 'ok',
             'name' => 'Index Synced',
-            'help' => false,
         ];
     }
 

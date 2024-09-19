@@ -3,15 +3,14 @@
 namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
+use OmniTerm\OmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\HealthCheck;
-use PDPhilip\ElasticLens\Commands\Terminal\LensTerm;
 use PDPhilip\ElasticLens\Index\LensMigration;
-
-use function Termwind\ask;
-use function Termwind\render;
 
 trait LensCommands
 {
+    use OmniTerm;
+
     protected mixed $migrate = null;
 
     protected bool $migrationPassed = false;
@@ -21,13 +20,7 @@ trait LensCommands
         $loadError = HealthCheck::loadErrorCheck($model);
         if ($loadError) {
             $this->newLine();
-
-            render((string) view('elasticlens::cli.components.status', [
-                'name' => $loadError['name'],
-                'status' => $loadError['status'],
-                'title' => $loadError['title'],
-                'help' => $loadError['help'],
-            ]));
+            $this->omni->status($loadError['status'], $loadError['name'], $loadError['title'], $loadError['help']);
 
             $this->newLine();
 
@@ -38,12 +31,7 @@ trait LensCommands
             if (! empty($check['configStatusHelp']['critical'])) {
                 foreach ($check['configStatusHelp']['critical'] as $critical) {
                     $this->newLine();
-                    render((string) view('elasticlens::cli.components.status', [
-                        'name' => 'ERROR',
-                        'status' => 'error',
-                        'title' => $critical['name'],
-                        'help' => $critical['help'],
-                    ]));
+                    $this->omni->statusError('ERROR', $critical['name'], $critical['help']);
                 }
                 $this->newLine();
 
@@ -51,11 +39,7 @@ trait LensCommands
             }
         } catch (Exception $e) {
             $this->newLine();
-            render((string) view('elasticlens::cli.components.status', [
-                'name' => 'ERROR',
-                'status' => 'error',
-                'title' => $e->getMessage(),
-            ]));
+            $this->omni->statusError('ERROR', $e->getMessage());
             $this->newLine();
 
             return false;
@@ -71,21 +55,21 @@ trait LensCommands
     public function migrationStep(): void
     {
         while (! in_array($this->migrate, ['yes', 'no', 'y', 'n'])) {
-            $this->migrate = ask((string) view('elasticlens::cli.components.question', ['question' => 'Migrate index?', 'options' => ['yes', 'no']]), ['yes', 'no']);
+            $this->migrate = $this->omni->ask('Migrate index?', ['yes', 'no']);
         }
         if (in_array($this->migrate, ['yes', 'y'])) {
             $this->migrationPassed = $this->processMigration($this->indexModel);
         } else {
             $this->migrationPassed = true;
             $this->newLine();
-            render((string) view('elasticlens::cli.components.info', ['message' => 'Index migration skipped']));
+            $this->omni->info('Index migration skipped');
         }
     }
 
     private function processMigration($indexModel): bool
     {
-
-        $async = LensTerm::asyncFunction(function () use ($indexModel) {
+        $this->omni->newLoader();
+        $result = $this->omni->runTask('Migrating Index', function () use ($indexModel) {
             try {
                 $migration = new LensMigration($indexModel);
                 $migration->runMigration();
@@ -103,24 +87,6 @@ trait LensCommands
                 ];
             }
         });
-        $async->withFailOver((string) view('elasticlens::cli.components.loader', [
-            'state' => 'failover',
-            'message' => 'Migrating Index',
-            'i' => 1,
-        ]));
-        $result = $async->run(function () use ($async) {
-            $async->render((string) view('elasticlens::cli.components.loader', [
-                'state' => 'running',
-                'message' => 'Migrating Index',
-                'i' => $async->getInterval(),
-            ]));
-        });
-        $async->render((string) view('elasticlens::cli.components.loader', [
-            'state' => $result['state'],
-            'message' => $result['message'],
-            'details' => $result['details'],
-            'i' => 0,
-        ]));
         $this->newLine();
 
         return $result['state'] === 'success';

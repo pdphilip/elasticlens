@@ -7,13 +7,16 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
+use OmniTerm\OmniTerm;
 use ReflectionClass;
 use RuntimeException;
 
-use function Termwind\render;
+use function OmniTerm\render;
 
 class LensMakeCommand extends GeneratorCommand
 {
+    use OmniTerm;
+
     public $signature = 'lens:make {model}';
 
     public $description = 'Make a new index for the specified model';
@@ -28,28 +31,16 @@ class LensMakeCommand extends GeneratorCommand
         //Check if model exists
         $modelCheck = config('elasticlens.namespaces.models', 'App\Models').'\\'.$model;
         if (! $this->class_exists_case_sensitive($modelCheck)) {
-
-            render((string) view('elasticlens::cli.components.status', [
-                'name' => 'ERROR',
-                'status' => 'error',
-                'title' => 'Base Model ('.$model.') was not found at: '.$modelCheck,
-            ]));
-
+            $this->omni->statusError('ERROR', 'Base Model ('.$model.') was not found at: '.$modelCheck);
             $this->newLine();
 
             return self::FAILURE;
-
         }
 
         //check if there already is an indexedModel for the model
         $indexedModel = config('elasticlens.namespaces.indexes', 'App\Models\Indexes').'\\Indexed'.$model;
         if ($this->class_exists_case_sensitive($indexedModel)) {
-
-            render((string) view('elasticlens::cli.components.status', [
-                'name' => 'ERROR',
-                'status' => 'error',
-                'title' => 'Indexed Model (for '.$model.' Model) already exists at: '.$indexedModel,
-            ]));
+            $this->omni->statusError('ERROR', 'Indexed Model (for '.$model.' Model) already exists at: '.$indexedModel);
 
             $this->newLine();
 
@@ -58,7 +49,6 @@ class LensMakeCommand extends GeneratorCommand
 
         // Set the fully qualified class name for the new indexed model
         $name = $this->qualifyClass($indexedModel);
-
         // Get the destination path for the generated file
         $path = $this->getPath($name);
 
@@ -74,14 +64,11 @@ class LensMakeCommand extends GeneratorCommand
         // Write the file to disk
         $this->files->put($path, $stub);
 
-        render((string) view('elasticlens::cli.components.status', [
-            'name' => 'SUCCESS',
-            'status' => 'success',
-            'title' => 'Indexed Model (for '.$model.' Model) created at: '.$indexedModel,
-        ]));
-        render((string) view('elasticlens::cli.components.code-trait', [
-            'model' => $model,
-        ]));
+        $this->omni->statusSuccess('SUCCESS', 'Indexed Model (for '.$model.' Model) created at: '.$indexedModel);
+        $this->omni->statusInfo('1', 'Add the Indexable trait to your <span class="text-sky-500">'.$model.'</span> model');
+        render((string) view('elasticlens::cli.components.code-trait', ['model' => $model]));
+        $this->newLine();
+        $this->omni->statusInfo('2', 'Then run: "<span class="text-emerald-500">php artisan lens:build '.$model.'</span>" to index your model');
 
         return self::SUCCESS;
     }
