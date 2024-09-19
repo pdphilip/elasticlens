@@ -51,7 +51,7 @@ class LensBuildCommand extends Command
      */
     public function handle(): int
     {
-
+        $this->initOmni();
         $this->model = $this->argument('model');
         $ok = $this->checkModel($this->model);
         if (! $ok) {

@@ -24,7 +24,7 @@ class LensHealthCommand extends Command
      */
     public function handle(): int
     {
-
+        $this->initOmni();
         $model = $this->argument('model');
 
         $loadError = HealthCheck::loadErrorCheck($model);

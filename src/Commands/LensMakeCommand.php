@@ -23,6 +23,8 @@ class LensMakeCommand extends GeneratorCommand
 
     public function handle(): int
     {
+        $this->initOmni();
+
         $this->newLine();
         $model = $this->argument('model');
         //ensure casing is correct

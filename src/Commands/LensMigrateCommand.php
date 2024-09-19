@@ -43,7 +43,7 @@ class LensMigrateCommand extends Command
      */
     public function handle(): int
     {
-
+        $this->initOmni();
         $model = $this->argument('model');
         $force = $this->option('force');
 
