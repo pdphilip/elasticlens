@@ -16,6 +16,10 @@ use PDPhilip\Elasticsearch\Eloquent\Model;
 /**
  * Class IndexModel
  *
+ * @method static Collection getBase()
+ * @method static Collection asBase()
+ * @method static LengthAwarePaginator paginateBase($perPage = 15, $pageName = 'page', $page = null, $options = [])
+ *
  * @property string $_id
  *
  * @mixin Model
@@ -42,7 +46,7 @@ abstract class IndexModel extends Model
             $this->baseModel = $this->guessBaseModelName();
         }
         $this->setConnection(config('elasticlens.database') ?? 'elasticsearch');
-        Builder::macro('paginateModels', function ($perPage = 15, $pageName = 'page', $page = null, $options = []) {
+        Builder::macro('paginateBase', function ($perPage = 15, $pageName = 'page', $page = null, $options = []) {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
             $items = $this->get()->forPage($page, $perPage);
             $items = $items->map(function ($value) {
@@ -58,7 +62,12 @@ abstract class IndexModel extends Model
                 $options
             );
         });
-        Collection::macro('asModel', function () {
+        Builder::macro('getBase', function () {
+            return $this->get()->map(function ($value) {
+                return $value->base;
+            });
+        });
+        Collection::macro('asBase', function () {
             return $this->map(function ($value) {
                 return $value->base;
             });
@@ -70,7 +79,7 @@ abstract class IndexModel extends Model
         return $this->belongsTo($this->baseModel, '_id');
     }
 
-    public function asModel()
+    public function asBase()
     {
         return $this->base;
 

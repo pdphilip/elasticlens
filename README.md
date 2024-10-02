@@ -261,19 +261,28 @@ User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
 - This can be useful for display purposes, such as highlighting embedded fields.
 - **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
 
-### To search and return results as `Base Models` use `asModel()`
+### To search and return results as `Base Models`:
+#### 1. use `asBase()`
 
-- Simply chain `->asModel()` at the end of your query:
+- Simply chain `->asBase()` at the end of your query:
 
 ```php
-User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->get()->asModel();
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asModel();
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asModel();
+User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->get()->asBase();
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asBase();
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asBase();
 ```
 
-### To search and paginate results as `Base Models` use: `paginateModels()`
+#### 2. use `getBase()` instead of `get()` 
 
-- Complete the query string with `->paginateModels()`
+```php
+User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->getBase();
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->getBase();
+```
+
+
+### To search and paginate results as `Base Models` use: `paginateBase()`
+
+- Complete the query string with `->paginateBase()`
 
 ```php
 // Returns a pagination instance of Users ✔️:
@@ -283,7 +292,7 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateModels(
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
 
 // Will not paginate ❌ (but will at least return a collection of 10 Users):
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10)->asModel();
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10)->asBase();
 ```
 
 ---
