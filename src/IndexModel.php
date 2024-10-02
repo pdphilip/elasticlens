@@ -64,6 +64,7 @@ abstract class IndexModel extends Model
         });
         Builder::macro('getBase', function () {
             return $this->get()->map(function ($value) {
+                //@phpstan-ignore-next-line
                 return $value->base;
             });
         });

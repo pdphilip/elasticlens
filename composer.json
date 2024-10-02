@@ -61,7 +61,7 @@
       "@php vendor/bin/testbench serve"
     ],
     "types": "phpstan analyse --ansi --memory-limit=2G",
-    "format": "pint -v",
+    "lint": "pint -v",
     "test-coverage": "pest --coverage",
     "test:lint": "pint --test -v",
     "test:types": "@types",
