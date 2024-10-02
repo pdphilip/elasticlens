@@ -257,7 +257,7 @@ User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
 
 ### Note on `Index Model` vs `Base Model` Results
 
-- Since the `viaIndex()` taps into the `IndexModel`, the results returned will be instances of `IndexedUser`, not the base `User` model.
+- Since the `viaIndex()` taps into the `IndexModel`, the results will be instances of `IndexedUser`, not the base `User` model.
 - This can be useful for display purposes, such as highlighting embedded fields.
 - **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
 
@@ -272,7 +272,7 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asBase()
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asBase();
 ```
 
-#### 2. use `getBase()` instead of `get()` 
+#### 2. use `getBase()` instead of `get()->asBase()` 
 
 ```php
 User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->getBase();
@@ -286,7 +286,7 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->getBase();
 
 ```php
 // Returns a pagination instance of Users ✔️:
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateModels(10);
+User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateBase(10);
 
 // Returns a pagination instance of IndexedUsers:
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
