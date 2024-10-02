@@ -18,12 +18,15 @@ trait Indexable
 
     public static function search($phrase)
     {
-        $indexModel = Lens::fetchIndexModel((new static));
+        $query = self::viaIndex();
 
-        return $indexModel->phrase($phrase)->search()->asModel();
+        return $query->phrase($phrase)->search()->asBase();
     }
 
-    public static function viaIndex(): Builder
+    /**
+     * @return Builder|QueryBuilder
+     */
+    public static function viaIndex()
     {
         $indexModel = Lens::fetchIndexModel((new static));
 
