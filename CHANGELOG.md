@@ -2,6 +2,13 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v1.3.1 - 2024-10-03
+
+- Bug fix: Bulk insert was not writing to the `IndexableBuild` model correctly
+- Better IDE support for IndexModel macros, ie: `getBase()`,  `asBase()` & `paginateBase()`
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.3.0...v1.3.1
+
 ## v1.3.0 - 2024-10-02
 
 ### Changes
@@ -31,6 +38,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -42,9 +50,6 @@ php artisan lens:build {model}
 The previous `lens:build` command is now `lens:migrate`, which better describes the feature.
 ```bash
 php artisan lens:migrate {model}
-
-
-
 ```
 <div align="center">
   <img
@@ -82,11 +87,13 @@ composer require pdphilip/elasticlens
 
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
