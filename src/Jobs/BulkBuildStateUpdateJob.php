@@ -21,7 +21,7 @@ class BulkBuildStateUpdateJob implements ShouldQueue
     {
         if (! empty($this->buildStates)) {
             foreach ($this->buildStates as $modelId => $buildState) {
-                IndexableBuild::writeState($this->baseModel, $modelId, $this->indexModel, $buildState, 'Bulk Index');
+                IndexableBuild::writeState(class_basename($this->baseModel), $modelId, class_basename($this->indexModel), $buildState, 'Bulk Index');
             }
         }
     }

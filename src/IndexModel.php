@@ -14,16 +14,14 @@ use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 
 /**
- * Class IndexModel
- *
- * @method static Collection getBase()
- * @method static Collection asBase()
- * @method static LengthAwarePaginator paginateBase($perPage = 15, $pageName = 'page', $page = null, $options = [])
- *
  * @property string $_id
  *
- * @mixin Model
- *
+ * @method static $this get()
+ * @method static $this search()
+ * @method static Collection getBase()
+ * @method static Collection asBase() This method should only be called after get() or search() has been executed.
+ * @method static LengthAwarePaginator paginateBase($perPage = 15, $pageName = 'page', $page = null, $options = [])
+ *                                                                                                                  *
  * @phpstan-consistent-constructor
  */
 abstract class IndexModel extends Model

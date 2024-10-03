@@ -11,12 +11,18 @@ class Lens
     //----------------------------------------------------------------------
     // Indexes
     //----------------------------------------------------------------------
+
+    /**
+     * Fetch the fully qualified class name of the index model.
+     *
+     * @return class-string<IndexModel> The fully qualified class name of the index model.
+     */
     public static function fetchIndexModelClass($baseModel): string
     {
         return config('elasticlens.namespaces.indexes').'\\Indexed'.class_basename($baseModel);
     }
 
-    public static function fetchIndexModel($baseModel): Model
+    public static function fetchIndexModel($baseModel): IndexModel
     {
         $indexModel = self::fetchIndexModelClass($baseModel);
 
@@ -24,7 +30,7 @@ class Lens
 
     }
 
-    public static function getIndexModel($indexModel): Model
+    public static function getIndexModel($indexModel): IndexModel
     {
         $indexModel = config('elasticlens.namespaces.indexes').'\\'.$indexModel;
 
