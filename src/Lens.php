@@ -14,36 +14,31 @@ class Lens
 
     /**
      * Fetch the fully qualified class name of the index model.
-     *
-     * @return class-string<IndexModel> The fully qualified class name of the index model.
      */
     public static function fetchIndexModelClass($baseModel): string
     {
-        return config('elasticlens.namespaces.indexes').'\\Indexed'.class_basename($baseModel);
-    }
+        $baseModel = is_object($baseModel) ? get_class($baseModel) : $baseModel;
+        $parts = explode('\\', $baseModel);
+        $baseModel = array_pop($parts);
+        $baseModelNamespace = implode('\\', $parts);
+        $namespace = config('elasticlens.namespaces');
+        if (empty($namespace[$baseModelNamespace])) {
+            abort(500, 'Namespace not configured for '.$baseModelNamespace);
+        }
+        $indexNamespace = $namespace[$baseModelNamespace];
 
-    public static function fetchIndexModel($baseModel): IndexModel
-    {
-        $indexModel = self::fetchIndexModelClass($baseModel);
-
-        return new $indexModel;
-
-    }
-
-    public static function getIndexModel($indexModel): IndexModel
-    {
-        $indexModel = config('elasticlens.namespaces.indexes').'\\'.$indexModel;
-
-        return new $indexModel;
+        return $indexNamespace.'\\Indexed'.$baseModel;
     }
 
     public static function returnAllRegisteredIndexes()
     {
         $indexes = [];
-
-        foreach (glob(app_path(config('elasticlens.app_paths.indexes').'*.php')) as $file) {
-            $indexModel = (config('elasticlens.namespaces.indexes').'\\'.basename($file, '.php'));
-            $indexes[] = (new $indexModel)::class;
+        $paths = config('elasticlens.index_paths');
+        foreach ($paths as $path => $namespace) {
+            foreach (glob(base_path($path.'*.php')) as $file) {
+                $indexModel = $namespace.'\\'.basename($file, '.php');
+                $indexes[] = (new $indexModel)::class;
+            }
         }
 
         return $indexes;

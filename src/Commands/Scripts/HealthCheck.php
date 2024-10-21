@@ -12,20 +12,23 @@ final class HealthCheck
 {
     public static function loadErrorCheck($model): array|bool
     {
+        $modelCheck = QualifyModel::check($model);
+        $modelClass = $modelCheck['qualified'];
+        if (! $modelClass) {
+            $help = [];
+            foreach ($modelCheck['notFound'] as $className) {
+                $help[] = $className.' does not exist';
+            }
 
-        $modelNameSpace = config('elasticlens.namespaces.models');
-        $className = $modelNameSpace.'\\'.$model;
-        if (! class_exists($className)) {
             return [
                 'name' => 'ERROR',
                 'status' => 'error',
                 'title' => 'Base Model not found',
-                'help' => [
-                    $className.' does not exist',
-                ],
+                'help' => $help,
             ];
         }
-        $indexModel = Lens::fetchIndexModelClass($model);
+
+        $indexModel = Lens::fetchIndexModelClass($modelClass);
         if (! class_exists($indexModel)) {
             return [
                 'name' => 'ERROR',
@@ -58,6 +61,16 @@ final class HealthCheck
      */
     public static function check($model): array
     {
+        $modelCheck = QualifyModel::check($model);
+        $model = $modelCheck['qualified'];
+        if (! $model) {
+            return [
+                'name' => 'ERROR',
+                'status' => 'error',
+                'title' => 'Base Model not found',
+                'help' => $modelCheck['notFound'],
+            ];
+        }
         $indexModel = Lens::fetchIndexModelClass($model);
         $index = new LensState($indexModel);
         $index = $index->healthCheck();

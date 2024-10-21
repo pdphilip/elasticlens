@@ -19,14 +19,11 @@ return [
     'index_migration_logs' => [
         'enabled' => true, //Recommended to keep this enabled
     ],
-
     'namespaces' => [
-        'models' => 'App\Models',
-        'indexes' => 'App\Models\Indexes',
+        'App\Models' => 'App\Models\Indexes',
     ],
 
-    'app_paths' => [
-        'models' => 'Models/',
-        'indexes' => 'Models/Indexes/',
+    'index_paths' => [
+        'app/Models/Indexes/' => 'App\Models\Indexes',
     ],
 ];

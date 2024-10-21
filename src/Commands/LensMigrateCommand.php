@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use OmniTerm\OmniTerm;
+use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
 use PDPhilip\ElasticLens\Index\LensBuilder;
 use PDPhilip\ElasticLens\Lens;
 
@@ -46,12 +47,13 @@ class LensMigrateCommand extends Command
         $this->initOmni();
         $model = $this->argument('model');
         $force = $this->option('force');
+        $modelCheck = QualifyModel::check($model);
+        if (! $modelCheck['qualified']) {
+            $this->omni->statusError('ERROR', 'Model not found', ['Model: '.$model]);
 
-        $ok = $this->checkModel($model);
-        if (! $ok) {
             return self::FAILURE;
         }
-
+        $model = $modelCheck['qualified'];
         $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($model);
         $this->newLine();

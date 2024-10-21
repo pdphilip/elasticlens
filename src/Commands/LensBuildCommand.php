@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use OmniTerm\OmniTerm;
+use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
 use PDPhilip\ElasticLens\Index\BulkIndexer;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
@@ -52,12 +53,15 @@ class LensBuildCommand extends Command
     public function handle(): int
     {
         $this->initOmni();
-        $this->model = $this->argument('model');
-        $ok = $this->checkModel($this->model);
-        if (! $ok) {
+        $model = $this->argument('model');
+        $modelCheck = QualifyModel::check($model);
+        if (! $modelCheck['qualified']) {
+            $this->omni->statusError('ERROR', 'Model not found', ['Model: '.$model]);
+
             return self::FAILURE;
         }
-
+        $model = $modelCheck['qualified'];
+        $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($this->model);
         $this->newLine();
         $name = Str::plural($this->model);

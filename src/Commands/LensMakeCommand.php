@@ -31,26 +31,36 @@ class LensMakeCommand extends GeneratorCommand
         $model = Str::studly($model);
 
         //Check if model exists
-        $modelCheck = config('elasticlens.namespaces.models', 'App\Models').'\\'.$model;
-        if (! $this->class_exists_case_sensitive($modelCheck)) {
-            $this->omni->statusError('ERROR', 'Base Model ('.$model.') was not found at: '.$modelCheck);
-            $this->newLine();
+        $modelFound = null;
+        $indexedModel = null;
+        $namespaces = config('elasticlens.namespaces');
+        $notFound = [];
+        foreach ($namespaces as $modelNamespace => $indexNameSpace) {
+            $modelCheck = $modelNamespace.'\\'.$model;
+            if ($this->class_exists_case_sensitive($modelCheck)) {
+                $modelFound = $modelCheck;
+                $indexedModel = $indexNameSpace.'\\Indexed'.$model;
+                break;
+            } else {
+                $notFound[] = $modelCheck;
+            }
+        }
+        if (! $modelFound) {
+            foreach ($notFound as $modelCheck) {
+                $this->omni->statusError('ERROR', 'Base Model ('.$model.') was not found at: '.$modelCheck);
+                $this->newLine();
+            }
 
             return self::FAILURE;
         }
-
-        //check if there already is an indexedModel for the model
-        $indexedModel = config('elasticlens.namespaces.indexes', 'App\Models\Indexes').'\\Indexed'.$model;
         if ($this->class_exists_case_sensitive($indexedModel)) {
             $this->omni->statusError('ERROR', 'Indexed Model (for '.$model.' Model) already exists at: '.$indexedModel);
 
-            $this->newLine();
-
             return self::FAILURE;
         }
-
         // Set the fully qualified class name for the new indexed model
         $name = $this->qualifyClass($indexedModel);
+
         // Get the destination path for the generated file
         $path = $this->getPath($name);
 
@@ -76,11 +86,6 @@ class LensMakeCommand extends GeneratorCommand
     }
 
     protected $type = 'Model';
-
-    protected function getDefaultNamespace($rootNamespace): string
-    {
-        return config('elasticlens.namespaces.indexes', $rootNamespace.'\\Models\Indexes');
-    }
 
     protected function getStub(): string
     {
