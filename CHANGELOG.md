@@ -2,6 +2,28 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v2.0.0 - 2024-10-21
+
+**Version 2 introduces breaking changes** to support multiple model namespace mappings, providing flexibility for domain-driven architecture. This update allows the use of multiple model sources.
+
+The elasticlens.php config file now requires the following structure:
+
+```php
+'namespaces' => [
+    'App\Models' => 'App\Models\Indexes',
+],
+
+'index_paths' => [
+    'app/Models/Indexes/' => 'App\Models\Indexes',
+],
+
+
+```
+•	The **namespaces** key maps models to their respective index namespaces.
+•	The **index_paths** key maps file paths to the corresponding index namespaces.
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.3.1...v2.0.0
+
 ## v1.3.1 - 2024-10-03
 
 - Bug fix: Bulk insert was not writing to the `IndexableBuild` model correctly
@@ -39,6 +61,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -60,7 +83,6 @@ php artisan lens:migrate {model}
 See changelog for other minor updates:
 **Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v1.1.0...v1.1.0
 ## v1.0.0 - 2024-09-02
-
 ### ElasticLens v1.0.0
 
 ElasticLens is proud to announce its initial release. This powerful and flexible Laravel package is designed to allow developers to search their Laravel models with the convenience of Eloquent and the power of Elasticsearch.
@@ -88,11 +110,13 @@ composer require pdphilip/elasticlens
 
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
