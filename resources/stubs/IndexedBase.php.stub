@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\Indexes;
+namespace {{ namespace }}\Indexes;
 
-use App\Models\{{ model }};
+use {{ namespace }}\{{ model }};
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
 use PDPhilip\ElasticLens\Builder\IndexField;
 use PDPhilip\ElasticLens\IndexModel;

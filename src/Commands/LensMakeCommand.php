@@ -34,17 +34,52 @@ class LensMakeCommand extends GeneratorCommand
         $modelFound = null;
         $indexedModel = null;
         $namespaces = config('elasticlens.namespaces');
+        $paths = config('elasticlens.index_paths');
+
+        $config = [
+            'model' => [
+                'name' => '',
+                'namespace' => '',
+                'full' => '',
+            ],
+            'index' => [
+                'name' => '',
+                'namespace' => '',
+                'full' => '',
+                'path' => '',
+            ],
+
+        ];
+
         $notFound = [];
         foreach ($namespaces as $modelNamespace => $indexNameSpace) {
             $modelCheck = $modelNamespace.'\\'.$model;
             if ($this->class_exists_case_sensitive($modelCheck)) {
                 $modelFound = $modelCheck;
-                $indexedModel = $indexNameSpace.'\\Indexed'.$model;
+                $config['model']['name'] = $model;
+                $config['model']['namespace'] = $modelNamespace;
+                $config['model']['full'] = $modelCheck;
+                $config['index']['name'] = 'Indexed'.$model;
+                $config['index']['namespace'] = $indexNameSpace;
+                $config['index']['full'] = $indexNameSpace.'\\'.$config['index']['name'];
+
+                $path = array_search($indexNameSpace, $paths);
+                if (! $path) {
+                    $this->omni->statusError('ERROR', 'Path for namespace '.$indexNameSpace.' not found', [
+                        'Namespace found: '.$indexNameSpace,
+                        'Check config("elasticlens.index_paths") for the correct {path} => \''.$indexNameSpace.'\'',
+                    ]);
+                    $this->newLine();
+
+                    return self::FAILURE;
+                }
+                $config['index']['path'] = $path;
                 break;
             } else {
                 $notFound[] = $modelCheck;
             }
         }
+
         if (! $modelFound) {
             foreach ($notFound as $modelCheck) {
                 $this->omni->statusError('ERROR', 'Base Model ('.$model.') was not found at: '.$modelCheck);
@@ -53,28 +88,26 @@ class LensMakeCommand extends GeneratorCommand
 
             return self::FAILURE;
         }
-        if ($this->class_exists_case_sensitive($indexedModel)) {
-            $this->omni->statusError('ERROR', 'Indexed Model (for '.$model.' Model) already exists at: '.$indexedModel);
+        if ($this->class_exists_case_sensitive($config['index']['full'])) {
+            $this->omni->statusError('ERROR', 'Indexed Model (for '.$model.' Model) already exists at: '.$config['index']['full']);
 
             return self::FAILURE;
         }
-        // Set the fully qualified class name for the new indexed model
-        $name = $this->qualifyClass($indexedModel);
 
-        // Get the destination path for the generated file
-        $path = $this->getPath($name);
+        $path = $config['index']['path'].$config['index']['name'];
 
+        $finalPath = $this->getPath($path);
         // Make sure the directory exists
-        $this->makeDirectory($path);
+        $this->makeDirectory($finalPath);
 
         // Get the stub file contents
         $stub = $this->files->get($this->getStub());
-
         // Replace the stub variables
-        $stub = $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        $stub = $this->replaceNamespaceCustom($stub, $config['model']['namespace']);
+        $stub = $this->replaceModel($stub, $config['model']['name']);
 
         // Write the file to disk
-        $this->files->put($path, $stub);
+        $this->files->put($finalPath, $stub);
 
         $this->omni->statusSuccess('SUCCESS', 'Indexed Model (for '.$model.' Model) created at: '.$indexedModel);
         $this->omni->statusInfo('1', 'Add the Indexable trait to your <span class="text-sky-500">'.$model.'</span> model');
@@ -98,11 +131,21 @@ class LensMakeCommand extends GeneratorCommand
         return $stubPath;
     }
 
-    public function replaceClass($stub, $name): string
+    protected function getPath($name)
     {
-        $stub = parent::replaceClass($stub, $name);
+        $name = Str::replaceFirst($this->rootNamespace(), '', $name);
 
-        return str_replace('{{ model }}', $this->argument('model'), $stub);
+        return $this->laravel['path.base'].'/'.str_replace('\\', '/', $name).'.php';
+    }
+
+    public function replaceNamespaceCustom($stub, $namespace): string
+    {
+        return str_replace('{{ namespace }}', $namespace, $stub);
+    }
+
+    public function replaceModel($stub, $name): string
+    {
+        return str_replace('{{ model }}', $name, $stub);
     }
 
     public function class_exists_case_sensitive(string $class_name): bool
