@@ -62,7 +62,7 @@ your `Base Model`.
 - [Control Observed models](#step-5-fine-tune-the-observers): Tailor which models are observed for changes.
 - [Manage Elasticsearch Migrations](#step-6-define-your-index-models-migrationmap): Define a required blueprint for your index migrations.
 - [Comprehensive CLI Tools](#step-7-monitor-and-administer-all-your-indexes-with-artisan-commands): Manage index health, migrate/rebuild indexes, and more with Artisan commands.
-- [Built-in IndexableBuildState model](#step-8-optionally-access-the-built-in-indexablebuildstate-model-to-track-index-build-states): Track the build states of your indexes.
+- [Built-in IndexableBuildState model](#step-8-optionally-access-the-built-in-indexablebuild-model-to-track-index-build-states): Track the build states of your indexes.
 - [Built-in Migration Logs](#step-9-optionally-access-the-built-in-indexablemigrationlog-model-for-index-migration-status): Track the build states of your indexes.
 
 # Requirements
@@ -753,9 +753,9 @@ Rebuilds all the `IndexedProfile` records for the `Profile` model.
 
 ---
 
-## Step 8: Optionally access the built-in `IndexableBuildState` model to track index build states
+## Step 8: Optionally access the built-in `IndexableBuild` model to track index build states
 
-ElasticLens includes a built-in `IndexableBuildState` model that allows you to monitor and track the state of your index builds. This model records the status of each index build, providing you with insights into the indexing process.
+ElasticLens includes a built-in `IndexableBuild` model that allows you to monitor and track the state of your index builds. This model records the status of each index build, providing you with insights into the indexing process.
 
 <details>
 <summary> Fields </summary>
@@ -783,12 +783,12 @@ ElasticLens includes a built-in `IndexableBuildState` model that allows you to m
 Built-in methods include:
 
 ```php
-IndexableBuildState::returnState($model, $modelId, $indexModel);
-IndexableBuildState::countModelErrors($indexModel);
-IndexableBuildState::countModelRecords($indexModel);
+IndexableBuild::returnState($model, $modelId, $indexModel);
+IndexableBuild::countModelErrors($indexModel);
+IndexableBuild::countModelRecords($indexModel);
 ```
 
-**Note**: While you can query the `IndexableBuildState` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be
+**Note**: While you can query the `IndexableBuild` model directly, avoid writing or deleting records within it manually, as this can interfere with the health checks and overall integrity of the indexing process. The model should be
 used for reading purposes only to ensure accurate monitoring and reporting.
 
 ---
