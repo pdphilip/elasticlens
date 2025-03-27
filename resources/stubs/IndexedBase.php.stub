@@ -6,7 +6,7 @@ use {{ namespace }}\{{ model }};
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
 use PDPhilip\ElasticLens\Builder\IndexField;
 use PDPhilip\ElasticLens\IndexModel;
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+use PDPhilip\Elasticsearch\Schema\Blueprint;
 
 class Indexed{{ model }} extends IndexModel
 {
@@ -19,6 +19,6 @@ class Indexed{{ model }} extends IndexModel
 
     //    public static function migrationMap(): callable
     //    {
-    //        return function (IndexBlueprint $index) {};
+    //        return function (Blueprint $index) {};
     //    }
 }

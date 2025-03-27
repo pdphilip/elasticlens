@@ -6,8 +6,8 @@
 
   <p>
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/elasticlens.svg?style=flat-square)](https://packagist.org/packages/pdphilip/elasticlens) 
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3Arun-tests+branch%3Amain) 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/elasticlens.svg?style=flat-square)](https://packagist.org/packages/pdphilip/elasticlens)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/elasticlens.svg)](https://packagist.org/packages/pdphilip/elasticlens)
 
@@ -265,6 +265,7 @@ User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
 - **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
 
 ### To search and return results as `Base Models`:
+
 #### 1. use `asBase()`
 
 - Simply chain `->asBase()` at the end of your query:
@@ -275,13 +276,12 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->get()->asBase()
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->first()->asBase();
 ```
 
-#### 2. use `getBase()` instead of `get()->asBase()` 
+#### 2. use `getBase()` instead of `get()->asBase()`
 
 ```php
 User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->getBase();
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->getBase();
 ```
-
 
 ### To search and paginate results as `Base Models` use: `paginateBase()`
 
@@ -328,7 +328,7 @@ class IndexedUser extends IndexModel
 
 ### Notes:
 
-- The `IndexedUser` records will contain only the fields defined in the `fieldMap()`. The value of `$user->id` will correspond to `$indexedUser->_id`.
+- The `IndexedUser` records will contain only the fields defined in the `fieldMap()`. The value of `$user->id` will correspond to `$indexedUser->id`.
 - Fields can also be derived from attributes in the `Base Model`. For example, `$field->bool('is_active')` could be derived from a custom attribute in the `Base Model`:
   ```php
     public function getIsActiveAttribute(): bool
@@ -635,14 +635,14 @@ Elasticsearch automatically indexes new fields it encounters, but it might not a
 Since the `Index Model` utilizes the [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, you can use `IndexBlueprint` to customize your `migrationMap()`
 
 ```php
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+use PDPhilip\Elasticsearch\Schema\Blueprint;
 
 class IndexedUser extends IndexModel
 {
     //......
     public function migrationMap(): callable
     {
-        return function (IndexBlueprint $index) {
+        return function (Blueprint $index) {
             $index->text('name');
             $index->keyword('first_name');
             $index->text('first_name');
@@ -650,7 +650,7 @@ class IndexedUser extends IndexModel
             $index->text('last_name');
             $index->keyword('email');
             $index->text('email');
-            $index->text('avatar')->index(false);
+            $index->text('avatar')->indexField(false);
             $index->keyword('type');
             $index->text('type');
             $index->keyword('state');

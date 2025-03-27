@@ -15,7 +15,7 @@ use PDPhilip\Elasticsearch\Schema\Schema;
  *
  ******Fields*******
  *
- * @property string $_id
+ * @property string $id
  * @property string $index_model
  * @property IndexableMigrationLogState $state
  * @property array $map
@@ -105,9 +105,9 @@ class IndexableMigrationLog extends Model
         return 0;
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Config
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public static function connectionName(): string
     {

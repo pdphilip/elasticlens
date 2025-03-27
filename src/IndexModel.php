@@ -14,7 +14,7 @@ use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 
 /**
- * @property string $_id
+ * @property string $id
  *
  * @method static $this get()
  * @method static $this search()
@@ -28,13 +28,13 @@ abstract class IndexModel extends Model
 {
     use IndexBaseModel, IndexFieldMap, IndexMigrationMap;
 
-    //@var string
+    // @var string
     public $connection = 'elasticsearch';
 
-    //@var bool
+    // @var bool
     protected $observeBase = true;
 
-    //@var string
+    // @var string
     protected $baseModel;
 
     public function __construct()
@@ -48,7 +48,7 @@ abstract class IndexModel extends Model
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
             $items = $this->get()->forPage($page, $perPage);
             $items = $items->map(function ($value) {
-                //@phpstan-ignore-next-line
+                // @phpstan-ignore-next-line
                 return $value->base;
             });
 
@@ -62,7 +62,7 @@ abstract class IndexModel extends Model
         });
         Builder::macro('getBase', function () {
             return $this->get()->map(function ($value) {
-                //@phpstan-ignore-next-line
+                // @phpstan-ignore-next-line
                 return $value->base;
             });
         });
@@ -75,7 +75,7 @@ abstract class IndexModel extends Model
 
     public function base(): BelongsTo
     {
-        return $this->belongsTo($this->baseModel, '_id');
+        return $this->belongsTo($this->baseModel, 'id');
     }
 
     public function asBase()

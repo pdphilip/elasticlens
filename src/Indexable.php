@@ -53,7 +53,7 @@ trait Indexable
         $indexModel = Lens::fetchIndexModelClass($this);
 
         try {
-            return $indexModel::where('_id', $modelId)->first();
+            return $indexModel::where('id', $modelId)->first();
         } catch (Exception $e) {
 
         }

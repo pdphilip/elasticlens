@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+use PDPhilip\Elasticsearch\Schema\Blueprint;
 use PDPhilip\Elasticsearch\Schema\Schema;
 
 return new class extends Migration
@@ -12,7 +12,7 @@ return new class extends Migration
 
         Schema::on($connectionName)->deleteIfExists('indexable_builds');
 
-        return Schema::on($connectionName)->create('indexable_builds', function (IndexBlueprint $index) {
+        Schema::on($connectionName)->create('indexable_builds', function (Blueprint $index) {
             $index->keyword('model');
             $index->keyword('model_id');
             $index->keyword('index_model');
@@ -20,8 +20,8 @@ return new class extends Migration
             $index->keyword('last_source');
             $index->text('last_source');
 
-            $index->mapProperty('state_data', 'flattened')->index(false);
-            $index->mapProperty('logs', 'flattened')->index(false);
+            $index->property('flattened', 'state_data')->indexField(false);
+            $index->property('flattened', 'logs')->indexField(false);
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
     {
         $connectionName = config('elasticlens.connection') ?? 'elasticsearch';
 
-        return Schema::on($connectionName)->deleteIfExists('indexable_builds');
+        Schema::on($connectionName)->deleteIfExists('indexable_builds');
     }
 };

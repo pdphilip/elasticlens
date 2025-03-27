@@ -9,7 +9,7 @@ use PDPhilip\ElasticLens\Enums\IndexableMigrationLogState;
 use PDPhilip\ElasticLens\Models\IndexableBuild;
 use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\ElasticLens\Traits\Timer;
-use PDPhilip\Elasticsearch\Schema\IndexBlueprint;
+use PDPhilip\Elasticsearch\Schema\Blueprint;
 use PDPhilip\Elasticsearch\Schema\Schema;
 
 class LensMigration extends LensIndex
@@ -72,12 +72,14 @@ class LensMigration extends LensIndex
 
             Schema::deleteIfExists($tableName);
             if (! $validBlueprint) {
-                $map = Schema::create($tableName, function (IndexBlueprint $index) {
+                Schema::create($tableName, function (Blueprint $index) {
                     $index->date('created_at');
                 });
+                $map = Schema::getMappings($tableName, true);
                 IndexableMigrationLog::saveMigrationLog($this->indexModelName, $version, IndexableMigrationLogState::UNDEFINED, $map);
             } else {
-                $map = Schema::create($tableName, $blueprint);
+                Schema::create($tableName, $blueprint);
+                $map = Schema::getMappings($tableName, true);
                 IndexableMigrationLog::saveMigrationLog($this->indexModelName, $version, IndexableMigrationLogState::SUCCESS, $map);
             }
 

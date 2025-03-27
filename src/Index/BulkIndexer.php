@@ -55,7 +55,7 @@ class BulkIndexer
                 $id = $record->{$this->builder->baseModelPrimaryKey};
                 $setup = $this->builder->prepareMap($id);
                 $setup->attachMigrationVersion($this->migrationVersion);
-                //Assume ok
+                // Assume ok
                 $setup->successful('Bulk Ok');
                 $builds[$id] = $setup;
             }
@@ -90,7 +90,7 @@ class BulkIndexer
             if (! empty($this->result['error'])) {
                 $builds = $this->buildMaps;
                 foreach ($this->result['error'] as $error) {
-                    $id = $error['payload']['_id'] ?? null;
+                    $id = $error['payload']['id'] ?? null;
                     $build = $builds[$id];
                     $build->setMessage($error['error']['type'], $error['error']['reason']);
                     $build->failed();

@@ -17,13 +17,13 @@ class IndexHelper extends LensIndex
         if (! empty($mappings['mappings']['properties'])) {
 
             $mappings = $mappings['mappings']['properties'];
-            if (! empty($mappings['_meta']['properties']['_id'])) {
-                $_id = $mappings['_meta']['properties']['_id'];
+            if (! empty($mappings['_meta']['properties']['id'])) {
+                $id = $mappings['_meta']['properties']['id'];
 
-                $schema['_id'] = $_id;
+                $schema['id'] = $id;
 
             } else {
-                $schema['_id'] = [
+                $schema['id'] = [
                     'type' => 'text',
                 ];
             }
@@ -87,7 +87,7 @@ class IndexHelper extends LensIndex
     {
         $sorted = [];
         $commonFields = [
-            '_id',
+            'id',
             'name',
             'email',
             'first_name',

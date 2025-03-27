@@ -15,7 +15,7 @@ use PDPhilip\Elasticsearch\Schema\Schema;
  *
  ******Fields*******
  *
- * @property string $_id
+ * @property string $id
  * @property string $model
  * @property string $model_id
  * @property string $index_model
@@ -128,9 +128,9 @@ class IndexableBuild extends Model
 
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Helpers
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public function _prepLogs($stateData, $source): array
     {
@@ -139,7 +139,7 @@ class IndexableBuild extends Model
             return [];
         }
         $logs = $this->logs ?? [];
-        unset($stateData['_id']);
+        unset($stateData['id']);
         $logs[] = [
             'ts' => time(),
             'success' => $stateData['success'],
@@ -152,9 +152,9 @@ class IndexableBuild extends Model
 
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Config
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public static function connectionName(): string
     {

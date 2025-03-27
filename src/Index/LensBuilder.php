@@ -95,18 +95,18 @@ class LensBuilder extends LensIndex
         return $this->buildResult->successful('Indexed successfully');
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Init
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     private function _buildInit($id): void
     {
         $this->buildResult = new BuildResult($id, $this->baseModel, 0);
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Setup Check
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public function checkSetup(): bool
     {
@@ -126,9 +126,9 @@ class LensBuilder extends LensIndex
         return true;
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Mapping Process
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     private function _buildMap(): bool
     {
@@ -160,13 +160,13 @@ class LensBuilder extends LensIndex
     private function mapId($model, $fieldMap): array
     {
         $data = [];
-        $data['_id'] = $model->{$model->getKeyName()};
-        if (isset($fieldMap['_id'])) {
-            $data['_id'] = $this->setType($data['_id'], $fieldMap['_id']);
-            unset($fieldMap['_id']);
+        $data['id'] = $model->{$model->getKeyName()};
+        if (isset($fieldMap['id'])) {
+            $data['id'] = $this->setType($data['id'], $fieldMap['id']);
+            unset($fieldMap['id']);
         }
         if (isset($fieldMap['id'])) {
-            $data['_id'] = $this->setType($data['_id'], $fieldMap['id']);
+            $data['id'] = $this->setType($data['id'], $fieldMap['id']);
             unset($fieldMap['id']);
         }
 
@@ -202,7 +202,7 @@ class LensBuilder extends LensIndex
         // ....I Also Like to Live Dangerously
         $data = $modelData->toArray();
 
-        //If this was the base model, kick the ID, we has it already
+        // If this was the base model, kick the ID, we has it already
         if ($modelData instanceof $this->baseModel) {
             unset($data[$this->baseModelPrimaryKey]);
         }
@@ -249,9 +249,9 @@ class LensBuilder extends LensIndex
         return $data;
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Create Index
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public function _createIndex(): bool
     {
@@ -261,7 +261,7 @@ class LensBuilder extends LensIndex
             if (! $index) {
                 $index = new $this->indexModelInstance;
             }
-            $index->_id = $modelId;
+            $index->id = $modelId;
 
             foreach ($this->buildResult->map as $field => $value) {
                 $index->{$field} = $value;
@@ -276,9 +276,9 @@ class LensBuilder extends LensIndex
         return true;
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Delete Index (And Build)
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public function processDelete($id)
     {
@@ -287,9 +287,9 @@ class LensBuilder extends LensIndex
         $index->delete();
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Dispatchers
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     public function dispatchBuild($modelId, $observedModel)
     {
@@ -301,9 +301,9 @@ class LensBuilder extends LensIndex
         IndexDeletedJob::dispatch($this->indexModel, $modelId);
     }
 
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Helpers
-    //----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
     private function setType($value, $type)
     {
