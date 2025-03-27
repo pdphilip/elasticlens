@@ -17,7 +17,7 @@ return new class extends Migration
             $index->keyword('state');
             $index->integer('version_major');
             $index->integer('version_minor');
-            $index->property('flattened', 'map')->indexField(false);
+            $index->flattened('map')->indexField(false);
         });
     }
 

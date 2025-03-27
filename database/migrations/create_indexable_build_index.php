@@ -20,8 +20,8 @@ return new class extends Migration
             $index->keyword('last_source');
             $index->text('last_source');
 
-            $index->property('flattened', 'state_data')->indexField(false);
-            $index->property('flattened', 'logs')->indexField(false);
+            $index->flattened('state_data')->indexField(false);
+            $index->flattened('logs')->indexField(false);
         });
     }
 
