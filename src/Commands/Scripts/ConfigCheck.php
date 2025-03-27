@@ -27,9 +27,9 @@ final class ConfigCheck
             ];
         }
         $output = [];
-        //----------------------------------------------------------------------
+        // ----------------------------------------------------------------------
         // Config File
-        //----------------------------------------------------------------------
+        // ----------------------------------------------------------------------
         self::checkConfig($output);
         $connectionOK = self::checkConnection($output);
         self::checkQueue($output);
@@ -79,7 +79,7 @@ final class ConfigCheck
                 'Connection error on ['.$connection.']: '.$e->getMessage(),
             ];
 
-            //If we get here, return output
+            // If we get here, return output
             return false;
 
         }

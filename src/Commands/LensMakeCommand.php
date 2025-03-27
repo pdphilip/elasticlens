@@ -27,10 +27,10 @@ class LensMakeCommand extends GeneratorCommand
 
         $this->newLine();
         $model = $this->argument('model');
-        //ensure casing is correct
+        // ensure casing is correct
         $model = Str::studly($model);
 
-        //Check if model exists
+        // Check if model exists
         $modelFound = null;
         $indexedModel = null;
         $namespaces = config('elasticlens.namespaces');
