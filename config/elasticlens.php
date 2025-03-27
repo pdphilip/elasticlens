@@ -3,7 +3,7 @@
 return [
     'database' => 'elasticsearch',
 
-    'queue' => null, //Set queue to use for dispatching index builds, ex: default, high, low, etc.
+    'queue' => null, // Set queue to use for dispatching index builds, ex: default, high, low, etc.
 
     'watchers' => [
         //        \App\Models\Profile::class => [
@@ -12,12 +12,12 @@ return [
     ],
 
     'index_build_state' => [
-        'enabled' => true, //Recommended to keep this enabled
-        'log_trim' => 2, //If null, the logs field will be empty
+        'enabled' => true, // Recommended to keep this enabled
+        'log_trim' => 2, // If null, the logs field will be empty
     ],
 
     'index_migration_logs' => [
-        'enabled' => true, //Recommended to keep this enabled
+        'enabled' => true, // Recommended to keep this enabled
     ],
     'namespaces' => [
         'App\Models' => 'App\Models\Indexes',

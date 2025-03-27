@@ -20,7 +20,7 @@ final class IndexCheck
                     $index = new LensState($indexModel);
                     $indexes[class_basename($indexModel)] = $index->healthCheck();
                 } catch (Exception $e) {
-                    //skip, I guess
+                    // skip, I guess
                 }
             }
         }

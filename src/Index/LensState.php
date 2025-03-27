@@ -72,7 +72,7 @@ class LensState extends LensIndex
             'builds' => $builds,
             'status' => $status,
         ];
-        //Status calc
+        // Status calc
     }
 
     private function _configCheck(): array
