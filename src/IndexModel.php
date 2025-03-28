@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use PDPhilip\ElasticLens\Index\LensState;
+use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\ElasticLens\Traits\IndexBaseModel;
 use PDPhilip\ElasticLens\Traits\IndexFieldMap;
 use PDPhilip\ElasticLens\Traits\IndexMigrationMap;
@@ -89,5 +90,10 @@ abstract class IndexModel extends Model
         $lens = new LensState(static::class);
 
         return $lens->healthCheck();
+    }
+
+    public static function whereMigrations(): Builder
+    {
+        return IndexableMigrationLog::query()->where('index_model', static::class);
     }
 }
