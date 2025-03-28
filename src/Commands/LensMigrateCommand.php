@@ -31,6 +31,7 @@ class LensMigrateCommand extends Command
         'didRun' => false,
         'processed' => 0,
         'success' => 0,
+        'skipped' => 0,
         'failed' => 0,
         'total' => 0,
         'state' => 'error',
@@ -118,6 +119,8 @@ class LensMigrateCommand extends Command
                 $this->buildData['processed']++;
                 if (! empty($build->success)) {
                     $this->buildData['success']++;
+                } elseif (! empty($build->skipped)) {
+                    $this->buildData['skipped']++;
                 } else {
                     $this->buildData['failed']++;
                 }
@@ -144,6 +147,7 @@ class LensMigrateCommand extends Command
         if ($this->buildData['didRun']) {
             $this->omni->header('Build Data', 'Value');
             $this->omni->row('Success', $this->buildData['success'], null, 'text-emerald-500');
+            $this->omni->row('Skipped', $this->buildData['skipped'], null, 'text-amber-500');
             $this->omni->row('Failed', $this->buildData['failed'], null, 'text-rose-500');
             $this->omni->row('Total', $this->buildData['total'], null, 'text-emerald-500');
             $this->newLine();

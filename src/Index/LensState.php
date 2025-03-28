@@ -119,7 +119,7 @@ class LensState extends LensIndex
             ];
         }
 
-        if ($modelData['records'] !== $indexData['records']) {
+        if ($modelData['records'] !== $indexData['records'] + $builds['skipped']) {
             return [
                 'status' => 'warning',
                 'name' => 'Indexes out of sync',
