@@ -85,7 +85,7 @@ class BulkIndexer
             }
         }
         if ($values) {
-            $this->result = $this->indexModel::insert($values);
+            $this->result = $this->indexModel::bulkInsert($values);
         }
         $this->updateAnyErrors();
         $this->result['skipped'] = $this->skipped;
