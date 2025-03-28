@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Traits\IndexBaseModel;
 use PDPhilip\ElasticLens\Traits\IndexFieldMap;
 use PDPhilip\ElasticLens\Traits\IndexMigrationMap;
@@ -81,6 +82,12 @@ abstract class IndexModel extends Model
     public function asBase()
     {
         return $this->base;
+    }
 
+    public static function lensHealth()
+    {
+        $lens = new LensState(self::class);
+
+        return $lens->healthCheck();
     }
 }
