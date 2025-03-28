@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use PDPhilip\ElasticLens\Enums\IndexableMigrationLogState;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\ElasticLens\Traits\IndexBaseModel;
@@ -95,5 +96,10 @@ abstract class IndexModel extends Model
     public static function whereMigrations(): Builder
     {
         return IndexableMigrationLog::query()->where('index_model', static::class);
+    }
+
+    public static function whereMigrationErrors(): Builder
+    {
+        return IndexableMigrationLog::query()->where('index_model', static::class)->where('state', IndexableMigrationLogState::FAILED);
     }
 }
