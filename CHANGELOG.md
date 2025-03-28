@@ -2,6 +2,30 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.0.1 - 2025-03-28
+
+This release is compatible with Laravel 10, 11 & 12
+
+### What's changed
+
+#### New features
+
+- Skippable models via optional `excludeIndex(): bool` method in your base model
+- Delete an index from your model instance: `$user->removeIndex()`
+- New Index Model method: `IndexedUser::whereIndexBuilds()->get()` - returns index build logs for model
+- New Index Model method: `IndexedUser::whereFailedIndexBuilds()->get()` - returns failed index build logs for model
+- New Index Model method: `IndexedUser::whereMigrations()->get()` - returns migration logs for model
+- New Index Model method: `IndexedUser::whereMigrationErrors()->get()` - returns failed migrations for model
+- New index Model method: `IndexedUser::lensHealth()` - returns an array of the index health
+
+#### Fixes
+
+- v5 compatibility fixes with bulk insert and saving without refresh
+- Indexable trait `search()` runs `searchPhrasePrefix()` under the hood
+- `paginateBase()` honors current path
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.0.0...v3.0.1
+
 ## v3.0.0 - 2025-03-28
 
 This is an updated dependency release compatible with:
@@ -40,6 +64,7 @@ The elasticlens.php config file now requires the following structure:
 'index_paths' => [
     'app/Models/Indexes/' => 'App\Models\Indexes',
 ],
+
 
 
 
@@ -90,6 +115,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -114,7 +140,6 @@ See changelog for other minor updates:
 ### ElasticLens v1.0.0
 ElasticLens is proud to announce its initial release. This powerful and flexible Laravel package is designed to allow developers to search their Laravel models with the convenience of Eloquent and the power of Elasticsearch.
 #### Features
-
 - **Eloquent Integration**: Easily index and search your Laravel models with Elasticsearch.
 - **Automatic Indexing**: Models are automatically indexed when created, updated, or deleted.
 - **Custom Mappings**: Define custom Elasticsearch mappings for your models.
@@ -139,11 +164,13 @@ composer require pdphilip/elasticlens
 
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
