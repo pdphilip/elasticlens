@@ -7,8 +7,10 @@ namespace PDPhilip\ElasticLens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use PDPhilip\ElasticLens\Enums\IndexableBuildState;
 use PDPhilip\ElasticLens\Enums\IndexableMigrationLogState;
 use PDPhilip\ElasticLens\Index\LensState;
+use PDPhilip\ElasticLens\Models\IndexableBuild;
 use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\ElasticLens\Traits\IndexBaseModel;
 use PDPhilip\ElasticLens\Traits\IndexFieldMap;
@@ -91,6 +93,29 @@ abstract class IndexModel extends Model
         $lens = new LensState(static::class);
 
         return $lens->healthCheck();
+    }
+
+    public static function whereIndexBuilds($byLatest = false): Builder
+    {
+
+        $indexModel = strtolower(class_basename(static::class));
+        $query = IndexableBuild::query()->where('index_model', $indexModel);
+        if ($byLatest) {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query;
+    }
+
+    public static function whereFailedIndexBuilds($byLatest = false): Builder
+    {
+        $indexModel = strtolower(class_basename(static::class));
+        $query = IndexableBuild::query()->where('index_model', $indexModel)->where('state', IndexableBuildState::FAILED);
+        if ($byLatest) {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query;
     }
 
     public static function whereMigrations($byLatest = false): Builder
