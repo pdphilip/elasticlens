@@ -8,6 +8,7 @@ enum IndexableBuildState: string
 {
     case INIT = 'init';
     case SUCCESS = 'success';
+    case SKIPPED = 'skipped';
     case FAILED = 'failed';
 
     public function color(): string
@@ -15,6 +16,7 @@ enum IndexableBuildState: string
         return match ($this) {
             IndexableBuildState::INIT => 'slate',
             IndexableBuildState::SUCCESS => 'emerald',
+            IndexableBuildState::SKIPPED => 'emerald',
             IndexableBuildState::FAILED => 'rose',
         };
     }
@@ -24,6 +26,7 @@ enum IndexableBuildState: string
         return match ($this) {
             IndexableBuildState::INIT => 'Build Initializing',
             IndexableBuildState::SUCCESS => 'Index Build Successful',
+            IndexableBuildState::SKIPPED => 'Index Build Skipped',
             IndexableBuildState::FAILED => 'Index Build Failed',
         };
     }

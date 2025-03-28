@@ -143,6 +143,7 @@ class LensBuilder extends LensIndex
         }
 
         if ($model->excludeIndex()) {
+            $this->buildResult->skipped = true;
             $this->buildResult->setMessage('BaseModel excluded', 'BaseModel '.$this->baseModel.' has excludeIndex() set to true');
 
             return false;

@@ -16,6 +16,8 @@ class BuildResult
 
     public bool $success = false;
 
+    public bool $skipped = false;
+
     public string $msg = '';
 
     public string $details = '';

@@ -87,6 +87,12 @@ class IndexableBuild extends Model
             unset($stateData['details']);
             unset($stateData['map']);
         }
+        if ($buildResult->skipped) {
+            $state = IndexableBuildState::SKIPPED;
+            unset($stateData['msg']);
+            unset($stateData['details']);
+            unset($stateData['map']);
+        }
 
         $source = $observerModel;
         $stateModel = self::returnState($model, $modelId, $indexModel);
@@ -101,7 +107,7 @@ class IndexableBuild extends Model
         $stateModel->last_source = $source;
         $logs = $stateModel->_prepLogs($stateData, $source);
         $stateModel->logs = $logs;
-        $stateModel->saveWithoutRefresh();
+        $stateModel->withoutRefresh()->save();
 
         return $stateModel;
     }
@@ -109,6 +115,11 @@ class IndexableBuild extends Model
     public static function countModelErrors($indexModel): int
     {
         return IndexableBuild::where('index_model', strtolower($indexModel))->where('state', IndexableBuildState::FAILED)->count();
+    }
+
+    public static function countModelSkips($indexModel): int
+    {
+        return IndexableBuild::where('index_model', strtolower($indexModel))->where('state', IndexableBuildState::SKIPPED)->count();
     }
 
     public static function countModelRecords($indexModel): int

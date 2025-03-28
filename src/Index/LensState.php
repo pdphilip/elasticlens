@@ -59,9 +59,11 @@ class LensState extends LensIndex
         $builds = [];
         $builds['success'] = 0;
         $builds['errors'] = 0;
+        $builds['skipped'] = 0;
         $builds['total'] = IndexableBuild::countModelRecords($this->indexModelName);
         if ($builds['total'] > 0) {
             $builds['errors'] = IndexableBuild::countModelErrors($this->indexModelName);
+            $builds['skipped'] = IndexableBuild::countModelSkips($this->indexModelName);
             $builds['success'] = $builds['total'] - $builds['errors'];
         }
         $status = $this->_buildStatus($indexData, $modelData, $builds);
