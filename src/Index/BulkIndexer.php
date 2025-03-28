@@ -27,6 +27,8 @@ class BulkIndexer
 
     protected mixed $result;
 
+    public int $skipped = 0;
+
     /**
      * @throws Exception
      */
@@ -56,7 +58,10 @@ class BulkIndexer
                 $setup = $this->builder->prepareMap($id);
                 $setup->attachMigrationVersion($this->migrationVersion);
                 // Assume ok
-                $setup->successful('Bulk Ok');
+                if (! $setup->skipped) {
+                    $setup->successful('Bulk Ok');
+                }
+
                 $builds[$id] = $setup;
             }
         }
@@ -71,6 +76,11 @@ class BulkIndexer
         $values = [];
         if ($this->buildMaps) {
             foreach ($this->buildMaps as $build) {
+                if ($build->skipped) {
+                    $this->skipped++;
+
+                    continue;
+                }
                 $values[] = $build->map;
             }
         }
@@ -78,6 +88,7 @@ class BulkIndexer
             $this->result = $this->indexModel::insert($values);
         }
         $this->updateAnyErrors();
+        $this->result['skipped'] = $this->skipped;
         BulkBuildStateUpdateJob::dispatch($this->indexModel, $this->baseModel, $this->buildMaps);
         $this->took = $this->getTime();
 

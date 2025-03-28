@@ -12,5 +12,6 @@ if ($completed) {
     @include('elasticlens::cli.components.hr')
     @include('elasticlens::cli.components.data-row-value',['key' => 'Created','value' => $created,'class' => 'text-sky-500'])
     @include('elasticlens::cli.components.data-row-value',['key' => 'Updated','value' => $updated,'class' => 'text-emerald-500'])
+    @include('elasticlens::cli.components.data-row-value',['key' => 'Skipped','value' => $skipped,'class' => 'text-amber-500'])
     @include('elasticlens::cli.components.data-row-value',['key' => 'Failed','value' => $failed,'class' => 'text-rose-500'])
 </div>

@@ -43,6 +43,8 @@ class LensBuildCommand extends Command
 
     protected int $created = 0;
 
+    protected int $skipped = 0;
+
     protected int $modified = 0;
 
     protected int $failed = 0;
@@ -117,6 +119,7 @@ class LensBuildCommand extends Command
             'model' => $this->model,
             'i' => $async->getInterval(),
             'created' => $this->created,
+            'skipped' => $this->skipped,
             'updated' => $this->modified,
             'failed' => $this->failed,
             'completed' => false,
@@ -131,6 +134,7 @@ class LensBuildCommand extends Command
                     'model' => $this->model,
                     'i' => $async->getInterval(),
                     'created' => $this->created,
+                    'skipped' => $this->skipped,
                     'updated' => $this->modified,
                     'failed' => $this->failed,
                     'completed' => false,
@@ -147,6 +151,7 @@ class LensBuildCommand extends Command
             'model' => $model,
             'i' => $async->getInterval(),
             'created' => $this->created,
+            'skipped' => $this->skipped,
             'updated' => $this->modified,
             'failed' => $this->failed,
             'completed' => true,
@@ -180,6 +185,7 @@ class LensBuildCommand extends Command
         return [
             'total' => $result['results']['total'],
             'created' => $result['results']['created'],
+            'skipped' => $result['results']['skipped'],
             'modified' => $result['results']['modified'],
             'failed' => $result['results']['failed'],
         ];

@@ -38,10 +38,7 @@ class LensBuilder extends LensIndex
     public function prepareMap($id)
     {
         $this->_buildInit($id);
-        $passedMapping = $this->_buildMap();
-        if (! $passedMapping) {
-            return false;
-        }
+        $this->_buildMap();
 
         return $this->buildResult;
     }
