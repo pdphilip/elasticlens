@@ -142,6 +142,7 @@ class LensBuildCommand extends Command
                 ]));
             });
             $this->created += $result['created'];
+            $this->skipped += $result['skipped'];
             $this->modified += $result['modified'];
             $this->failed += $result['failed'];
         });
