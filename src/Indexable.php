@@ -71,4 +71,9 @@ trait Indexable
         return $build->toArray();
 
     }
+
+    public function excludeIndex(): bool
+    {
+        return false;
+    }
 }

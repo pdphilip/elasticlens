@@ -142,6 +142,12 @@ class LensBuilder extends LensIndex
             return false;
         }
 
+        if ($model->excludeIndex()) {
+            $this->buildResult->setMessage('BaseModel excluded', 'BaseModel '.$this->baseModel.' has excludeIndex() set to true');
+
+            return false;
+        }
+
         $data = $this->mapId($model, $fieldMap);
         try {
             $dataMap = $this->mapRecordsToFields($fieldMap, $model);

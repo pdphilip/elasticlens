@@ -86,20 +86,33 @@ abstract class IndexModel extends Model
         return $this->base;
     }
 
-    public static function lensHealth()
+    public static function lensHealth(): array
     {
         $lens = new LensState(static::class);
 
         return $lens->healthCheck();
     }
 
-    public static function whereMigrations(): Builder
+    public static function whereMigrations($byLatest = false): Builder
     {
-        return IndexableMigrationLog::query()->where('index_model', static::class);
+        $indexModel = strtolower(class_basename(static::class));
+        $query = IndexableMigrationLog::query()->where('index_model', $indexModel);
+        if ($byLatest) {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query;
     }
 
-    public static function whereMigrationErrors(): Builder
+    public static function whereMigrationErrors($byLatest = false): Builder
     {
-        return IndexableMigrationLog::query()->where('index_model', static::class)->where('state', IndexableMigrationLogState::FAILED);
+        $indexModel = strtolower(class_basename(static::class));
+        $query = IndexableMigrationLog::query()->where('index_model', $indexModel)->where('state', IndexableMigrationLogState::FAILED);
+        if ($byLatest) {
+            $query->orderByDesc('created_at');
+        }
+
+        return $query;
+
     }
 }
