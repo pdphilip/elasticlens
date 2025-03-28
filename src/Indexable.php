@@ -26,7 +26,7 @@ trait Indexable
     {
         $query = self::viaIndex();
 
-        return $query->phrase($phrase)->search()->asBase();
+        return $query->searchPhrase($phrase)->getBase();
     }
 
     public static function viaIndex(): IndexModel|Builder

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PDPhilip\ElasticLens;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use PDPhilip\ElasticLens\Enums\IndexableBuildState;
@@ -51,19 +50,22 @@ abstract class IndexModel extends Model
         $this->setConnection(config('elasticlens.database') ?? 'elasticsearch');
         Builder::macro('paginateBase', function ($perPage = 15, $pageName = 'page', $page = null, $options = []) {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
+            $path = LengthAwarePaginator::resolveCurrentPath();
             $items = $this->get()->forPage($page, $perPage);
             $items = $items->map(function ($value) {
                 // @phpstan-ignore-next-line
                 return $value->base;
             });
-
-            return new LengthAwarePaginator(
+            $pagi = new LengthAwarePaginator(
                 $items,
                 $this->count(),
                 $perPage,
                 $page,
                 $options
             );
+            $pagi->setPath($path);
+
+            return $pagi;
         });
         Builder::macro('getBase', function () {
             return $this->get()->map(function ($value) {
@@ -78,9 +80,9 @@ abstract class IndexModel extends Model
         });
     }
 
-    public function base(): BelongsTo
+    public function getBaseAttribute()
     {
-        return $this->belongsTo($this->baseModel, 'id');
+        return $this->baseModel::find($this->id);
     }
 
     public function asBase()
