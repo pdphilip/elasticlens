@@ -86,7 +86,7 @@ abstract class IndexModel extends Model
 
     public static function lensHealth()
     {
-        $lens = new LensState(self::class);
+        $lens = new LensState(static::class);
 
         return $lens->healthCheck();
     }
