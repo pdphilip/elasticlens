@@ -76,4 +76,18 @@ trait Indexable
     {
         return false;
     }
+
+    public function removeIndex(): bool
+    {
+        $modelId = $this->{$this->getKeyName()};
+        $indexModel = Lens::fetchIndexModelClass($this);
+
+        try {
+            $deleted = $indexModel::destory($modelId);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return $deleted;
+    }
 }

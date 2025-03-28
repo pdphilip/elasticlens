@@ -110,7 +110,7 @@ class LensMigrateCommand extends Command
         }
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
-        $this->omni->createProgressBar($this->buildData['total']);
+        $this->omni->createSimpleProgressBar($this->buildData['total']);
         $migrationVersion = $builder->fetchCurrentMigrationVersion();
         $builder->baseModel::chunk(100, function ($records) use ($builder, $migrationVersion) {
             foreach ($records as $record) {
