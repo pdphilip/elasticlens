@@ -89,7 +89,7 @@ trait LensCommands
         });
         $this->newLine();
 
-        return $result['state'] === 'success';
+        return ! empty($result['state']) && $result['state'] === 'success';
 
     }
 }

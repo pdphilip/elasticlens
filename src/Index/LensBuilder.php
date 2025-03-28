@@ -266,7 +266,7 @@ class LensBuilder extends LensIndex
             foreach ($this->buildResult->map as $field => $value) {
                 $index->{$field} = $value;
             }
-            $index->saveWithoutRefresh();
+            $index->withoutRefresh()->save();
         } catch (Exception $e) {
             $this->buildResult->setMessage('Index build Error', $e->getMessage());
 

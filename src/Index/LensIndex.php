@@ -59,7 +59,7 @@ abstract class LensIndex
         $this->indexModelInstance = $instance;
         $migrationSettings = $instance->getMigrationSettings();
         $this->indexModelName = class_basename($indexModel);
-        $this->indexModelTable = $instance->getIndex();
+        $this->indexModelTable = $instance->getTable();
         $this->indexExists = $instance::indexExists();
         $this->fieldMap = $instance->getFieldSet();
         $this->observers = $instance->getObserverSet();

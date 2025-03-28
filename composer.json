@@ -20,7 +20,7 @@
   "require": {
     "php": "^8.2",
     "illuminate/contracts": "^10.0||^11.0||^12.0",
-    "pdphilip/elasticsearch": "^5",
+    "pdphilip/elasticsearch": "^5.0.1",
     "pdphilip/omniterm": "^1.0.5",
     "spatie/laravel-package-tools": "^1.16"
   },
@@ -62,6 +62,7 @@
     ],
     "types": "phpstan analyse --ansi --memory-limit=2G",
     "lint": "pint -v",
+    "pest": "pest --colors=always",
     "test-coverage": "pest --coverage",
     "test:lint": "pint --test -v",
     "test:types": "@types",

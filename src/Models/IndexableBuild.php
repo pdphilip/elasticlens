@@ -165,6 +165,6 @@ class IndexableBuild extends Model
     {
         $connectionName = self::connectionName();
 
-        return Schema::on($connectionName)->hasIndex('indexable_builds');
+        return Schema::on($connectionName)->indexExists('indexable_builds');
     }
 }

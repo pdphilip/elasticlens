@@ -9,7 +9,6 @@ use PDPhilip\ElasticLens\Commands\LensHealthCommand;
 use PDPhilip\ElasticLens\Commands\LensMakeCommand;
 use PDPhilip\ElasticLens\Commands\LensMigrateCommand;
 use PDPhilip\ElasticLens\Commands\LensStatusCommand;
-use PDPhilip\Elasticsearch\ElasticServiceProvider;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -29,7 +28,6 @@ class ElasticLensServiceProvider extends PackageServiceProvider
             ->hasViews('elasticlens')
             ->hasMigrations(['create_indexable_build_index', 'create_indexable_migration_logs_index'])
             ->runsMigrations()
-            ->publishesServiceProvider(ElasticServiceProvider::class)
             ->hasCommand(LensHealthCommand::class)
             ->hasCommand(LensStatusCommand::class)
             ->hasCommand(LensBuildCommand::class)

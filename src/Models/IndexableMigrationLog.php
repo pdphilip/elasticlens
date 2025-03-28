@@ -118,6 +118,6 @@ class IndexableMigrationLog extends Model
     {
         $connectionName = self::connectionName();
 
-        return Schema::on($connectionName)->hasIndex('indexable_migration_logs');
+        return Schema::on($connectionName)->indexExists('indexable_migration_logs');
     }
 }
