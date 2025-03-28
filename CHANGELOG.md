@@ -2,6 +2,24 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.0.0 - 2025-03-28
+
+This is an updated dependency release compatible with:
+
+- Laravel 10/11/12
+- `laravel-elasticsearch` package v5
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/pdphilip/elasticlens/pull/1
+* Bump aglipanci/laravel-pint-action from 2.4 to 2.5 by @dependabot in https://github.com/pdphilip/elasticlens/pull/2
+
+### New Contributors
+
+* @dependabot made their first contribution in https://github.com/pdphilip/elasticlens/pull/1
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v2.0.1...v3.0.0
+
 ## v2.0.1 - 2024-11-04
 
 Bug fix: `lens:make` command fixed to properly accommodate Domain spaced setups
@@ -22,6 +40,7 @@ The elasticlens.php config file now requires the following structure:
 'index_paths' => [
     'app/Models/Indexes/' => 'App\Models\Indexes',
 ],
+
 
 
 
@@ -70,6 +89,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -93,7 +113,6 @@ See changelog for other minor updates:
 ## v1.0.0 - 2024-09-02
 ### ElasticLens v1.0.0
 ElasticLens is proud to announce its initial release. This powerful and flexible Laravel package is designed to allow developers to search their Laravel models with the convenience of Eloquent and the power of Elasticsearch.
-
 #### Features
 
 - **Eloquent Integration**: Easily index and search your Laravel models with Elasticsearch.
@@ -119,11 +138,13 @@ composer require pdphilip/elasticlens
 
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
