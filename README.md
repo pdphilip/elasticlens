@@ -134,7 +134,7 @@ User::viaIndex()->searchTerm('running')->orSearchTerm('swimming')->get();
 
 # Step 2: Search your models
 
-### [Docs → Full-text base-model search](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
+## [Docs → Full-text base-model search](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
 
 Perform quick and easy full-text searches:
 
