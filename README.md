@@ -26,7 +26,6 @@ ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index
 User::viaIndex()->searchPhrase('loves dogs')->where('status','active')->get();
 ```
 
---- 
 
 ## Wait, isn't this what Laravel Scout does?
 
@@ -34,27 +33,25 @@ Yes, but mostly no.
 
 **ElasticLens is built from the ground up around Elasticsearch**.
 
-It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package (Elasticsearch using Eloquent), creating a dedicated `Index Model` that is fully accessible and automatically synced with
-your `Base Model`.
+It integrates directly with the  [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package (Elasticsearch using Eloquent), creating a dedicated `Index-Model` that is fully accessible and automatically synced with
+your `Base-Model`.
 
 <details>
 <summary> How? </summary>
 
 
-> The `Index Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index Model`, ElasticLens offers tools for
+> The `Index-Model` acts as a separate Elasticsearch model managed by ElasticLens, yet you retain full control over it, just like any other Laravel model. In addition to working directly with the `Index-Model`, ElasticLens offers tools for
 > mapping fields (with embedding relationships) during the build process, and managing index migrations.
 
-> For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` Model that provides all the features from [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) to search your `Base Model`.
+> For Example, a base `User` Model will sync with an Elasticsearch `IndexedUser` Model that provides all the features from [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) to search your `Base-Model`.
 
 </details>
-
---- 
 
 
 
 # Requirements
 
-- Laravel 10.x 11.x & 12.x
+- Laravel 10.x/11.x/12.x
 - Elasticsearch 8.x
 
 # Installation
@@ -72,10 +69,10 @@ Run the migrations to create the index build and migration logs indexes:
 ```bash
 php artisan migrate
 ```
-# [Documentation](https://elasticsearch.pdphilip.com/elasticlens/getting-started/)
+# Read the [Documentation](https://elasticsearch.pdphilip.com/elasticlens/getting-started/)
 
----
-# Features
+
+## Features
 
 - [Zero config setup](#step-1-zero-config-setup): Start indexing with minimal configuration. [Docs](https://elasticsearch.pdphilip.com/elasticlens/index-model/)
 - [Eloquent-Like Querying](#step-2-search-your-models): Search your models as if you're using Eloquent, with the full power of Elasticsearch. [Docs](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
@@ -86,19 +83,16 @@ php artisan migrate
 - [Built-in IndexableBuildState model](#step-8-optionally-access-the-built-in-indexablebuild-model-to-track-index-build-states): Track the build states of your indexes. [Docs](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/)
 - [Built-in Migration Logs](#step-9-optionally-access-the-built-in-indexablemigrationlog-model-for-index-migration-status): Track the build states of your indexes. [Docs](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/)
 
----
 
-# Usage
+### Example Usage
 
-The Walkthrough below will demonstrate all the features by way of an example.
+The Walkthrough below will demonstrate all the features by way of an example. In this example, we'll index a `User` model.
 
-In this example, we'll index a `User` model.
+# Step 1: Zero config setup 
 
-## Step 1: Zero config setup 
+## [Docs → Indexing your Base-Model](https://elasticsearch.pdphilip.com/elasticlens/index-model/)
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/index-model/)
-
-#### 1. Add the `Indexable` Trait to Your Base Model:
+#### 1. Add the `Indexable` Trait to Your Base-Model:
 
 ```php
 use PDPhilip\ElasticLens\Indexable;
@@ -108,9 +102,17 @@ class User extends Eloquent implements Authenticatable, CanResetPassword
     use Indexable;
 ```
 
-#### 2. Create an Index Model for Your Base Model:
+#### 2. Create an Index-Model for Your Base-Model:
 
-- ElasticLens expects the `Index Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory.
+ElasticLens expects the `Index-Model` to be named as `Indexed` + `BaseModelName` and located in the `App\Models\Indexes` directory.
+
+2(a) Create the `User` index with artisan:
+```bash
+php artisan lens:make User
+```
+
+
+2(b) or create the `User` index directly:
 
 ```php
 /**
@@ -130,11 +132,9 @@ class IndexedUser extends IndexModel{}
 User::viaIndex()->searchTerm('running')->orSearchTerm('swimming')->get();
 ```
 
----
+# Step 2: Search your models
 
-## Step 2: Search your models
-
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
+### [Docs → Full-text base-model search](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
 
 Perform quick and easy full-text searches:
 
@@ -149,17 +149,17 @@ Cute. But that's not why we're here...
 To truly harness the power of [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) for eloquent-like querying, you can use more advanced queries:
 
 ```php
-BaseModel::viaIndex()->{build your ES Eloquent query}->first();
-BaseModel::viaIndex()->{build your ES Eloquent query}->get();
-BaseModel::viaIndex()->{build your ES Eloquent query}->paginate();
-BaseModel::viaIndex()->{build your ES Eloquent query}->avg('orders');
-BaseModel::viaIndex()->{build your ES Eloquent query}->distinct();
-BaseModel::viaIndex()->{build your ES Eloquent query}->{etc}
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->first();
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->get();
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->paginate();
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->avg('orders');
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->distinct();
+BaseModel::viaIndex()->{build_your_es_eloquent_query}->{etc}
 ```
 
-### Examples:
+#### Examples:
 
-#### 1. Basic Term Search:
+##### 1. Basic Term Search:
 
 ```php
 User::viaIndex()->searchTerm('nara')
@@ -264,13 +264,13 @@ User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
 > Searches for the phrase prefix 'loves espr' across all fields and highlights where it was found.
 > - [https://elasticsearch.pdphilip.com/full-text-search#highlighting](https://elasticsearch.pdphilip.com/eloquent/search-queries/#search-phrase-prefix)
 
-### Note on `Index Model` vs `Base Model` Results
+### Note on `Index-Model` vs `Base-Model` Results
 
 - Since the `viaIndex()` taps into the `IndexModel`, the results will be instances of `IndexedUser`, not the base `User` model.
 - This can be useful for display purposes, such as highlighting embedded fields.
-- **<u>However, in most cases you'll need to return and work with the `Base Model`</u>**
+- **<u>However, in most cases you'll need to return and work with the `Base-Model`</u>**
 
-### To search and return results as `Base Models`:
+### To search and return results as `Base-Models`:
 
 #### 1. use `asBase()`
 
@@ -289,7 +289,7 @@ User::viaIndex()->searchTerm('david')->orderByDesc('created_at')->limit(3)->getB
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->getBase();
 ```
 
-### To search and paginate results as `Base Models` use: `paginateBase()`
+### To search and paginate results as `Base-Models` use: `paginateBase()`
 
 - Complete the query string with `->paginateBase()`
 
@@ -304,13 +304,11 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10);
 User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginate(10)->asBase();
 ```
 
----
+# Step 3: Create a field Map
 
-## Step 3: Create a field Map
+## [Docs → Index-model field mapping](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/)
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/)
-
-You can define the `fieldMap()` method in your `Index Model` to control how the index is built during synchronisation.
+You can define the `fieldMap()` method in your `Index-Model` to control how the index is built during synchronisation.
 
 ```php
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
@@ -337,23 +335,22 @@ class IndexedUser extends IndexModel
 ### Notes:
 
 - The `IndexedUser` records will contain only the fields defined in the `fieldMap()`. The value of `$user->id` will correspond to `$indexedUser->id`.
-- Fields can also be derived from attributes in the `Base Model`. For example, `$field->bool('is_active')` could be derived from a custom attribute in the `Base Model`:
+- Fields can also be derived from attributes in the `Base-Model`. For example, `$field->bool('is_active')` could be derived from a custom attribute in the `Base-Model`:
   ```php
     public function getIsActiveAttribute(): bool
     {
         return $this->updated_at >= Carbon::now()->modify('-30 days');
     }
   ```
-- When mapping enums, ensure that you also cast them in the `Index Model`.
+- When mapping enums, ensure that you also cast them in the `Index-Model`.
 - If a value is not found during the build process, it will be stored as `null`.
 
----
 
-## Step 4: Update `fieldMap()` to Include Relationships as Embedded Fields
+# Step 4: Update `fieldMap()` to include relationships as embedded fields
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/)
+## [Docs → Relationships as embedded fields](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/#relationships-as-embedded-fields)
 
-You can further customise the indexing process by embedding relationships as nested objects within your Index Model. The builder allows you to define fields and embed relationships, enabling more complex data structures in your
+You can further customise the indexing process by embedding relationships as nested objects within your Index-Model. The builder allows you to define fields and embed relationships, enabling more complex data structures in your
 Elasticsearch index.
 
 ### Examples:
@@ -574,15 +571,14 @@ class IndexedUser extends IndexModel
 - `embedMap(function (IndexField $field) {})` - Define the mapping for the embedded relationship
 - `dontObserve()` - Don't observe changes in the `$relatedModelClass`
 
----
 
-## Step 5: Define your `Index Model`'s `migrationMap()`
+# Step 5: Define your `Index-Model`'s `migrationMap()`
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/index-model-migrations/)
+## [Docs → Index-model migrations](https://elasticsearch.pdphilip.com/elasticlens/index-model-migrations/)
 
-Elasticsearch automatically indexes new fields it encounters, but it might not always index them in the way you need. To ensure the index is structured correctly, you can define a `migrationMap()` in your Index Model.
+Elasticsearch automatically indexes new fields it encounters, but it might not always index them in the way you need. To ensure the index is structured correctly, you can define a `migrationMap()` in your Index-Model.
 
-Since the `Index Model` utilizes the [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, you can use `IndexBlueprint` to customize your `migrationMap()`
+Since the `Index-Model` utilizes the [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, you can use `IndexBlueprint` to customize your `migrationMap()`
 
 ```php
 use PDPhilip\Elasticsearch\Schema\Blueprint;
@@ -621,19 +617,17 @@ php artisan lens:migrate User
 
 This command will delete the existing index, run the migration, and rebuild all records.
 
----
+# Step 6: Fine-tune the Observers
 
-## Step 6: Fine-tune the Observers
+## [Docs → Base Model Observers](https://elasticsearch.pdphilip.com/elasticlens/model-observers/)
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/model-observers/)
-
-By default, the base model will be observed for changes (saves) and deletions. When the `Base Model` is deleted, the corresponding `Index Model` will also be deleted, even in cases of soft deletion.
+By default, the Base-Model will be observed for changes (saves) and deletions. When the `Base-Model` is deleted, the corresponding `Index-Model` will also be deleted, even in cases of soft deletion.
 
 ### Handling Embedded Models
 
-When you define a `fieldMap()` with embedded fields, the related models are also observed. For example:
+The related models are also observed when you define a `fieldMap()` with embedded fields. For example:
 
-- A save or delete action on `ProfileStatus` will trigger a chain reaction, fetching the related `Profile` and then `User`, which in turn initiates a rebuild of the index for that user record.
+- A save or delete action on `ProfileStatus` will trigger a chain reaction, fetching the related `Profile` and then `User`, which in turn initiates a rebuild of the `IndexedUser`.
 
 However, to ensure these observers are loaded, you need to reference the User model explicitly:
 
@@ -642,7 +636,7 @@ However, to ensure these observers are loaded, you need to reference the User mo
 $profileStatus->status = 'Unavailable';
 $profileStatus->save();
 
-//This will 
+//This will since the observers are loaded in the User model
 new User::class
 $profileStatus->status = 'Unavailable';
 $profileStatus->save();
@@ -673,9 +667,9 @@ class ProfileStatus extends Eloquent
 ],
 ```
 
-### Disabling Base Model Observation
+### Disabling Base-Model Observation
 
-If you want to disable the automatic observation of the `Base Model`, include the following in your `Index Model`:
+If you want to disable the automatic observation of the `Base-Model`, include the following in your `Index-Model`:
 
 ```php
 class IndexedUser extends IndexModel
@@ -688,9 +682,9 @@ class IndexedUser extends IndexModel
 
 ---
 
-## Step 7: Monitor and administer all your indexes with Artisan commands
+# Step 7: Monitor and administer all your indexes with Artisan commands
 
-### [Docs](https://elasticsearch.pdphilip.com/elasticlens/artisan-cli-tools/)
+## [Docs → Artisan CLI Tools](https://elasticsearch.pdphilip.com/elasticlens/artisan-cli-tools/)
 
 Use the following Artisan commands to manage and monitor your Elasticsearch indexes:
 
@@ -738,7 +732,7 @@ Deletes the existing User index, runs the migration, and rebuilds all records.
     />
 </div>
 
-4. Create a New `Index Model` for a `Base Model`:
+4. Create a New `Index-Model` for a `Base-Model`:
 
 ```bash
 php artisan lens:make Profile
@@ -753,7 +747,7 @@ Generates a new index for the `Profile` model.
     />
 </div>
 
-5. Bulk (Re)Build Indexes for a `Base Model`:
+5. Bulk (Re)Build Indexes for a `Base-Model`:
 
 ```bash
 php artisan lens:build Profile
@@ -770,9 +764,9 @@ Rebuilds all the `IndexedProfile` records for the `Profile` model.
 
 ---
 
-## Step 8: Optionally access the built-in `IndexableBuild` model to track index build states
+# Step 8: Optionally access the built-in `IndexableBuild` model to track index build states
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/)
+## [Docs → Accessing IndexableBuild model](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/#accessing-indexablebuild-model)
 
 ElasticLens includes a built-in `IndexableBuild` model that allows you to monitor and track the state of your index builds. This model records the status of each index build, providing you with insights into the indexing process.
 
@@ -781,9 +775,9 @@ ElasticLens includes a built-in `IndexableBuild` model that allows you to monito
 
 ### Model Fields:
 
-- string `$model`: The base model being indexed.
-- string `$model_id`: The ID of the base model.
-- string `$index_model`: The corresponding index model.
+- string `$model`: The Base-Model being indexed.
+- string `$model_id`: The ID of the Base-Model.
+- string `$index_model`: The corresponding Index-Model.
 - string `$last_source`: The last source of the build state.
 - IndexableStateType `$state`: The current state of the index build.
 - array `$state_data`: Additional data related to the build state.
@@ -812,16 +806,16 @@ used for reading purposes only to ensure accurate monitoring and reporting.
 
 ---
 
-## Step 9: Optionally Access the Built-in `IndexableMigrationLog` Model for Index Migration Status
+# Step 9: Optionally Access the Built-in `IndexableMigrationLog` Model for Index Migration Status
 
-### [→ Docs](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/)
+## [Docs → Access IndexableMigrationLog model](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/#access-indexablemigrationlog-model) 
 
-ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and tracking the state of index migrations. This model logs each migration related to an `Index Model`.
+ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and tracking the state of index migrations. This model logs each migration related to an `Index-Model`.
 
 <details>
 <summary>  Fields </summary>
 
-- string `$index_model`: The migrated Index Model.
+- string `$index_model`: The migrated Index-Model.
 - IndexableMigrationLogState `$state`: State of the migration
 - array `$map`: Migration map that was passed to Elasticsearch.
 - int `$version_major`: Major version of the indexing process.
