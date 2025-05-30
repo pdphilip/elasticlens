@@ -123,12 +123,12 @@ ES_OPT_DEFAULT_LIMIT=1000
 ```
 </details>
 
-You can install the package via composer:
+Install the package via composer:
 
 ```bash
 composer require pdphilip/elasticlens
 ```
-Publish the config file and run the migrations with:
+Publish the config file:
 ```bash
 php artisan lens:install
 ```
