@@ -9,10 +9,10 @@
 
   </p>
     <h3>
-    Search your <strong>Laravel Models</strong> with the convenience of Eloquent and the power of Elasticsearch
+    Search your <strong>Laravel models</strong> with the convenience of Eloquent and the power of Elasticsearch
   </h3>
   <p>
-ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index of your Eloquent models.
+ElasticLens for Laravel uses Elasticsearch to create and sync a searchable index of your Laravel models.
   </p>
 </div>
 <div align="center">
@@ -237,7 +237,7 @@ User::viaIndex()->searchTerm('nara')
     ->limit(3)->get();
 ```
 
-> This searches all users who are `active` for the term 'nara' across all fields and return the top 3 results.
+> This searches all users who are `active` for the term 'nara' across all fields and returns the top 3 results.
 > - [https://elasticsearch.pdphilip.com/full-text-search#term-search-term](https://elasticsearch.pdphilip.com/eloquent/search-queries/#search-term)
 
 #### 2. Phrase Search:
@@ -248,7 +248,7 @@ User::viaIndex()->searchPhrase('Ice bathing')
     ->limit(5)->get();
 ```
 
-> Searches all fields for the phrase 'Ice bathing' and returns the 3 newest results. Phrases match exact words in order.
+> Searches all fields for the phrase 'Ice bathing' and returns the three newest results. Phrases match exact words in order.
 > - [https://elasticsearch.pdphilip.com/eloquent/search-queries/#search-phrase](https://elasticsearch.pdphilip.com/eloquent/search-queries/#search-phrase)
 
 #### 3. Boosting Terms fields:
@@ -257,7 +257,7 @@ User::viaIndex()->searchPhrase('Ice bathing')
 User::viaIndex()->searchTerm('David',['first_name^3', 'last_name^2', 'bio'])->get();
 ```
 
-> Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and also checks the bio field. Results are ordered by score.
+> Searches for the term 'David', boosts the first_name field by 3, last_name by 2, and checks the bio field. Results are ordered by score.
 > - [https://elasticsearch.pdphilip.com/full-text-search#boosting-terms](https://elasticsearch.pdphilip.com/eloquent/search-queries/#parameter-fields)
 > - [https://elasticsearch.pdphilip.com/full-text-search#minimum-score](https://elasticsearch.pdphilip.com/eloquent/search-queries/#parameter-options)
 
@@ -280,7 +280,7 @@ User::viaIndex()->where('status', 'active')
 User::viaIndex()->whereRegex('favourite_color', 'bl(ue)?(ack)?')->get();
 ```
 
-> Finds all users whose favourite color is blue or black.
+> Finds all users whose favourite colour is blue or black.
 > - [https://elasticsearch.pdphilip.com/full-text-search#regular-expressions](https://elasticsearch.pdphilip.com/eloquent/es-queries/#where-regex)
 
 #### 6. Pagination:
@@ -307,7 +307,7 @@ User::viaIndex()->whereNestedObject('user_logs', function (Builder $query) {
 #### 8. Fuzzy Search:
 
 ```php
-User::viaIndex()->searchFuzzy('quikc')->asFuzzy()
+User::viaIndex()->searchFuzzy('quikc')
     ->orSearchFuzzy('brwn')
     ->orSearchFuzzy('foks')
     ->get();
@@ -319,7 +319,8 @@ User::viaIndex()->searchFuzzy('quikc')->asFuzzy()
 #### 9. Highlighting Search Results:
 
 ```php
-User::viaIndex()->searchTerm('espresso')->withHighlights()->get();
+User::viaIndex()->searchTerm('espresso')
+    ->withHighlights()->get();
 ```
 
 > Searches for 'espresso' across all fields and highlights where it was found.
@@ -328,7 +329,8 @@ User::viaIndex()->searchTerm('espresso')->withHighlights()->get();
 #### 10. Phrase prefix search:
 
 ```php
-User::viaIndex()->searchPhrasePrefix('loves espr')->withHighlights()->get();
+User::viaIndex()->searchPhrasePrefix('loves espr')
+    ->withHighlights()->get();
 ```
 
 > Searches for the phrase prefix 'loves espr' across all fields and highlights where it was found.
@@ -420,7 +422,7 @@ class IndexedUser extends IndexModel
 
 ## [Docs → Relationships as embedded fields](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/#relationships-as-embedded-fields)
 
-You can further customise the indexing process by embedding relationships as nested objects within your Index-Model. The builder allows you to define fields and embed relationships, enabling more complex data structures in your
+You can further customise indexing by embedding relationships as nested objects within your Index-Model. The builder allows you to define fields and embed relationships, enabling more complex data structures in your
 Elasticsearch index.
 
 ### Examples:
@@ -633,8 +635,8 @@ class IndexedUser extends IndexModel
 
 **Note**: For embeds the `$whereRelatedField`, `$equalsLocalField`, `$query` parameters are optional.
 
-- `$whereRelatedField` is the `foreignKey` & `$equalsLocalField` is the `localKey` and they will be inferred from the relationship if not provided.
-- `$query` is a closure that allows you to customize the query for the related model.
+- `$whereRelatedField` is the `foreignKey`, and `$equalsLocalField` is the `localKey`; if they are not provided, they will be inferred from the relationship.
+- `$query` is a closure that allows you to customise the query for the related model.
 
 ### Embedded Relationship Builder Methods:
 
@@ -648,7 +650,7 @@ class IndexedUser extends IndexModel
 
 Elasticsearch automatically indexes new fields it encounters, but it might not always index them in the way you need. To ensure the index is structured correctly, you can define a `migrationMap()` in your Index-Model.
 
-Since the `Index-Model` utilizes the [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, you can use `IndexBlueprint` to customize your `migrationMap()`
+Since the `Index-Model` utilises the [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) package, you can use `IndexBlueprint` to customise your `migrationMap()`
 
 ```php
 use PDPhilip\Elasticsearch\Schema\Blueprint;
@@ -691,7 +693,7 @@ This command will delete the existing index, run the migration, and rebuild all 
 
 ## [Docs → Base Model Observers](https://elasticsearch.pdphilip.com/elasticlens/model-observers/)
 
-By default, the Base-Model will be observed for changes (saves) and deletions. When the `Base-Model` is deleted, the corresponding `Index-Model` will also be deleted, even in cases of soft deletion.
+By default, the `Base Model` is observed for changes (saves) and deletions. When the `Base Model` is deleted, the corresponding `Index Model` will also be deleted, even in cases of soft deletion.
 
 ### Handling Embedded Models
 
@@ -858,7 +860,7 @@ ElasticLens includes a built-in `IndexableBuild` model that allows you to monito
 ### Attributes:
 
 - @property-read string `$state_name`: The name of the current state.
-- @property-read string `$state_color`: The color associated with the current state.
+- @property-read string `$state_color`: The colour associated with the current state.
 
 </details>
 
@@ -887,16 +889,16 @@ ElasticLens includes a built-in `IndexableMigrationLog` model for monitoring and
 
 - string `$index_model`: The migrated Index-Model.
 - IndexableMigrationLogState `$state`: State of the migration
-- array `$map`: Migration map that was passed to Elasticsearch.
+- array `$map`: Migration map passed to Elasticsearch.
 - int `$version_major`: Major version of the indexing process.
 - int `$version_minor`: Minor version of the indexing process.
 - Carbon `$created_at`: Timestamp of when the migration was created.
 
 ### Attributes:
 
-- @property-read string `$version`: Parsed version ex v2.03
+- @property-read string `$version`: Parsed version, ex v2.03
 - @property-read string `$state_name`: Current state name.
-- @property-read string `$state_color`: Color representing the current state.
+- @property-read string `$state_color`: Colour representing the current state.
 
 </details>
 
@@ -908,7 +910,7 @@ IndexableMigrationLog::getLatestVersion($indexModel);
 IndexableMigrationLog::getLatestMigration($indexModel);
 ```
 
-**Note**: While you can query the `IndexableMigrationLog` model directly, avoid writing or deleting records within it manually, as this can interfere with versioning of the migrations. The model should be used for reading purposes only to
+**Note**: While you can query the `IndexableMigrationLog` model directly, avoid writing or deleting records within it manually, as this can interfere with versioning of the migrations. The model should be used for reading purposes only, to
 ensure accuracy.
 
 ---
