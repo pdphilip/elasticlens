@@ -54,7 +54,74 @@ your `Base-Model`.
 - Laravel 10.x/11.x/12.x
 - Elasticsearch 8.x
 
+
 # Installation
+
+<details>
+<summary>NB: Before you start, set the Laravel-Elasticsearch DB Config (click to expand)</summary>
+
+> See [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) for more details    
+>    
+> Update `.env`
+
+```dotenv
+ES_AUTH_TYPE=http
+ES_HOSTS="http://localhost:9200"
+ES_USERNAME=
+ES_PASSWORD=
+ES_CLOUD_ID=
+ES_API_ID=
+ES_API_KEY=
+ES_SSL_CA=
+ES_INDEX_PREFIX=my_app_
+# prefix will be added to all indexes created by the package with an underscore
+# ex: my_app_user_logs for UserLog model
+ES_SSL_CERT=
+ES_SSL_CERT_PASSWORD=
+ES_SSL_KEY=
+ES_SSL_KEY_PASSWORD=
+# Options
+ES_OPT_ID_SORTABLE=false
+ES_OPT_VERIFY_SSL=true
+ES_OPT_RETRIES=
+ES_OPT_META_HEADERS=true
+ES_ERROR_INDEX=
+ES_OPT_BYPASS_MAP_VALIDATION=false
+ES_OPT_DEFAULT_LIMIT=1000
+```
+
+> Update `config/database.php`
+
+ ```php
+'elasticsearch' => [
+    'driver' => 'elasticsearch',
+    'auth_type' => env('ES_AUTH_TYPE', 'http'), //http or cloud
+    'hosts' => explode(',', env('ES_HOSTS', 'http://localhost:9200')),
+    'username' => env('ES_USERNAME', ''),
+    'password' => env('ES_PASSWORD', ''),
+    'cloud_id' => env('ES_CLOUD_ID', ''),
+    'api_id' => env('ES_API_ID', ''),
+    'api_key' => env('ES_API_KEY', ''),
+    'ssl_cert' => env('ES_SSL_CA', ''),
+    'ssl' => [
+        'cert' => env('ES_SSL_CERT', ''),
+        'cert_password' => env('ES_SSL_CERT_PASSWORD', ''),
+        'key' => env('ES_SSL_KEY', ''),
+        'key_password' => env('ES_SSL_KEY_PASSWORD', ''),
+    ],
+    'index_prefix' => env('ES_INDEX_PREFIX', false),
+    'options' => [
+        'bypass_map_validation' => env('ES_OPT_BYPASS_MAP_VALIDATION', false),
+        'logging' => env('ES_OPT_LOGGING', false),
+        'ssl_verification' => env('ES_OPT_VERIFY_SSL', true),
+        'retires' => env('ES_OPT_RETRIES', null),
+        'meta_header' => env('ES_OPT_META_HEADERS', true),
+        'default_limit' => env('ES_OPT_DEFAULT_LIMIT', 1000),
+        'allow_id_sort' => env('ES_OPT_ID_SORTABLE', false),
+    ],
+],
+```
+</details>
 
 You can install the package via composer:
 
@@ -69,13 +136,16 @@ Run the migrations to create the index build and migration logs indexes:
 ```bash
 php artisan migrate
 ```
+
+
+
 # Read the [Documentation](https://elasticsearch.pdphilip.com/elasticlens/getting-started/)
 
 
 ## Features
 
 - [Zero config setup](#step-1-zero-config-setup): Start indexing with minimal configuration. [Docs](https://elasticsearch.pdphilip.com/elasticlens/index-model/)
-- [Eloquent-Like Querying](#step-2-search-your-models): Search your models as if you're using Eloquent, with the full power of Elasticsearch. [Docs](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
+- [Eloquent Querying](#step-2-search-your-models): Search your models with Eloquent and the full power of Elasticsearch. [Docs](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
 - [Custom Field Mapping](#step-3-create-a-field-map): Control how your index is built, including [mapping model relationships as embedded fields](#step-4-update-fieldmap-to-include-relationships-as-embedded-fields). [Docs](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/)
 - [Manage Elasticsearch Migrations](#step-5-define-your-index-models-migrationmap): Define a required blueprint for your index migrations. [Docs](https://elasticsearch.pdphilip.com/elasticlens/index-model-migrations/)
 - [Control Observed models](#step-6-fine-tune-the-observers): Tailor which models are observed for changes. [Docs](https://elasticsearch.pdphilip.com/elasticlens/model-observers/)
