@@ -2,6 +2,15 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.0.2 - 2025-06-04
+
+### What's Changed
+
+* Bug fix: Stub template update
+* Bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot in https://github.com/pdphilip/elasticlens/pull/3
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.0.1...v3.0.2
+
 ## v3.0.1 - 2025-03-28
 
 This release is compatible with Laravel 10, 11 & 12
@@ -69,6 +78,7 @@ The elasticlens.php config file now requires the following structure:
 
 
 
+
 ```
 •	The **namespaces** key maps models to their respective index namespaces.
 •	The **index_paths** key maps file paths to the corresponding index namespaces.
@@ -116,6 +126,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -149,7 +160,6 @@ ElasticLens is proud to announce its initial release. This powerful and flexible
 - **Pagination**: Built-in support for paginating search results.
 - **Console Commands**: Artisan commands for managing indices and performing bulk operations.
 - **Model Observers**: Customizable model observation for index builds.
-
 #### Installation
 
 You can install ElasticLens via Composer:
@@ -165,11 +175,13 @@ composer require pdphilip/elasticlens
 
 
 
+
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
