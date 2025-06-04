@@ -17,7 +17,7 @@ class Indexed{{ model }} extends IndexModel
         return IndexBuilder::map({{ model }}::class, function (IndexField $field) {});
     }
 
-    //    public static function migrationMap(): callable
+    //    public function migrationMap(): callable
     //    {
     //        return function (Blueprint $index) {};
     //    }
