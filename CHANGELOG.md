@@ -2,6 +2,14 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.0.3 - 2025-06-11
+
+### What's Changed
+
+- `paginateBase()` bug. Fixed issue where subsequent paging returned data (items) as non-sequential arrays.
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.0.2...v3.0.3
+
 ## v3.0.2 - 2025-06-04
 
 ### What's Changed
@@ -79,6 +87,7 @@ The elasticlens.php config file now requires the following structure:
 
 
 
+
 ```
 •	The **namespaces** key maps models to their respective index namespaces.
 •	The **index_paths** key maps file paths to the corresponding index namespaces.
@@ -127,6 +136,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -161,11 +171,11 @@ ElasticLens is proud to announce its initial release. This powerful and flexible
 - **Console Commands**: Artisan commands for managing indices and performing bulk operations.
 - **Model Observers**: Customizable model observation for index builds.
 #### Installation
-
 You can install ElasticLens via Composer:
 
 ```bash
 composer require pdphilip/elasticlens
+
 
 
 
@@ -181,6 +191,7 @@ Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
