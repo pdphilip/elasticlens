@@ -56,8 +56,9 @@ abstract class IndexModel extends Model
                 // @phpstan-ignore-next-line
                 return $value->base;
             });
+            $baseItems = $items->values();
             $pagi = new LengthAwarePaginator(
-                $items,
+                $baseItems,
                 $this->count(),
                 $perPage,
                 $page,
