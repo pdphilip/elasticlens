@@ -26,4 +26,25 @@ return [
     'index_paths' => [
         'app/Models/Indexes/' => 'App\Models\Indexes',
     ],
+
+    'chunk_rates' => [
+        'default' => 1000,
+        'migrate_default' => 100,
+
+        'relationship_scaling' => [
+            'enabled' => true,
+            'thresholds' => [
+                3 => 750,
+                6 => 500,
+                9 => 250,
+            ],
+        ],
+
+        'models' => [
+            // 'App\Models\User' => [
+            //     'build' => 500,
+            //     'migrate' => 50,
+            // ],
+        ],
+    ],
 ];
