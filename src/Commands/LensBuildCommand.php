@@ -194,23 +194,15 @@ class LensBuildCommand extends Command
 
     public function setChunkRate(LensState $health): void
     {
-        $config = config('elasticlens.chunk_rates');
-        $modelName = get_class($this->baseModel);
+        $chunk = config('elasticlens.chunk_rates.default', $this->chunkRate);
 
-        if (isset($config['models'][$modelName]['build'])) {
-            $this->chunkRate = $config['models'][$modelName]['build'];
-            return;
-        }
-
-        $chunk = $config['default'] ?? $this->chunkRate;
-
-        if ($config['relationship_scaling']['enabled'] ?? true) {
+        if (config('elasticlens.chunk_rates.relationship_scaling.enabled', true)) {
             $relationships = count($health->indexModelInstance->getRelationships());
-            $thresholds = $config['relationship_scaling']['thresholds'] ?? [
+            $thresholds = config('elasticlens.chunk_rates.relationship_scaling.thresholds', [
                 3 => 750,
                 6 => 500,
                 9 => 250,
-            ];
+            ]);
 
             krsort($thresholds);
             foreach ($thresholds as $relation_count => $chunkSize) {
