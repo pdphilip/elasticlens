@@ -26,4 +26,5 @@ return [
     'index_paths' => [
         'app/Models/Indexes/' => 'App\Models\Indexes',
     ],
+
 ];

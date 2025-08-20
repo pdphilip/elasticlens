@@ -192,10 +192,14 @@ class LensBuildCommand extends Command
         ];
     }
 
-    public function setChunkRate(LensState $health): void
+    public function setChunkRate(LensState $health): int
     {
-        $chunk = $this->chunkRate;
+
+        if ($modelBuildChunkRate = $health->indexModelInstance->getBuildChunkRate()) {
+            return $this->chunkRate = $modelBuildChunkRate;
+        }
         $relationships = count($health->indexModelInstance->getRelationships());
+        $chunk = $this->chunkRate;
         if ($relationships > 3) {
             $chunk = 750;
         }
@@ -205,6 +209,7 @@ class LensBuildCommand extends Command
         if ($relationships > 9) {
             $chunk = 250;
         }
-        $this->chunkRate = $chunk;
+
+        return $this->chunkRate = $chunk;
     }
 }
