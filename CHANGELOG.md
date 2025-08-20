@@ -2,6 +2,35 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.1.0 - 2025-08-20
+
+This release is compatible with Laravel 10, 11 & 12
+
+### What's Changed
+
+1. Chunk rate for the migration command can now be explicitly set in the `Index-Model` with the `protected int $buildChunkRate` property
+
+```php
+class IndexedUser extends IndexModel
+{
+    protected int $buildChunkRate = 2000;
+
+```
+2. Migrations are validated before running the `lens:migration` and `lens:build` commands. If there are any migration errors in the `migrationMap()` method then it will be shown - via issue #6
+
+### PRs
+
+* Bump aglipanci/laravel-pint-action from 2.5 to 2.6 by @dependabot[bot] in https://github.com/pdphilip/elasticlens/pull/8
+* Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/pdphilip/elasticlens/pull/10
+* Bump stefanzweifel/git-auto-commit-action from 5 to 6 by @dependabot[bot] in https://github.com/pdphilip/elasticlens/pull/4
+* Use chunk rates from config for Indexing and Migration by @Tschucki in https://github.com/pdphilip/elasticlens/pull/7
+
+### New Contributors
+
+* @Tschucki made their first contribution in https://github.com/pdphilip/elasticlens/pull/7
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.0.3...v3.1.0
+
 ## v3.0.3 - 2025-06-11
 
 ### What's Changed
@@ -88,6 +117,7 @@ The elasticlens.php config file now requires the following structure:
 
 
 
+
 ```
 •	The **namespaces** key maps models to their respective index namespaces.
 •	The **index_paths** key maps file paths to the corresponding index namespaces.
@@ -137,6 +167,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -172,9 +203,9 @@ ElasticLens is proud to announce its initial release. This powerful and flexible
 - **Model Observers**: Customizable model observation for index builds.
 #### Installation
 You can install ElasticLens via Composer:
-
 ```bash
 composer require pdphilip/elasticlens
+
 
 
 
@@ -191,6 +222,7 @@ Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
