@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens\Models;
 use Illuminate\Support\Carbon;
 use PDPhilip\ElasticLens\Enums\IndexableBuildState;
 use PDPhilip\ElasticLens\Index\BuildResult;
+use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 use PDPhilip\Elasticsearch\Schema\Schema;
 
@@ -114,17 +115,30 @@ class IndexableBuild extends Model
 
     public static function countModelErrors($indexModel): int
     {
-        return IndexableBuild::where('index_model', strtolower($indexModel))->where('state', IndexableBuildState::FAILED)->count();
+        $indexModel = self::sanitizeIndexModelName($indexModel);
+
+        return IndexableBuild::where('index_model', $indexModel)->where('state', IndexableBuildState::FAILED)->count();
     }
 
     public static function countModelSkips($indexModel): int
     {
+        $indexModel = self::sanitizeIndexModelName($indexModel);
+
         return IndexableBuild::where('index_model', strtolower($indexModel))->where('state', IndexableBuildState::SKIPPED)->count();
     }
 
     public static function countModelRecords($indexModel): int
     {
-        return IndexableBuild::where('index_model', strtolower($indexModel))->count();
+        $indexModel = self::sanitizeIndexModelName($indexModel);
+
+        return IndexableBuild::where('index_model', $indexModel)->count();
+    }
+
+    public static function buildErrorsQuery($indexModel): Builder
+    {
+        $indexModel = self::sanitizeIndexModelName($indexModel);
+
+        return IndexableBuild::query()->where('index_model', $indexModel)->where('state', IndexableBuildState::FAILED);
     }
 
     public static function deleteState($model, $modelId, $indexModel): void
@@ -135,7 +149,8 @@ class IndexableBuild extends Model
 
     public static function deleteStateModel($indexModel): void
     {
-        IndexableBuild::where('index_model', strtolower($indexModel))->delete();
+        $indexModel = self::sanitizeIndexModelName($indexModel);
+        IndexableBuild::where('index_model', $indexModel)->delete();
 
     }
 
@@ -161,6 +176,11 @@ class IndexableBuild extends Model
 
         return $collection->sortByDesc('ts')->take($trim)->values()->all();
 
+    }
+
+    public static function sanitizeIndexModelName($indexModel): string
+    {
+        return strtolower(class_basename($indexModel));
     }
 
     // ----------------------------------------------------------------------
