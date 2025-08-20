@@ -12,6 +12,8 @@ class Indexed{{ model }} extends IndexModel
 {
     protected $baseModel = {{ model }}::class;
 
+	protected int $buildChunkRate = 0;
+
     public function fieldMap(): IndexBuilder
     {
         return IndexBuilder::map({{ model }}::class, function (IndexField $field) {});

@@ -27,6 +27,8 @@ class LensMigrateCommand extends Command
 
     protected mixed $build = null;
 
+    protected int $chunkRate = 1000;
+
     protected array $buildData = [
         'didRun' => false,
         'processed' => 0,
@@ -112,8 +114,10 @@ class LensMigrateCommand extends Command
         $this->buildData['total'] = $recordsCount;
         $this->omni->createSimpleProgressBar($this->buildData['total']);
         $migrationVersion = $builder->fetchCurrentMigrationVersion();
-        $chunkSize = config('elasticlens.chunk_rates.migrate_default', 100);
-
+        $chunkSize = $this->chunkRate;
+        if ($modelBuildChunkRate = $builder->indexModelInstance->getBuildChunkRate()) {
+            $chunkSize = $modelBuildChunkRate;
+        }
         $builder->baseModel::chunk($chunkSize, function ($records) use ($builder, $migrationVersion) {
             foreach ($records as $record) {
                 $id = $record->{$builder->baseModelPrimaryKey};

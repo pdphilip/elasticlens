@@ -11,6 +11,8 @@ trait IndexMigrationMap
 {
     protected int $migrationMajorVersion = 1;
 
+    protected int $buildChunkRate = 0;
+
     public function migrationMap(): ?callable
     {
         return null;
@@ -32,6 +34,11 @@ trait IndexMigrationMap
         }
 
         return $version;
+    }
+
+    public function getBuildChunkRate(): int|bool
+    {
+        return $this->buildChunkRate > 0 ? $this->buildChunkRate : false;
     }
 
     public static function validateIndexMigrationBlueprint(): array
