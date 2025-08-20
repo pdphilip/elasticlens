@@ -13,6 +13,8 @@ trait LensCommands
 
     protected mixed $migrate = null;
 
+    protected mixed $migrateAnyway = null;
+
     protected bool $migrationPassed = false;
 
     public function checkModel($model): bool
@@ -58,12 +60,79 @@ trait LensCommands
             $this->migrate = $this->omni->ask('Migrate index?', ['yes', 'no']);
         }
         if (in_array($this->migrate, ['yes', 'y'])) {
-            $this->migrationPassed = $this->processMigration($this->indexModel);
-        } else {
+            $this->migrationValidationStep($this->indexModel);
+            while (! in_array($this->migrateAnyway, ['yes', 'no', 'y', 'n', 'cancel'])) {
+                $this->migrateAnyway = $this->omni->ask('Migrate anyway?', ['yes', 'no']);
+            }
+            if ($this->migrateAnyway === 'cancel') {
+                exit();
+            }
+            if (in_array($this->migrateAnyway, ['yes', 'y'])) {
+                $this->migrationPassed = $this->processMigration($this->indexModel);
+
+                return;
+            }
+
             $this->migrationPassed = true;
             $this->newLine();
             $this->omni->info('Index migration skipped');
+
         }
+    }
+
+    public function migrationValidationStep($indexModel): void
+    {
+
+        $this->omni->newLoader();
+        $validated = $this->omni->runTask('Validating Index Migration', function () use ($indexModel) {
+
+            try {
+                $migration = new LensMigration($indexModel);
+                $validation = $migration->validateMigration();
+
+                if (empty($validation['blueprint'])) {
+                    return [
+                        'state' => 'warning',
+                        'message' => 'No Blueprint Found',
+                        'details' => '',
+                    ];
+                }
+
+                $version = $validation['version'] ?? 'v1';
+                if ($validation['validated']) {
+                    return [
+                        'state' => 'success',
+                        'message' => 'Valid Migration Blueprint '.$version,
+                        'details' => '',
+                    ];
+                } else {
+                    return [
+                        'state' => 'error',
+                        'message' => $validation['state'] ?? '',
+                        'details' => $validation['message'] ?? '',
+                    ];
+                }
+
+            } catch (Exception $e) {
+                return [
+                    'state' => 'error',
+                    'message' => 'Migration Validation Error',
+                    'details' => $e->getMessage(),
+                ];
+            }
+        });
+        if (! empty($validated['state'])) {
+            if ($validated['state'] === 'success') {
+                $this->migrateAnyway = 'y';
+
+                return;
+            }
+            if ($validated['state'] === 'warning') {
+                return;
+            }
+        }
+
+        $this->migrateAnyway = 'cancel';
     }
 
     private function processMigration($indexModel): bool
@@ -87,7 +156,6 @@ trait LensCommands
                 ];
             }
         });
-        $this->newLine();
 
         return ! empty($result['state']) && $result['state'] === 'success';
 

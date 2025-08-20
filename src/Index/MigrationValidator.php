@@ -57,7 +57,7 @@ final class MigrationValidator
             return $this->asArray();
         } catch (Exception $e) {
             $this->message = $e->getMessage();
-            $this->state = 'Failed';
+            $this->state = 'Failed Migration Validation';
 
             return $this->asArray();
         }
