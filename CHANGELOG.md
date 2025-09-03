@@ -2,6 +2,22 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.1.1 - 2025-09-03
+
+This release is compatible with Laravel 10, 11 & 12
+
+### What's changed
+
+- New Helper: `IndexableBuild::buildErrorsQuery($indexModel)` - returns a query prepared for failed builds of an index-model
+
+```php
+$buildErrors = IndexableBuild::buildErrorsQuery(IndexedUser::class)->get();
+
+```
+- Bug fix: ensure array for internal state_data on IndexableBuild
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.1.0...v3.1.1
+
 ## v3.1.0 - 2025-08-20
 
 This release is compatible with Laravel 10, 11 & 12
@@ -14,6 +30,7 @@ This release is compatible with Laravel 10, 11 & 12
 class IndexedUser extends IndexModel
 {
     protected int $buildChunkRate = 2000;
+
 
 ```
 2. Migrations are validated before running the `lens:migration` and `lens:build` commands. If there are any migration errors in the `migrationMap()` method then it will be shown - via issue #6
@@ -118,6 +135,7 @@ The elasticlens.php config file now requires the following structure:
 
 
 
+
 ```
 •	The **namespaces** key maps models to their respective index namespaces.
 •	The **index_paths** key maps file paths to the corresponding index namespaces.
@@ -168,6 +186,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -205,23 +224,12 @@ ElasticLens is proud to announce its initial release. This powerful and flexible
 You can install ElasticLens via Composer:
 ```bash
 composer require pdphilip/elasticlens
-
-
-
-
-
-
-
-
-
-
-
-
 ```
 Then run install:
 
 ```bash
 php artisan lens:install
+
 
 
 
