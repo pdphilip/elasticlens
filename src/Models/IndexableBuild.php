@@ -104,7 +104,7 @@ class IndexableBuild extends Model
             $stateModel->index_model = $indexModel;
         }
         $stateModel->state = $state;
-        $stateModel->state_data = $stateData;
+        $stateModel->state_data = is_array($stateData) ? $stateData : [];
         $stateModel->last_source = $source;
         $logs = $stateModel->_prepLogs($stateData, $source);
         $stateModel->logs = $logs;
