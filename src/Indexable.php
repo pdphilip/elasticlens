@@ -83,11 +83,11 @@ trait Indexable
         $indexModel = Lens::fetchIndexModelClass($this);
 
         try {
-            $deleted = $indexModel::destory($modelId);
+            $deleted = $indexModel::destroy($modelId);
         } catch (Exception $e) {
             return false;
         }
 
-        return $deleted;
+        return $deleted == 1;
     }
 }
