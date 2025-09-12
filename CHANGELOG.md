@@ -2,6 +2,16 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v3.1.2 - 2025-09-12
+
+This release is compatible with Laravel 10, 11 & 12
+
+### What's Changed
+
+* Bug fix: Fixed typo in `removeIndex()` method and ensure bool is returned
+
+**Full Changelog**: https://github.com/pdphilip/elasticlens/compare/v3.1.2...v3.1.2
+
 ## v3.1.1 - 2025-09-03
 
 This release is compatible with Laravel 10, 11 & 12
@@ -12,6 +22,7 @@ This release is compatible with Laravel 10, 11 & 12
 
 ```php
 $buildErrors = IndexableBuild::buildErrorsQuery(IndexedUser::class)->get();
+
 
 ```
 - Bug fix: ensure array for internal state_data on IndexableBuild
@@ -30,6 +41,7 @@ This release is compatible with Laravel 10, 11 & 12
 class IndexedUser extends IndexModel
 {
     protected int $buildChunkRate = 2000;
+
 
 
 ```
@@ -136,6 +148,7 @@ The elasticlens.php config file now requires the following structure:
 
 
 
+
 ```
 •	The **namespaces** key maps models to their respective index namespaces.
 •	The **index_paths** key maps file paths to the corresponding index namespaces.
@@ -187,6 +200,7 @@ php artisan lens:build {model}
 
 
 
+
 ```
 <div align="center">
   <img
@@ -226,9 +240,9 @@ You can install ElasticLens via Composer:
 composer require pdphilip/elasticlens
 ```
 Then run install:
-
 ```bash
 php artisan lens:install
+
 
 
 
