@@ -41,6 +41,8 @@ abstract class IndexModel extends Model
     // @var string
     protected $baseModel;
 
+    private static bool $macrosRegistered = false;
+
     public function __construct()
     {
         parent::__construct();
@@ -48,6 +50,16 @@ abstract class IndexModel extends Model
             $this->baseModel = $this->guessBaseModelName();
         }
         $this->setConnection(config('elasticlens.database') ?? 'elasticsearch');
+        self::registerMacros();
+    }
+
+    private static function registerMacros(): void
+    {
+        if (self::$macrosRegistered) {
+            return;
+        }
+        self::$macrosRegistered = true;
+
         Builder::macro('paginateBase', function ($perPage = 15, $pageName = 'page', $page = null, $options = []) {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
             $path = LengthAwarePaginator::resolveCurrentPath();

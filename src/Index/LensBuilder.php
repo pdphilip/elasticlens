@@ -107,7 +107,6 @@ class LensBuilder extends LensIndex
 
     public function checkSetup(): bool
     {
-
         if (! $this->baseModel) {
             $this->buildResult->setMessage('BaseModel not set', 'Set property: `protected $baseModel = User::class;`');
 
@@ -167,11 +166,6 @@ class LensBuilder extends LensIndex
         $data['id'] = $model->{$model->getKeyName()};
         if (isset($fieldMap['id'])) {
             $data['id'] = $this->setType($data['id'], $fieldMap['id']);
-            unset($fieldMap['id']);
-        }
-        if (isset($fieldMap['id'])) {
-            $data['id'] = $this->setType($data['id'], $fieldMap['id']);
-            unset($fieldMap['id']);
         }
 
         return $data;
@@ -179,7 +173,6 @@ class LensBuilder extends LensIndex
 
     private function mapRecordsToFields($fields, $modelData): array
     {
-
         $data = [];
         if ($fields) {
             foreach ($fields as $field => $type) {
@@ -284,11 +277,11 @@ class LensBuilder extends LensIndex
     // Delete Index (And Build)
     // ----------------------------------------------------------------------
 
-    public function processDelete($id)
+    public function processDelete($id): void
     {
         IndexableBuild::deleteState($this->baseModelName, $id, $this->indexModelName);
         $index = $this->indexModelInstance::find($id);
-        $index->delete();
+        $index?->delete();
     }
 
     // ----------------------------------------------------------------------

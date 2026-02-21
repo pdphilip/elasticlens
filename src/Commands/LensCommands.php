@@ -82,7 +82,6 @@ trait LensCommands
 
     public function migrationValidationStep($indexModel): void
     {
-
         $this->omni->newLoader();
         $validated = $this->omni->runTask('Validating Index Migration', function () use ($indexModel) {
 
@@ -103,15 +102,14 @@ trait LensCommands
                     return [
                         'state' => 'success',
                         'message' => 'Valid Migration Blueprint '.$version,
-                        'details' => '',
-                    ];
-                } else {
-                    return [
-                        'state' => 'error',
-                        'message' => $validation['state'] ?? '',
-                        'details' => $validation['message'] ?? '',
                     ];
                 }
+
+                return [
+                    'state' => 'error',
+                    'message' => $validation['state'] ?? '',
+                    'details' => $validation['message'] ?? '',
+                ];
 
             } catch (Exception $e) {
                 return [
@@ -121,15 +119,13 @@ trait LensCommands
                 ];
             }
         });
-        if (! empty($validated['state'])) {
-            if ($validated['state'] === 'success') {
-                $this->migrateAnyway = 'y';
+        if ($validated && $validated->isSuccess()) {
+            $this->migrateAnyway = 'y';
 
-                return;
-            }
-            if ($validated['state'] === 'warning') {
-                return;
-            }
+            return;
+        }
+        if ($validated && $validated->isWarning()) {
+            return;
         }
 
         $this->migrateAnyway = 'cancel';
@@ -157,7 +153,7 @@ trait LensCommands
             }
         });
 
-        return ! empty($result['state']) && $result['state'] === 'success';
+        return $result && $result->isSuccess();
 
     }
 }

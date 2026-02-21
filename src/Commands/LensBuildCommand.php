@@ -28,10 +28,6 @@ class LensBuildCommand extends Command
 
     protected mixed $baseModel = null;
 
-    protected mixed $migrate = null;
-
-    protected bool $migrationPassed = false;
-
     protected mixed $build = null;
 
     protected int $chunkRate = 1000;
@@ -190,7 +186,6 @@ class LensBuildCommand extends Command
 
     public function setChunkRate(LensState $health): int
     {
-
         if ($modelBuildChunkRate = $health->indexModelInstance->getBuildChunkRate()) {
             return $this->chunkRate = $modelBuildChunkRate;
         }
