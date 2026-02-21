@@ -10,7 +10,7 @@ return new class extends Migration
     {
         $connectionName = config('elasticlens.connection') ?? 'elasticsearch';
 
-        Schema::on($connectionName)->deleteIfExists('indexable_migration_logs');
+        Schema::on($connectionName)->dropIfExists('indexable_migration_logs');
 
         Schema::on($connectionName)->create('indexable_migration_logs', function (Blueprint $index) {
             $index->keyword('index_model');
@@ -25,6 +25,6 @@ return new class extends Migration
     {
         $connectionName = config('elasticlens.connection') ?? 'elasticsearch';
 
-        Schema::on($connectionName)->deleteIfExists('indexable_migration_logs');
+        Schema::on($connectionName)->dropIfExists('indexable_migration_logs');
     }
 };

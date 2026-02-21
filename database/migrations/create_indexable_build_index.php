@@ -10,7 +10,7 @@ return new class extends Migration
     {
         $connectionName = config('elasticlens.connection') ?? 'elasticsearch';
 
-        Schema::on($connectionName)->deleteIfExists('indexable_builds');
+        Schema::on($connectionName)->dropIfExists('indexable_builds');
 
         Schema::on($connectionName)->create('indexable_builds', function (Blueprint $index) {
             $index->keyword('model');
@@ -29,6 +29,6 @@ return new class extends Migration
     {
         $connectionName = config('elasticlens.connection') ?? 'elasticsearch';
 
-        Schema::on($connectionName)->deleteIfExists('indexable_builds');
+        Schema::on($connectionName)->dropIfExists('indexable_builds');
     }
 };
