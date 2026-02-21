@@ -114,7 +114,7 @@ class RecordBuilder
     private static function mapRecord(IndexConfig $config, mixed $id, BuildResult $result): bool
     {
         $query = $config->baseModel::query();
-        if (method_exists($config->baseModel, 'withTrashed')) {
+        if (method_exists($config->baseModel, 'trashed')) {
             $query = $query->withTrashed();
         }
         $model = $query->find($id);
