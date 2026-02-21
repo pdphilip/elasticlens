@@ -3,13 +3,13 @@
 namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
-use OmniTerm\OmniTerm;
+use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\HealthCheck;
 use PDPhilip\ElasticLens\Index\LensMigration;
 
 trait LensCommands
 {
-    use OmniTerm;
+    use HasOmniTerm;
 
     protected mixed $migrate = null;
 

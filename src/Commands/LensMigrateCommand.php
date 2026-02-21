@@ -6,16 +6,14 @@ namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use OmniTerm\OmniTerm;
+use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
 use PDPhilip\ElasticLens\Index\LensBuilder;
 use PDPhilip\ElasticLens\Lens;
 
-use function OmniTerm\render;
-
 class LensMigrateCommand extends Command
 {
-    use LensCommands, OmniTerm;
+    use HasOmniTerm, LensCommands;
 
     public $signature = 'lens:migrate {model} {--force}';
 
@@ -47,7 +45,6 @@ class LensMigrateCommand extends Command
      */
     public function handle(): int
     {
-        $this->initOmni();
         $model = $this->argument('model');
         $force = $this->option('force');
         $modelCheck = QualifyModel::check($model);
@@ -60,7 +57,7 @@ class LensMigrateCommand extends Command
         $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($model);
         $this->newLine();
-        render((string) view('elasticlens::cli.components.title', ['title' => 'Migrate and Build '.class_basename($this->indexModel), 'color' => 'sky']));
+        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => 'Migrate and Build '.class_basename($this->indexModel), 'color' => 'sky']));
         $this->newLine();
         $this->migrate = $force ? 'yes' : null;
         $this->build = $force ? 'yes' : null;
@@ -112,13 +109,14 @@ class LensMigrateCommand extends Command
         }
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
-        $this->omni->createSimpleProgressBar($this->buildData['total']);
+        $bar = $this->omni->progressBar($this->buildData['total'])->steps();
         $migrationVersion = $builder->fetchCurrentMigrationVersion();
         $chunkSize = $this->chunkRate;
         if ($modelBuildChunkRate = $builder->indexModelInstance->getBuildChunkRate()) {
             $chunkSize = $modelBuildChunkRate;
         }
-        $builder->baseModel::chunk($chunkSize, function ($records) use ($builder, $migrationVersion) {
+        $bar->start();
+        $builder->baseModel::chunk($chunkSize, function ($records) use ($builder, $migrationVersion, $bar) {
             foreach ($records as $record) {
                 $id = $record->{$builder->baseModelPrimaryKey};
                 $build = $builder->buildIndex($id, 'Index Rebuild', $migrationVersion);
@@ -130,10 +128,10 @@ class LensMigrateCommand extends Command
                 } else {
                     $this->buildData['failed']++;
                 }
-                $this->omni->progressAdvance();
+                $bar->advance();
             }
         });
-        $this->omni->progressFinish();
+        $bar->finish();
         $this->buildData['state'] = 'success';
         $this->buildData['message'] = 'Indexes Synced';
         if ($this->buildData['failed']) {
@@ -151,11 +149,11 @@ class LensMigrateCommand extends Command
     private function showStatus(): void
     {
         if ($this->buildData['didRun']) {
-            $this->omni->header('Build Data', 'Value');
-            $this->omni->row('Success', $this->buildData['success'], null, 'text-emerald-500');
-            $this->omni->row('Skipped', $this->buildData['skipped'], null, 'text-amber-500');
-            $this->omni->row('Failed', $this->buildData['failed'], null, 'text-rose-500');
-            $this->omni->row('Total', $this->buildData['total'], null, 'text-emerald-500');
+            $this->omni->tableHeader('Build Data', 'Value');
+            $this->omni->tableRow('Success', $this->buildData['success'], null, 'text-emerald-500');
+            $this->omni->tableRow('Skipped', $this->buildData['skipped'], null, 'text-amber-500');
+            $this->omni->tableRow('Failed', $this->buildData['failed'], null, 'text-rose-500');
+            $this->omni->tableRow('Total', $this->buildData['total'], null, 'text-emerald-500');
             $this->newLine();
             $this->omni->status($this->buildData['state'], 'Build Status', $this->buildData['message']);
             $this->newLine();

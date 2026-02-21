@@ -6,14 +6,12 @@ namespace PDPhilip\ElasticLens\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use OmniTerm\OmniTerm;
+use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\HealthCheck;
-
-use function OmniTerm\render;
 
 class LensHealthCommand extends Command
 {
-    use OmniTerm;
+    use HasOmniTerm;
 
     public $signature = 'lens:health {model : Base Model Name, example: User}';
 
@@ -24,7 +22,6 @@ class LensHealthCommand extends Command
      */
     public function handle(): int
     {
-        $this->initOmni();
         $model = $this->argument('model');
 
         $loadError = HealthCheck::loadErrorCheck($model);
@@ -36,36 +33,36 @@ class LensHealthCommand extends Command
             return self::FAILURE;
         }
         $health = HealthCheck::check($model);
-        render((string) view('elasticlens::cli.components.title', ['title' => $health['title'], 'color' => 'emerald']));
+        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => $health['title'], 'color' => 'emerald']));
         $this->omni->status($health['indexStatus']['status'], $health['indexStatus']['title'], $health['indexStatus']['name'], $health['indexStatus']['help'] ?? []);
         $this->newLine();
-        $this->omni->header('Index Model', 'Value');
+        $this->omni->tableHeader('Index Model', 'Value');
         foreach ($health['indexData'] as $detail => $value) {
-            $this->omni->row($detail, $value);
+            $this->omni->tableRow($detail, $value);
         }
         $this->newLine();
-        $this->omni->header('Base Model', 'Value');
+        $this->omni->tableHeader('Base Model', 'Value');
         foreach ($health['modelData'] as $detail => $value) {
-            $this->omni->row($detail, $value);
+            $this->omni->tableRow($detail, $value);
         }
         $this->newLine();
-        $this->omni->header('Build Data', 'Value');
+        $this->omni->tableHeader('Build Data', 'Value');
         foreach ($health['buildData'] as $detail => $value) {
-            $this->omni->row($detail, $value);
+            $this->omni->tableRow($detail, $value);
         }
         $this->omni->status($health['configStatus']['status'], $health['configStatus']['name'], $health['configStatus']['title'], $health['configStatus']['help'] ?? []);
         $this->newLine();
-        $this->omni->header('Config', 'Value');
+        $this->omni->tableHeader('Config', 'Value');
         foreach ($health['configData'] as $detail => $value) {
-            $this->omni->row($detail, $value);
+            $this->omni->tableRow($detail, $value);
         }
         $this->newLine();
         if (! $health['observers']) {
             $this->omni->warning('No observers found');
         } else {
-            $this->omni->header('Observed Model', 'Type');
+            $this->omni->tableHeader('Observed Model', 'Type');
             foreach ($health['observers'] as $observer) {
-                $this->omni->row($observer['key'], $observer['value']);
+                $this->omni->tableRow($observer['key'], $observer['value']);
             }
         }
         if ($health['configStatusHelp']['critical'] || $health['configStatusHelp']['warning']) {

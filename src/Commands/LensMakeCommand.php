@@ -7,15 +7,13 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
-use OmniTerm\OmniTerm;
+use OmniTerm\HasOmniTerm;
 use ReflectionClass;
 use RuntimeException;
 
-use function OmniTerm\render;
-
 class LensMakeCommand extends GeneratorCommand
 {
-    use OmniTerm;
+    use HasOmniTerm;
 
     public $signature = 'lens:make {model}';
 
@@ -23,8 +21,6 @@ class LensMakeCommand extends GeneratorCommand
 
     public function handle(): int
     {
-        $this->initOmni();
-
         $this->newLine();
         $model = $this->argument('model');
         // ensure casing is correct
@@ -111,7 +107,7 @@ class LensMakeCommand extends GeneratorCommand
 
         $this->omni->statusSuccess('SUCCESS', 'Indexed Model (for '.$model.' Model) created at: '.$indexedModel);
         $this->omni->statusInfo('1', 'Add the Indexable trait to your <span class="text-sky-500">'.$model.'</span> model');
-        render((string) view('elasticlens::cli.components.code-trait', ['model' => $model]));
+        $this->omni->render((string) view('elasticlens::cli.components.code-trait', ['model' => $model]));
         $this->newLine();
         $this->omni->statusInfo('2', 'Then run: "<span class="text-emerald-500">php artisan lens:build '.$model.'</span>" to index your model');
 

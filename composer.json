@@ -21,7 +21,7 @@
     "php": "^8.2",
     "illuminate/contracts": "^10.0||^11.0||^12.0",
     "pdphilip/elasticsearch": "^5.0.2",
-    "pdphilip/omniterm": "^1.0.5",
+    "pdphilip/omniterm": "^2",
     "spatie/laravel-package-tools": "^1.16"
   },
   "require-dev": {

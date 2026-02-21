@@ -12,3 +12,4 @@ node_modules
 /_BACK/*
 /src/Commands/LensTestCommand.php
 /resources/views/cli/tests/*
+.ELASTICLENS_*

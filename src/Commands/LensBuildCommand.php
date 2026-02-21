@@ -7,19 +7,16 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use OmniTerm\OmniTerm;
+use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
 use PDPhilip\ElasticLens\Index\BulkIndexer;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
 use PDPhilip\ElasticLens\Traits\Timer;
 
-use function OmniTerm\asyncFunction;
-use function OmniTerm\render;
-
 class LensBuildCommand extends Command
 {
-    use LensCommands, OmniTerm, Timer;
+    use HasOmniTerm, LensCommands, Timer;
 
     public $signature = 'lens:build {model}';
 
@@ -54,7 +51,6 @@ class LensBuildCommand extends Command
      */
     public function handle(): int
     {
-        $this->initOmni();
         $model = $this->argument('model');
         $modelCheck = QualifyModel::check($model);
         if (! $modelCheck['qualified']) {
@@ -67,7 +63,7 @@ class LensBuildCommand extends Command
         $this->indexModel = Lens::fetchIndexModelClass($this->model);
         $this->newLine();
         $name = Str::plural($this->model);
-        render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.$name, 'color' => 'cyan']));
+        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.$name, 'color' => 'cyan']));
         $this->newLine();
         $health = new LensState($this->indexModel);
         $this->baseModel = $health->baseModel;
@@ -113,7 +109,7 @@ class LensBuildCommand extends Command
         }
         $this->startTimer();
 
-        $async = asyncFunction(function () {});
+        $async = $this->omni->async(function () {});
         $async->render((string) view('elasticlens::cli.bulk', [
             'screenWidth' => $async->getScreenWidth(),
             'model' => $this->model,
