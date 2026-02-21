@@ -41,6 +41,8 @@ final class IndexConfig
 
     public readonly int $buildChunkRate;
 
+    public readonly ?bool $indexSoftDeletes;
+
     public static function for(string $indexModelClass): self
     {
         return self::$cache[$indexModelClass] ??= new self($indexModelClass);
@@ -101,5 +103,17 @@ final class IndexConfig
 
         $chunkRate = $instance->getBuildChunkRate();
         $this->buildChunkRate = is_int($chunkRate) ? $chunkRate : 0;
+
+        // Soft deletes
+        $this->indexSoftDeletes = $instance->getIndexSoftDeletes();
+    }
+
+    public function shouldIndexSoftDeletes(): bool
+    {
+        if ($this->indexSoftDeletes !== null) {
+            return $this->indexSoftDeletes;
+        }
+
+        return config('elasticlens.index_soft_deletes', false);
     }
 }

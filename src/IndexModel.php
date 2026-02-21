@@ -41,6 +41,8 @@ abstract class IndexModel extends Model
 
     protected int $buildChunkRate = 0;
 
+    protected ?bool $indexSoftDeletes = null;
+
     private static bool $macrosRegistered = false;
 
     public function __construct()
@@ -253,6 +255,11 @@ abstract class IndexModel extends Model
     public function getBuildChunkRate(): int|bool
     {
         return $this->buildChunkRate > 0 ? $this->buildChunkRate : false;
+    }
+
+    public function getIndexSoftDeletes(): ?bool
+    {
+        return $this->indexSoftDeletes;
     }
 
     public static function validateIndexMigrationBlueprint(): array

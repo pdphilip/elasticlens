@@ -5,6 +5,8 @@ return [
 
     'queue' => null, // Set queue to use for dispatching index builds, ex: default, high, low, etc.
 
+    'index_soft_deletes' => false, // true: soft-deleted models keep their index record (deleted_at synced)
+
     'watchers' => [
         //        \App\Models\Profile::class => [
         //            \App\Models\Indexes\IndexedUser::class,

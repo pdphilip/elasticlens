@@ -113,7 +113,11 @@ class RecordBuilder
 
     private static function mapRecord(IndexConfig $config, mixed $id, BuildResult $result): bool
     {
-        $model = $config->baseModel::find($id);
+        $query = $config->baseModel::query();
+        if (method_exists($config->baseModel, 'withTrashed')) {
+            $query = $query->withTrashed();
+        }
+        $model = $query->find($id);
         if (! $model) {
             $result->setMessage('BaseModel not found', 'BaseModel '.$config->baseModel.' did not have a record for id: '.$id);
 
