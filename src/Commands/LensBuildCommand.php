@@ -9,7 +9,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
-use PDPhilip\ElasticLens\Index\BulkIndexer;
+use PDPhilip\ElasticLens\Config\IndexConfig;
+use PDPhilip\ElasticLens\Engine\BulkBuilder;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
 use PDPhilip\ElasticLens\Traits\Timer;
@@ -171,7 +172,7 @@ class LensBuildCommand extends Command
      */
     public function bulkInsertTask($records): array
     {
-        $bulk = new BulkIndexer($this->baseModel);
+        $bulk = new BulkBuilder($this->baseModel);
         $bulk->setRecords($records)->build();
         $result = $bulk->getResult();
 
@@ -186,10 +187,11 @@ class LensBuildCommand extends Command
 
     public function setChunkRate(LensState $health): int
     {
-        if ($modelBuildChunkRate = $health->indexModelInstance->getBuildChunkRate()) {
-            return $this->chunkRate = $modelBuildChunkRate;
+        $config = IndexConfig::for($health->indexModel);
+        if ($config->buildChunkRate > 0) {
+            return $this->chunkRate = $config->buildChunkRate;
         }
-        $relationships = count($health->indexModelInstance->getRelationships());
+        $relationships = count($config->relationships);
         $chunk = $this->chunkRate;
         if ($relationships > 3) {
             $chunk = 750;

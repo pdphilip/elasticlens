@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PDPhilip\ElasticLens\Models;
 
 use Illuminate\Support\Carbon;
+use PDPhilip\ElasticLens\Engine\BuildResult;
 use PDPhilip\ElasticLens\Enums\IndexableBuildState;
-use PDPhilip\ElasticLens\Index\BuildResult;
 use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 use PDPhilip\Elasticsearch\Schema\Schema;

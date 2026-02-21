@@ -8,8 +8,10 @@ use Exception;
 use Illuminate\Console\Command;
 use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
-use PDPhilip\ElasticLens\Index\LensBuilder;
+use PDPhilip\ElasticLens\Config\IndexConfig;
+use PDPhilip\ElasticLens\Engine\RecordBuilder;
 use PDPhilip\ElasticLens\Lens;
+use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 
 class LensMigrateCommand extends Command
 {
@@ -95,31 +97,32 @@ class LensMigrateCommand extends Command
     private function processBuild($indexModel): bool
     {
         try {
-            $builder = new LensBuilder($indexModel);
-            $recordsCount = $builder->baseModel::count();
+            $config = IndexConfig::for($indexModel);
+            $recordsCount = $config->baseModel::count();
         } catch (Exception $e) {
             $this->omni->statusError('ERROR', 'Base Model not found', [$e->getMessage()]);
 
             return false;
         }
         if (! $recordsCount) {
-            $this->omni->statusWarning('BUILD SKIPPED', 'No records found for '.$builder->baseModel);
+            $this->omni->statusWarning('BUILD SKIPPED', 'No records found for '.$config->baseModel);
 
             return false;
         }
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
         $bar = $this->omni->progressBar($this->buildData['total'])->steps();
-        $migrationVersion = $builder->fetchCurrentMigrationVersion();
+        $migrationVersion = IndexableMigrationLog::getLatestVersion($config->indexModelName)
+            ?: 'v'.$config->migrationMajorVersion.'.0';
         $chunkSize = $this->chunkRate;
-        if ($modelBuildChunkRate = $builder->indexModelInstance->getBuildChunkRate()) {
-            $chunkSize = $modelBuildChunkRate;
+        if ($config->buildChunkRate > 0) {
+            $chunkSize = $config->buildChunkRate;
         }
         $bar->start();
-        $builder->baseModel::chunk($chunkSize, function ($records) use ($builder, $migrationVersion, $bar) {
+        $config->baseModel::chunk($chunkSize, function ($records) use ($config, $migrationVersion, $bar) {
             foreach ($records as $record) {
-                $id = $record->{$builder->baseModelPrimaryKey};
-                $build = $builder->buildIndex($id, 'Index Rebuild', $migrationVersion);
+                $id = $record->{$config->baseModelPrimaryKey};
+                $build = RecordBuilder::build($config->indexModel, $id, 'Index Rebuild', $migrationVersion);
                 $this->buildData['processed']++;
                 if (! empty($build->success)) {
                     $this->buildData['success']++;

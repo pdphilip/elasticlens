@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace PDPhilip\ElasticLens\Observers;
 
 use Exception;
-use PDPhilip\ElasticLens\Index\LensBuilder;
+use PDPhilip\ElasticLens\Config\IndexConfig;
+use PDPhilip\ElasticLens\Jobs\IndexBuildJob;
+use PDPhilip\ElasticLens\Jobs\IndexDeletedJob;
 use PDPhilip\ElasticLens\Lens;
 
 class BaseModelObserver
@@ -14,8 +16,8 @@ class BaseModelObserver
     {
         $indexModel = Lens::fetchIndexModelClass($model);
         try {
-            $builder = new LensBuilder($indexModel);
-            $builder->dispatchBuild($model->{$builder->baseModelPrimaryKey}, ($builder->baseModel).' (saved)');
+            $config = IndexConfig::for($indexModel);
+            IndexBuildJob::dispatch($config->indexModel, $model->{$config->baseModelPrimaryKey}, $config->baseModel.' (saved)');
         } catch (Exception $e) {
             report($e);
         }
@@ -26,8 +28,7 @@ class BaseModelObserver
         $modelId = $model->{$model->getKeyName()};
         $indexModel = Lens::fetchIndexModelClass($model);
         try {
-            $index = new LensBuilder($indexModel);
-            $index->dispatchDeleted($modelId);
+            IndexDeletedJob::dispatch($indexModel, $modelId);
         } catch (Exception $e) {
             report($e);
         }

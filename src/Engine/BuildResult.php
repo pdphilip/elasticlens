@@ -2,14 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PDPhilip\ElasticLens\Index;
-
-use PDPhilip\ElasticLens\Traits\Timer;
+namespace PDPhilip\ElasticLens\Engine;
 
 class BuildResult
 {
-    use Timer;
-
     public mixed $id;
 
     public mixed $model;
@@ -28,21 +24,23 @@ class BuildResult
 
     public array $took = [];
 
+    private float $startTime;
+
     public function __construct($id, $model, $migrationVersion = 0)
     {
         $this->id = $id;
         $this->model = $model;
         $this->migration_version = $migrationVersion;
-        $this->startTimer();
+        $this->startTime = microtime(true);
     }
 
-    public function setMessage($msg, $details = ''): void
+    public function setMessage(string $msg, string $details = ''): void
     {
         $this->msg = $msg;
         $this->details = $details;
     }
 
-    public function setMap($map): void
+    public function setMap(array $map): void
     {
         $this->map = $map;
     }
@@ -50,16 +48,16 @@ class BuildResult
     public function failed(): static
     {
         $this->success = false;
-        $this->took = $this->getTime();
+        $this->took = $this->elapsed();
 
         return $this;
     }
 
-    public function successful($details = ''): static
+    public function successful(string $details = ''): static
     {
         $this->details = $details;
         $this->success = true;
-        $this->took = $this->getTime();
+        $this->took = $this->elapsed();
 
         return $this;
     }
@@ -82,6 +80,17 @@ class BuildResult
             'map' => $this->map,
             'migration_version' => $this->migration_version,
             'took' => $this->took,
+        ];
+    }
+
+    private function elapsed(): array
+    {
+        $ms = round((microtime(true) - $this->startTime) * 1000, 0);
+
+        return [
+            'ms' => $ms,
+            'sec' => round($ms / 1000, 2),
+            'min' => round($ms / 60000, 2),
         ];
     }
 }
