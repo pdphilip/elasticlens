@@ -73,9 +73,11 @@ class BulkBuilder
     public function build(): static
     {
         $values = [];
-        foreach ($this->buildMaps as $build) {
+        $skippedIds = [];
+        foreach ($this->buildMaps as $id => $build) {
             if ($build->skipped) {
                 $this->skipped++;
+                $skippedIds[] = $id;
 
                 continue;
             }
@@ -86,6 +88,7 @@ class BulkBuilder
             $this->result = ($this->config->indexModel)::bulkInsert($values);
         }
 
+        $this->removeStaleIndexes($skippedIds);
         $this->updateAnyErrors();
         $this->result['skipped'] = $this->skipped;
         BulkBuildStateUpdateJob::dispatch($this->config->indexModel, $this->config->baseModel, $this->buildMaps);
@@ -105,6 +108,19 @@ class BulkBuilder
             ],
             'results' => $this->result,
         ];
+    }
+
+    private function removeStaleIndexes(array $ids): void
+    {
+        if (! $ids) {
+            return;
+        }
+
+        try {
+            ($this->config->indexModel)::destroy($ids);
+        } catch (\Exception $e) {
+            // Stale records may not exist — safe to ignore
+        }
     }
 
     private function updateAnyErrors(): void
