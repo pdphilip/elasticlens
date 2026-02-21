@@ -143,15 +143,20 @@ class IndexableBuild extends Model
 
     public static function deleteState($model, $modelId, $indexModel): void
     {
+        if (! self::isEnabled()) {
+            return;
+        }
         $stateModel = IndexableBuild::returnState(strtolower($model), $modelId, strtolower($indexModel));
         $stateModel?->delete();
     }
 
     public static function deleteStateModel($indexModel): void
     {
+        if (! self::isEnabled()) {
+            return;
+        }
         $indexModel = self::sanitizeIndexModelName($indexModel);
         IndexableBuild::where('index_model', $indexModel)->delete();
-
     }
 
     // ----------------------------------------------------------------------
