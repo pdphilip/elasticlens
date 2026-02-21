@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use PDPhilip\ElasticLens\Config\IndexConfig;
+use PDPhilip\ElasticLens\Eloquent\LensBuilder;
 use PDPhilip\ElasticLens\Engine\RecordBuilder;
 use PDPhilip\ElasticLens\Tests\Models\Indexes\IndexedUser;
 use PDPhilip\ElasticLens\Tests\Models\Profile;
@@ -141,4 +142,72 @@ it('indexRebuild instance method works', function () {
 
     $result = $index->indexRebuild('test');
     expect($result->success)->toBeTrue();
+});
+
+// ======================================================================
+// LensBuilder
+// ======================================================================
+
+it('IndexModel::query() returns LensBuilder', function () {
+    expect(IndexedUser::query())->toBeInstanceOf(LensBuilder::class);
+});
+
+it('getIndex returns index models', function () {
+    for ($i = 1; $i <= 3; $i++) {
+        $user = User::create([
+            'name' => "User $i",
+            'email' => "getindex$i@test.com",
+            'status' => 'active',
+            'age' => 20 + $i,
+        ]);
+        RecordBuilder::build(IndexedUser::class, $user->id, 'test');
+    }
+
+    sleep(1);
+
+    $results = IndexedUser::query()->getIndex();
+
+    expect($results)->toHaveCount(3)
+        ->and($results->first())->toBeInstanceOf(IndexedUser::class);
+});
+
+it('direct query get returns index models without flag', function () {
+    $user = User::create([
+        'name' => 'Direct Get',
+        'email' => 'directget@test.com',
+        'status' => 'active',
+        'age' => 30,
+    ]);
+
+    RecordBuilder::build(IndexedUser::class, $user->id, 'test');
+    sleep(1);
+
+    $results = IndexedUser::query()->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first())->toBeInstanceOf(IndexedUser::class);
+});
+
+it('viaIndex get returns base models', function () {
+    $user = User::create([
+        'name' => 'Via Index Get',
+        'email' => 'viaindexget@test.com',
+        'status' => 'active',
+        'age' => 30,
+    ]);
+
+    RecordBuilder::build(IndexedUser::class, $user->id, 'test');
+    sleep(1);
+
+    $results = User::viaIndex()->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first())->toBeInstanceOf(User::class)
+        ->and($results->first()->name)->toBe('Via Index Get');
+});
+
+it('viaIndex returns LensBuilder with returnAsBase flag', function () {
+    $builder = User::viaIndex();
+
+    expect($builder)->toBeInstanceOf(LensBuilder::class);
 });

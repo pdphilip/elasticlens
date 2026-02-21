@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PDPhilip\ElasticLens;
 
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use PDPhilip\ElasticLens\Builder\IndexBuilder;
+use PDPhilip\ElasticLens\Eloquent\LensBuilder;
 use PDPhilip\ElasticLens\Engine\BuildResult;
 use PDPhilip\ElasticLens\Engine\RecordBuilder;
 use PDPhilip\ElasticLens\Enums\IndexableBuildState;
@@ -21,12 +21,13 @@ use PDPhilip\Elasticsearch\Eloquent\Model;
 /**
  * @property string $id
  *
- * @method static $this get()
- * @method static $this search()
- * @method static Collection getBase()
- * @method static Collection asBase() This method should only be called after get() or search() has been executed.
- * @method static LengthAwarePaginator paginateBase($perPage = 15, $pageName = 'page', $page = null, $options = [])
- *                                                                                                                  *
+ * @method static LensBuilder query()
+ * @method Collection getBase($columns = ['*'])
+ * @method \PDPhilip\Elasticsearch\Eloquent\ElasticCollection|array getIndex($columns = ['*'])
+ * @method \Illuminate\Pagination\LengthAwarePaginator paginateBase(int $perPage = 15, string $pageName = 'page', ?int $page = null, array $options = [])
+ * @method \Illuminate\Pagination\LengthAwarePaginator paginateIndex($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null)
+ * @method static Collection asBase() This method should only be called on a Collection of index model results.
+ *
  * @phpstan-consistent-constructor
  */
 abstract class IndexModel extends Model
@@ -43,7 +44,7 @@ abstract class IndexModel extends Model
 
     protected ?bool $indexSoftDeletes = null;
 
-    private static bool $macrosRegistered = false;
+    private static bool $collectionMacroRegistered = false;
 
     public function __construct()
     {
@@ -52,51 +53,25 @@ abstract class IndexModel extends Model
             $this->baseModel = $this->guessBaseModelName();
         }
         $this->setConnection(config('elasticlens.database') ?? 'elasticsearch');
-        self::registerMacros();
+        self::registerCollectionMacro();
     }
 
     // ======================================================================
-    // Macros
+    // Builder
     // ======================================================================
 
-    private static function registerMacros(): void
+    public function newEloquentBuilder($query): LensBuilder
     {
-        if (self::$macrosRegistered) {
+        return new LensBuilder($query);
+    }
+
+    private static function registerCollectionMacro(): void
+    {
+        if (self::$collectionMacroRegistered) {
             return;
         }
-        self::$macrosRegistered = true;
+        self::$collectionMacroRegistered = true;
 
-        // Batch-fetch base models with whereIn (avoids N+1)
-        Builder::macro('getBase', function () {
-            $results = $this->get();
-            if ($results->isEmpty()) {
-                return collect();
-            }
-
-            return IndexModel::batchFetchBaseModels($results);
-        });
-
-        // ES-level pagination + batch-fetch base models
-        Builder::macro('paginateBase', function ($perPage = 15, $pageName = 'page', $page = null, $options = []) {
-            $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
-            $path = LengthAwarePaginator::resolveCurrentPath();
-
-            $esResults = $this->paginate($perPage, ['*'], $pageName, $page);
-            $items = collect($esResults->items());
-
-            if ($items->isEmpty()) {
-                return new LengthAwarePaginator(collect(), 0, $perPage, $page, $options + ['path' => $path]);
-            }
-
-            $baseItems = IndexModel::batchFetchBaseModels($items);
-
-            $pagi = new LengthAwarePaginator($baseItems, $esResults->total(), $perPage, $page, $options);
-            $pagi->setPath($path);
-
-            return $pagi;
-        });
-
-        // Batch-fetch on a collection of index model results
         Collection::macro('asBase', function () {
             if ($this->isEmpty()) {
                 return collect();

@@ -6,8 +6,8 @@ namespace PDPhilip\ElasticLens;
 
 use Exception;
 use Illuminate\Support\Collection;
+use PDPhilip\ElasticLens\Eloquent\LensBuilder;
 use PDPhilip\ElasticLens\Observers\ObserverRegistry;
-use PDPhilip\Elasticsearch\Eloquent\Builder;
 
 /**
  * Trait Indexable
@@ -24,12 +24,12 @@ trait Indexable
 
     public static function search(string $phrase): ?Collection
     {
-        return self::viaIndex()->searchPhrasePrefix($phrase)->getBase();
+        return self::viaIndex()->searchPhrasePrefix($phrase)->get();
     }
 
-    public static function viaIndex(): IndexModel|Builder
+    public static function viaIndex(): LensBuilder
     {
-        return Lens::fetchIndexModelClass((new static))::query();
+        return self::indexModel()::query()->returnAsBase();
     }
 
     /**
