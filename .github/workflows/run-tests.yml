@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.3, 8.2]
-        laravel: [12.*, 11.*, 10.*]
-        stability: [prefer-stable]
+        php: [ 8.3, 8.2 ]
+        laravel: [ 12.*, 11.*, 10.* ]
+        stability: [ prefer-stable ]
         include:
           - laravel: 12.*
             testbench: 10.*
@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify Elasticsearch connection
         run: curl -s "localhost:9200/_cluster/health?pretty=true"
