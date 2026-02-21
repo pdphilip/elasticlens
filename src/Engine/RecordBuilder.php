@@ -27,6 +27,13 @@ class RecordBuilder
         $result->attachMigrationVersion($migrationVersion);
 
         if (! self::mapRecord($config, $id, $result)) {
+            if ($result->skipped) {
+                self::removeStaleIndex($config, $id);
+                self::writeState($config, $id, $result, $source);
+
+                return $result;
+            }
+
             return $result->failed();
         }
 
@@ -50,7 +57,7 @@ class RecordBuilder
         }
 
         if (! self::mapRecord($config, $id, $result)) {
-            return $result->failed();
+            return $result->skipped ? $result : $result->failed();
         }
 
         return $result->successful();
@@ -164,6 +171,15 @@ class RecordBuilder
         }
 
         return true;
+    }
+
+    private static function removeStaleIndex(IndexConfig $config, mixed $id): void
+    {
+        try {
+            $config->indexModel::destroy($id);
+        } catch (\Exception $e) {
+            // Index record may not exist — safe to ignore
+        }
     }
 
     private static function writeState(IndexConfig $config, mixed $id, BuildResult $result, string $source): void

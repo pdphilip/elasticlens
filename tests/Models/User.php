@@ -19,6 +19,8 @@ class User extends Model
 
     protected static $unguarded = true;
 
+    public static ?\Closure $excludeIndexUsing = null;
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
@@ -27,6 +29,15 @@ class User extends Model
     public function logs()
     {
         return $this->hasMany(UserLog::class);
+    }
+
+    public function excludeIndex(): bool
+    {
+        if (static::$excludeIndexUsing) {
+            return (bool) (static::$excludeIndexUsing)($this);
+        }
+
+        return false;
     }
 
     public static function executeSchema(): void
@@ -38,6 +49,7 @@ class User extends Model
             $table->string('name');
             $table->string('email')->unique();
             $table->string('status')->default('active');
+            $table->boolean('is_admin')->default(false);
             $table->integer('age')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -13,6 +13,7 @@ use PDPhilip\ElasticLens\Tests\Models\UserLog;
 
 beforeEach(function () {
     IndexConfig::clearCache();
+    User::$excludeIndexUsing = null;
     User::executeSchema();
     Profile::executeSchema();
     UserLog::executeSchema();
