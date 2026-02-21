@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace PDPhilip\ElasticLens;
 
-use PDPhilip\Elasticsearch\Eloquent\Model;
-
 class Lens
 {
     // ----------------------------------------------------------------------
@@ -13,7 +11,7 @@ class Lens
     // ----------------------------------------------------------------------
 
     /**
-     * Fetch the fully qualified class name of the index model.
+     * @return class-string<IndexModel>
      */
     public static function fetchIndexModelClass($baseModel): string
     {

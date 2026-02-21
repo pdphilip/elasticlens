@@ -22,25 +22,18 @@ trait Indexable
         ObserverRegistry::register(self::class);
     }
 
-    public static function search($phrase): ?Collection
+    public static function search(string $phrase): ?Collection
     {
-        $query = self::viaIndex();
-
-        return $query->searchPhrasePrefix($phrase)->getBase();
+        return self::viaIndex()->searchPhrasePrefix($phrase)->getBase();
     }
 
     public static function viaIndex(): IndexModel|Builder
     {
-        $indexModel = Lens::fetchIndexModelClass((new static));
-
-        return $indexModel::query();
-
+        return Lens::fetchIndexModelClass((new static))::query();
     }
 
     /**
-     * Fetch the fully qualified class name of the index model.
-     *
-     * @return class-string<IndexModel> The fully qualified class name of the index model.
+     * @return class-string<IndexModel>
      */
     public static function indexModel(): string
     {
@@ -50,26 +43,19 @@ trait Indexable
     public function returnIndex(): ?IndexModel
     {
         $modelId = $this->{$this->getKeyName()};
-        $indexModel = Lens::fetchIndexModelClass($this);
 
         try {
-            return $indexModel::where('id', $modelId)->first();
+            return self::indexModel()::where('id', $modelId)->first();
         } catch (Exception $e) {
-
+            return null;
         }
-
-        return null;
     }
 
     public function buildIndex(): array
     {
         $modelId = $this->{$this->getKeyName()};
-        $indexModel = Lens::fetchIndexModelClass($this);
 
-        $build = $indexModel::indexBuild($modelId, 'Direct call from '.get_class($this).' trait');
-
-        return $build->toArray();
-
+        return self::indexModel()::indexBuild($modelId, 'Direct call from '.get_class($this).' trait')->toArray();
     }
 
     public function excludeIndex(): bool
@@ -80,10 +66,9 @@ trait Indexable
     public function removeIndex(): bool
     {
         $modelId = $this->{$this->getKeyName()};
-        $indexModel = Lens::fetchIndexModelClass($this);
 
         try {
-            $deleted = $indexModel::destroy($modelId);
+            $deleted = self::indexModel()::destroy($modelId);
         } catch (Exception $e) {
             return false;
         }
