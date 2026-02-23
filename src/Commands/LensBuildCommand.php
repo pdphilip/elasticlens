@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use OmniTerm\Async\Spinner;
 use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
 use PDPhilip\ElasticLens\Config\IndexConfig;
@@ -60,7 +61,7 @@ class LensBuildCommand extends Command
         $this->indexModel = Lens::fetchIndexModelClass($this->model);
         $this->newLine();
         $name = Str::plural($this->model);
-        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => 'Rebuild '.$name, 'color' => 'cyan']));
+        $this->omni->titleBar('Rebuild '.$name, 'cyan');
         $this->newLine();
         $health = new LensState($this->indexModel);
         $this->baseModel = $health->baseModel;
@@ -104,52 +105,76 @@ class LensBuildCommand extends Command
 
             return false;
         }
+        $this->omni->debug($health);
         $this->startTimer();
+        $name = Str::plural($this->model);
+        $title = 'Building '.$name.' ';
+        $task = $this->omni->liveTask($title, Spinner::Dots);
+        $task->row('Created', 0, 'text-sky-500');
+        $task->row('Updated', 0, 'text-emerald-500');
+        $task->row('Skipped', 0, 'text-amber-500');
+        $task->row('Failed', 0, 'text-rose-500');
 
-        $async = $this->omni->async(function () {});
-        $async->render((string) view('elasticlens::cli.bulk', [
-            'screenWidth' => $async->getScreenWidth(),
-            'model' => $this->model,
-            'i' => $async->getInterval(),
-            'created' => $this->created,
-            'skipped' => $this->skipped,
-            'updated' => $this->modified,
-            'failed' => $this->failed,
-            'completed' => false,
-            'took' => false,
-        ]));
-        $this->baseModel::chunk($this->chunkRate, function ($records) use ($async) {
-            $result = $async->withTask(function () use ($records) {
+        $this->baseModel::chunk($this->chunkRate, function ($records) use ($task) {
+
+            $result = $task->run(function () use ($records) {
                 return $this->bulkInsertTask($records);
-            })->run(function () use ($async) {
-                $async->render((string) view('elasticlens::cli.bulk', [
-                    'screenWidth' => $async->getScreenWidth(),
-                    'model' => $this->model,
-                    'i' => $async->getInterval(),
-                    'created' => $this->created,
-                    'skipped' => $this->skipped,
-                    'updated' => $this->modified,
-                    'failed' => $this->failed,
-                    'completed' => false,
-                    'took' => false,
-                ]));
             });
+
+            $task->increment('Created', $result['created']);
+            $task->increment('Updated', $result['modified']);
+            $task->increment('Skipped', $result['skipped']);
+            $task->increment('Failed', $result['failed']);
+
             $this->created += $result['created'];
-            $this->skipped += $result['skipped'];
             $this->modified += $result['modified'];
-            $this->failed += $result['failed'];
         });
 
-        $async->render((string) view('elasticlens::cli.bulk', [
-            'screenWidth' => $async->getScreenWidth(),
-            'model' => $model,
-            'i' => $async->getInterval(),
-            'created' => $this->created,
-            'skipped' => $this->skipped,
-            'updated' => $this->modified,
-            'failed' => $this->failed,
-            'completed' => true,
-        ]));
+        $task->finish('Build complete');
+        //        $async = $this->omni->async(function () {});
+        //        $async->render((string) view('elasticlens::cli.bulk', [
+        //            'screenWidth' => $async->getScreenWidth(),
+        //            'model' => $this->model,
+        //            'i' => $async->getInterval(),
+        //            'created' => $this->created,
+        //            'skipped' => $this->skipped,
+        //            'updated' => $this->modified,
+        //            'failed' => $this->failed,
+        //            'completed' => false,
+        //            'took' => false,
+        //        ]));
+        //        $this->baseModel::chunk($this->chunkRate, function ($records) use ($async) {
+        //            $result = $async->withTask(function () use ($records) {
+        //                return $this->bulkInsertTask($records);
+        //            })->run(function () use ($async) {
+        //                $async->render((string) view('elasticlens::cli.bulk', [
+        //                    'screenWidth' => $async->getScreenWidth(),
+        //                    'model' => $this->model,
+        //                    'i' => $async->getInterval(),
+        //                    'created' => $this->created,
+        //                    'skipped' => $this->skipped,
+        //                    'updated' => $this->modified,
+        //                    'failed' => $this->failed,
+        //                    'completed' => false,
+        //                    'took' => false,
+        //                ]));
+        //            });
+        //            $this->created += $result['created'];
+        //            $this->skipped += $result['skipped'];
+        //            $this->modified += $result['modified'];
+        //            $this->failed += $result['failed'];
+        //        });
+        //
+        //        $async->render((string) view('elasticlens::cli.bulk', [
+        //            'screenWidth' => $async->getScreenWidth(),
+        //            'model' => $model,
+        //            'i' => $async->getInterval(),
+        //            'created' => $this->created,
+        //            'skipped' => $this->skipped,
+        //            'updated' => $this->modified,
+        //            'failed' => $this->failed,
+        //            'completed' => true,
+        //        ]));
 
         $this->newLine();
         $name = Str::plural($model);

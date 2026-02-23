@@ -33,7 +33,7 @@ class LensHealthCommand extends Command
             return self::FAILURE;
         }
         $health = HealthCheck::check($model);
-        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => $health['title'], 'color' => 'emerald']));
+        $this->omni->titleBar($health['title'], 'emerald');
         $this->omni->status($health['indexStatus']['status'], $health['indexStatus']['title'], $health['indexStatus']['name'], $health['indexStatus']['help'] ?? []);
         $this->newLine();
         $this->omni->tableHeader('Index Model', 'Value');

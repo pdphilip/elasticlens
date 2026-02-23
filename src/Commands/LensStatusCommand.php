@@ -20,7 +20,7 @@ class LensStatusCommand extends Command
     public function handle(): int
     {
         $this->newLine();
-        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => 'ElasticLens Status', 'color' => 'teal']));
+        $this->omni->titleBar('ElasticLens Status', 'teal');
         $this->newLine();
         $checks = ConfigCheck::check();
         $indexes = IndexCheck::get();

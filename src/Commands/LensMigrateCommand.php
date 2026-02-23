@@ -59,7 +59,7 @@ class LensMigrateCommand extends Command
         $this->model = $model;
         $this->indexModel = Lens::fetchIndexModelClass($model);
         $this->newLine();
-        $this->omni->render((string) view('elasticlens::cli.components.title', ['title' => 'Migrate and Build '.class_basename($this->indexModel), 'color' => 'sky']));
+        $this->omni->titleBar('Migrate and Build '.class_basename($this->indexModel), 'sky');
         $this->newLine();
         $this->migrate = $force ? 'yes' : null;
         $this->build = $force ? 'yes' : null;
