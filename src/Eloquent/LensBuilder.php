@@ -69,6 +69,49 @@ class LensBuilder extends Builder
     }
 
     // ======================================================================
+    // First
+    // ======================================================================
+
+    /**
+     * When returnAsBase is set, returns the base (Laravel) model.
+     * Otherwise returns the index model (default ES behavior).
+     *
+     * @param  array|string  $columns
+     */
+    public function first($columns = ['*'])
+    {
+        $result = parent::first($columns);
+
+        if ($result && $this->returnAsBase) {
+            return $result->asBase(); // @phpstan-ignore method.notFound
+        }
+
+        return $result;
+    }
+
+    /**
+     * Always returns the index model, regardless of scope flag.
+     *
+     * @param  array|string  $columns
+     */
+    public function firstIndex($columns = ['*'])
+    {
+        return parent::first($columns);
+    }
+
+    /**
+     * Always returns the base (Laravel) model, regardless of scope flag.
+     *
+     * @param  array|string  $columns
+     */
+    public function firstBase($columns = ['*'])
+    {
+        $result = parent::first($columns);
+
+        return $result?->asBase(); // @phpstan-ignore method.notFound
+    }
+
+    // ======================================================================
     // Paginate
     // ======================================================================
 
@@ -86,7 +129,7 @@ class LensBuilder extends Builder
      */
     public function paginateIndex($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null): LengthAwarePaginator
     {
-        return parent::paginate($perPage, $columns, $pageName, $page, $total);
+        return $this->paginateAsIndex(fn () => parent::paginate($perPage, $columns, $pageName, $page, $total));
     }
 
     /**
@@ -97,7 +140,9 @@ class LensBuilder extends Builder
         $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
         $path = LengthAwarePaginator::resolveCurrentPath();
 
-        $esResults = parent::paginate($perPage, ['*'], $pageName, $page);
+        // parent::paginate() calls $this->get() internally — must disable
+        // base conversion so we receive index models for the batch lookup
+        $esResults = $this->paginateAsIndex(fn () => parent::paginate($perPage, ['*'], $pageName, $page));
         $items = collect($esResults->items());
 
         if ($items->isEmpty()) {
@@ -110,5 +155,21 @@ class LensBuilder extends Builder
         $paginator->setPath($path);
 
         return $paginator;
+    }
+
+    /**
+     * Runs a paginate callback with returnAsBase disabled so parent::paginate()
+     * returns index models (since it internally calls $this->get()).
+     */
+    protected function paginateAsIndex(callable $callback): LengthAwarePaginator
+    {
+        $wasReturnAsBase = $this->returnAsBase;
+        $this->returnAsBase = false;
+
+        try {
+            return $callback();
+        } finally {
+            $this->returnAsBase = $wasReturnAsBase;
+        }
     }
 }

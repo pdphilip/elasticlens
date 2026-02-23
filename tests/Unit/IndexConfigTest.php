@@ -27,7 +27,9 @@ it('extracts field map from index model', function () {
     $config = IndexConfig::for(IndexedUser::class);
 
     expect($config->fieldMap)->toBeArray()
-        ->and($config->fieldMap)->toHaveKeys(['name', 'email', 'status', 'age', 'created_at', 'profile', 'logs']);
+        ->and($config->fieldMap)->toHaveKeys(['name', 'email', 'status', 'age', 'created_at', 'profile', 'logs'])
+        ->and($config->fieldMap['profile'])->toBeArray()
+        ->and($config->fieldMap['profile'])->toHaveKeys(['id', 'bio', 'website']);
 });
 
 it('extracts relationships from index model', function () {

@@ -60,7 +60,7 @@ it('embeds hasOne relationship', function () {
         'status' => 'active',
         'age' => 25,
     ]);
-    Profile::create([
+    $profile = Profile::create([
         'user_id' => $user->id,
         'bio' => 'Developer',
         'website' => 'jane.dev',
@@ -70,6 +70,7 @@ it('embeds hasOne relationship', function () {
     $data = RecordMapper::map($user, $config);
 
     expect($data['profile'])->toBeArray()
+        ->and($data['profile']['id'])->toBe((string) $profile->id)
         ->and($data['profile']['bio'])->toBe('Developer')
         ->and($data['profile']['website'])->toBe('jane.dev');
 });

@@ -176,7 +176,7 @@ class IndexBuilder
 
     protected function buildRelationship($baseModel, $relation, $type, $whereRelatedField = null, $equalsLocalField = null, $query = null): array
     {
-        if (! $whereRelatedField || $equalsLocalField) {
+        if (! $whereRelatedField || ! $equalsLocalField) {
             [$whereRelatedField, $equalsLocalField] = $this->_inferKeys($baseModel, $relation, $type, $whereRelatedField, $equalsLocalField);
         }
 

@@ -40,10 +40,6 @@ class RecordMapper
         }
 
         foreach ($fields as $field => $type) {
-            if ($field === 'id') {
-                continue;
-            }
-
             if (is_array($type)) {
                 $data[$field] = self::mapEmbeddedRelationship($field, $type, $modelData, $config);
 

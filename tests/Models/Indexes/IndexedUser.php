@@ -27,6 +27,7 @@ class IndexedUser extends IndexModel
 
             $field->embedsOne('profile', Profile::class)
                 ->embedMap(function ($embed) {
+                    $embed->text('id');
                     $embed->text('bio');
                     $embed->text('website');
                 });

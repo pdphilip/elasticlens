@@ -111,7 +111,7 @@ class LensMigrateCommand extends Command
         }
         $this->buildData['didRun'] = true;
         $this->buildData['total'] = $recordsCount;
-        $bar = $this->omni->progressBar($this->buildData['total'])->steps();
+        $bar = $this->omni->progressBar($this->buildData['total'])->gradient();
         $migrationVersion = IndexableMigrationLog::getLatestVersion($config->indexModelName)
             ?: 'v'.$config->migrationMajorVersion.'.0';
         $chunkSize = $this->chunkRate;
