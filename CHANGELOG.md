@@ -2,6 +2,29 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v4.0.0
+
+This release is compatible with Laravel 10, 11 & 12
+
+The engine has been rewritten from the ground up. The core indexing, observer, and build systems were gutted and rebuilt with cleaner internals, typed signatures, and proper error boundaries. The package now has a full test suite (unit + integration) running against a real Elasticsearch instance in CI - something that didn't exist before.
+
+Full documentation now lives at **[elasticlens.pdphilip.com](https://elasticlens.pdphilip.com)**
+
+### What's New
+
+- `viaIndex()->get()` now returns base models directly - no more `getBase()` needed
+- [Conditional Indexing](https://elasticlens.pdphilip.com/conditional-indexing/) - control which records get indexed via `excludeIndex()`
+- [Soft Delete Support](https://elasticlens.pdphilip.com/soft-deletes/) - configurable globally or per index model
+- Full test suite with Elasticsearch service container in CI
+- Requires `pdphilip/omniterm: ^2`
+
+### Breaking Changes
+
+- `viaIndex()->get()` returns base model collection (was index model collection; use `->get()` directly instead of `->getBase()`)
+- `getBase()` and `paginateBase()` still work but are no longer necessary for the default case
+
+See the [upgrade guide](https://elasticlens.pdphilip.com/upgrade-guide/) for migration details.
+
 ## v3.1.2 - 2025-09-12
 
 This release is compatible with Laravel 10, 11 & 12

@@ -1,16 +1,17 @@
 <div align="center">
 <img src="https://cdn.snipform.io/pdphilip/elasticlens/elasticlens-banner.svg" alt="ElasticLens for Laravel" />
-  <p>
+    <p>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/elasticlens.svg?style=flat-square)](https://packagist.org/packages/pdphilip/elasticlens)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/elasticlens/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/elasticlens/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/elasticlens.svg)](https://packagist.org/packages/pdphilip/elasticlens)
 
-  </p>
-</div>
+    </p>
+    <h3>Search your <strong>Laravel models</strong> with the ease of Eloquent and the power of Elasticsearch</h3>
+    <p>The convenience of Scout • The full power of Elasticsearch • Complete control of your models.</p>
 
-The convenience of Scout. The full power of Elasticsearch. Complete control of your models.
+</div>
 
 ```php
 // Starts just like Scout - add a trait, search your models.
@@ -39,7 +40,8 @@ User::viaIndex()
 
 Scout gives you a search box behind a black box. ElasticLens gives you a search engine you can open up.
 
-Every index is a real Eloquent model you can query, inspect, and control directly. You define the field mappings. You define the Elasticsearch schema. You see exactly what's indexed and how. No magic, no guessing, no driver abstractions between you and your data.
+Every index is a real Eloquent model you can query, inspect, and control directly. You define the field mappings. You define the Elasticsearch schema. You see exactly what's indexed and how. No magic, no guessing, no driver abstractions
+between you and your data.
 
 Under the hood: a dedicated Elasticsearch index per model with embedded relationships, migrations, and auto-sync via observers - all powered by [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch).
 
@@ -80,7 +82,7 @@ User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateBase(10
 
 ## Embed Relationships Into Your Index
 
-This is where it gets interesting. Flatten your relational data into Elasticsearch and search across it as nested objects.
+This is where Elasticlens shines. Flatten your relational data into Elasticsearch and search across it as nested objects.
 
 ```php
 class IndexedUser extends IndexModel
@@ -217,11 +219,11 @@ Restoring a soft-deleted model automatically rebuilds its index.
 
 ## Requirements
 
-| | Version |
-|---|---|
-| PHP | 8.2+ |
-| Laravel | 10 / 11 / 12 |
-| Elasticsearch | 8.x |
+|               | Version      |
+|---------------|--------------|
+| PHP           | 8.2+         |
+| Laravel       | 10 / 11 / 12 |
+| Elasticsearch | 8.x          |
 
 ## Installation
 
@@ -240,15 +242,19 @@ php artisan migrate         # Create build state + migration log indexes
 
 ## Documentation
 
-Full documentation at **[elasticsearch.pdphilip.com/elasticlens](https://elasticsearch.pdphilip.com/elasticlens/getting-started/)**
+Full documentation at **[elasticlens.pdphilip.com](https://elasticlens.pdphilip.com)**
 
-- [Index Models](https://elasticsearch.pdphilip.com/elasticlens/index-model/)
-- [Field Mapping](https://elasticsearch.pdphilip.com/elasticlens/field-mapping/)
-- [Full-Text Search](https://elasticsearch.pdphilip.com/elasticlens/full-text-search)
-- [Migrations](https://elasticsearch.pdphilip.com/elasticlens/index-model-migrations/)
-- [Model Observers](https://elasticsearch.pdphilip.com/elasticlens/model-observers/)
-- [CLI Tools](https://elasticsearch.pdphilip.com/elasticlens/artisan-cli-tools/)
-- [Build States](https://elasticsearch.pdphilip.com/elasticlens/build-migration-states/)
+- [Getting Started](https://elasticlens.pdphilip.com/getting-started/)
+- [Index Models](https://elasticlens.pdphilip.com/index-model/)
+- [Field Mapping](https://elasticlens.pdphilip.com/field-mapping/)
+- [Full-Text Search](https://elasticlens.pdphilip.com/full-text-search/)
+- [Embedded Relations](https://elasticlens.pdphilip.com/embedded-relations/)
+- [Conditional Indexing](https://elasticlens.pdphilip.com/conditional-indexing/)
+- [Soft Deletes](https://elasticlens.pdphilip.com/soft-deletes/)
+- [Migrations](https://elasticlens.pdphilip.com/index-model-migrations/)
+- [Model Observers](https://elasticlens.pdphilip.com/model-observers/)
+- [CLI Tools](https://elasticlens.pdphilip.com/artisan-cli-tools/)
+- [Build States](https://elasticlens.pdphilip.com/build-migration-states/)
 
 ---
 
