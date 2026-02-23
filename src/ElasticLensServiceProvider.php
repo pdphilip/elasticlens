@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PDPhilip\ElasticLens;
 
 use PDPhilip\ElasticLens\Commands\LensBuildCommand;
+use PDPhilip\ElasticLens\Commands\LensErrorsCommand;
 use PDPhilip\ElasticLens\Commands\LensHealthCommand;
 use PDPhilip\ElasticLens\Commands\LensMakeCommand;
 use PDPhilip\ElasticLens\Commands\LensMigrateCommand;
@@ -31,6 +32,7 @@ class ElasticLensServiceProvider extends PackageServiceProvider
             ->hasCommand(LensHealthCommand::class)
             ->hasCommand(LensStatusCommand::class)
             ->hasCommand(LensBuildCommand::class)
+            ->hasCommand(LensErrorsCommand::class)
             ->hasCommand(LensMigrateCommand::class)
             ->hasCommand(LensMakeCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {

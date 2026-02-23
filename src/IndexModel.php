@@ -34,6 +34,8 @@ abstract class IndexModel extends Model
 {
     public $connection = 'elasticsearch';
 
+    public $timestamps = false;
+
     protected $observeBase = true;
 
     protected $baseModel;
