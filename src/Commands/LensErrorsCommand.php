@@ -82,7 +82,7 @@ class LensErrorsCommand extends Command
             $this->newLine();
 
             foreach ($errors as $error) {
-                $this->omni->dataList($this->formatError($error), $error->model_id, 'text-rose-400'); // @phpstan-ignore method.notFound
+                $this->omni->dataList($this->formatError($error), $error->model_id, 'text-rose-400');
             }
 
             $offset += $perPage;

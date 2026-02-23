@@ -11,11 +11,6 @@ parameters:
     ignoreErrors:
         - '#Return type .* of method .* should be compatible with return type .* of method#'
         -
-            identifier: argument.type
-            message: '#Parameter \#1 \$view of function view expects view-string\|null, string given#'
-            paths:
-                - src/Commands/
-        -
             identifier: return.type
             message: '#should return PDPhilip\\Elasticsearch\\Eloquent\\Builder but returns Illuminate\\Database\\Eloquent\\Builder#'
             paths:
