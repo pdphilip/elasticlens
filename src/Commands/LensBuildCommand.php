@@ -105,9 +105,9 @@ class LensBuildCommand extends Command
 
             return false;
         }
-        $this->omni->debug($health);
+
         $this->startTimer();
-        $name = Str::plural($this->model);
+        $name = Str::title($health->baseModelTable);
         $title = 'Building '.$name.' ';
         $task = $this->omni->liveTask($title, Spinner::Dots);
         $task->row('Created', 0, 'text-sky-500');
