@@ -8,43 +8,42 @@
 [![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/elasticlens.svg)](https://packagist.org/packages/pdphilip/elasticlens)
 
 </p>
-    
-<h3>Search your <strong>Laravel models</strong> with the ease of Eloquent and the power of Elasticsearch</h3>
-<p>The convenience of Scout • The full power of Elasticsearch • Complete control of your models.</p>
+
+<h3>Search your <strong>Laravel models</strong> with Eloquent ease and Elasticsearch power</h3>
+<p>Scout's simplicity • Elasticsearch's power • Your rules</p>
 
 </div>
 
 ```php
-// Starts just like Scout - add a trait, search your models.
-User::search('loves espressos');
+// Add a trait. Search your models.
+User::search('mass donuts');
 ```
 
 ```php
-// Except you're not limited to basic text search.
+// Phrase match + filters + embedded fields + pagination. One query.
 User::viaIndex()
-    ->searchPhrase('ice bathing')
+    ->searchPhrase('mass donuts')
     ->where('status', 'active')
-    ->whereNestedObject('logs', function ($query) {
-        $query->where('logs.country', 'Norway');
-    })
+    ->where('logs.country', 'Norway')
     ->orderByDesc('created_at')
     ->paginate(10);
 ```
 
 ```php
-// Geo queries. Fuzzy matching. Regex. Aggregations. On your Laravel models.
+// Find every user within 5km who mentioned "espressos" in their profile.
+// Sorted by distance. Because priorities.
 User::viaIndex()
-    ->filterGeoPoint('home.location', '5km', [40.7128, -74.0060])
+    ->searchTerm('espressos')
+    ->whereGeoDistance('home.location', '5km', [40.7128, -74.0060])
     ->orderByGeo('home.location', [40.7128, -74.0060])
     ->get();
 ```
 
 Scout gives you a search box behind a black box. ElasticLens gives you a search engine you can open up.
 
-Every index is a real Eloquent model you can query, inspect, and control directly. You define the field mappings. You define the Elasticsearch schema. You see exactly what's indexed and how. No magic, no guessing, no driver abstractions
-between you and your data.
+Every index is a real Eloquent model you own. You define the field mappings. You define the schema. You see exactly what's indexed and how. No magic, no guessing, no driver abstractions between you and your data.
 
-Under the hood: a dedicated Elasticsearch index per model with embedded relationships, migrations, and auto-sync via observers - all powered by [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch).
+Powered by [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch).
 
 ---
 
@@ -65,25 +64,28 @@ class User extends Model
 php artisan lens:make User
 ```
 
-This creates `IndexedUser` - a real Elasticsearch model that stays synced with your `User` model via observers. Every create, update, and delete is automatically reflected.
+Creates `IndexedUser`: a real Elasticsearch model that stays synced with your `User` via observers. Every create, update, delete is reflected automatically.
 
 **3. Search**
 
 ```php
-// Quick search - returns User models
-User::search('david');
+// Quick search across all fields
+User::search('vinyl collecting');
 
-// Full power - term search, fuzzy, phrase, regex, geo, nested, aggregations
-User::viaIndex()->searchTerm('david')->where('state', 'active')->getBase();
-User::viaIndex()->searchFuzzy('quikc brwn foks')->get();
-User::viaIndex()->whereRegex('favorite_color', 'bl(ue)?(ack)?')->paginateBase(10);
+// Full Elasticsearch query builder. Go nuts.
+User::viaIndex()->searchTerm('vinyl')->where('state', 'active')->get();
+User::viaIndex()->searchFuzzy('elsticsearsh')->get();   // can't even spell it? no problem
+User::viaIndex()->whereRegex('hobby', 'sw(im|itch)')->paginate(10);
 ```
 
 ---
 
-## Embed Relationships Into Your Index
+## Embed Relationships
 
-This is where Elasticlens shines. Flatten your relational data into Elasticsearch and search across it as nested objects.
+Here's where the "oh cool" becomes "holy shit."
+
+You've got a User model. Profiles in one table. Company in another. Logs in a third. Country in a fourth. In SQL, searching across all of that is a JOIN nightmare you pretend doesn't bother you. With ElasticLens, you flatten everything into
+one searchable document:
 
 ```php
 class IndexedUser extends IndexModel
@@ -97,15 +99,20 @@ class IndexedUser extends IndexModel
             $field->text('last_name');
             $field->text('email');
             $field->type('state', UserState::class);
+
+            // Embed the user's profiles as nested objects
             $field->embedsMany('profiles', Profile::class)->embedMap(function ($field) {
-                $field->text('profile_name');
-                $field->text('about');
+                $field->text('bio');
                 $field->array('tags');
             });
+
+            // Embed the company they belong to
             $field->embedsBelongTo('company', Company::class)->embedMap(function ($field) {
                 $field->text('name');
                 $field->text('industry');
             });
+
+            // Last 10 logs only. We're not animals.
             $field->embedsMany('logs', UserLog::class, null, null, function ($query) {
                 $query->orderBy('created_at', 'desc')->limit(10);
             })->embedMap(function ($field) {
@@ -117,21 +124,26 @@ class IndexedUser extends IndexModel
 }
 ```
 
-Then search across all of it:
+Now search across all of it:
 
 ```php
-User::viaIndex()->whereNestedObject('profiles', function ($query) {
-    $query->where('profiles.about', 'like', '%elasticsearch%');
-})->get();
+// Active users at tech companies whose profiles mention "elasticsearch"
+User::viaIndex()
+    ->where('state', 'active')
+    ->where('company.industry', 'Technology')
+    ->where('profiles.bio', 'like', '%elasticsearch%')
+    ->get();
 ```
 
-The related models are observed too. Update a `Profile` and the parent `IndexedUser` rebuilds automatically.
+Six SQL tables. Zero JOINs. One query.
+
+Update a `Profile`? The parent `IndexedUser` rebuilds automatically. The observer chain traces all the way up. You don't have to think about it.
 
 ---
 
 ## Conditional Indexing
 
-Control which records get indexed:
+Not everything deserves an index entry:
 
 ```php
 class User extends Model
@@ -140,18 +152,18 @@ class User extends Model
 
     public function excludeIndex(): bool
     {
-        return $this->is_admin;
+        return $this->is_banned; // bye
     }
 }
 ```
 
-Excluded models are skipped during indexing, stale records are cleaned up, and health checks account for the difference.
+Excluded records are tracked as skipped (not failed) in build state and health checks.
 
 ---
 
 ## Index Migrations
 
-Define your Elasticsearch mapping with a Blueprint, just like database migrations:
+Define your Elasticsearch mapping with a Blueprint. Same idea as database migrations:
 
 ```php
 public function migrationMap(): callable
@@ -180,10 +192,10 @@ php artisan lens:migrate User
 ## CLI Tools
 
 ```bash
-php artisan lens:status              # Overview of all indexes
-php artisan lens:health User         # Detailed health check for an index
-php artisan lens:build User          # Bulk rebuild all index records
-php artisan lens:migrate User        # Drop, migrate, and rebuild
+php artisan lens:status              # Bird's eye view of all indexes
+php artisan lens:health User         # Deep health check for one index
+php artisan lens:build User          # Bulk rebuild all records
+php artisan lens:migrate User        # Drop, migrate, rebuild. The nuclear option.
 php artisan lens:make Profile        # Generate a new index model
 ```
 
@@ -199,11 +211,11 @@ php artisan lens:make Profile        # Generate a new index model
 
 ## Soft Delete Support
 
-ElasticLens respects Laravel's `SoftDeletes`. Configure globally or per-model whether soft-deleted records keep their index:
+Configure globally or per-model whether soft-deleted records keep their index:
 
 ```php
 // config/elasticlens.php
-'index_soft_deletes' => true,  // Keep index records for soft-deleted models
+'index_soft_deletes' => true,
 ```
 
 ```php
@@ -214,7 +226,7 @@ class IndexedUser extends IndexModel
 }
 ```
 
-Restoring a soft-deleted model automatically rebuilds its index.
+Restoring a model rebuilds its index automatically.
 
 ---
 
@@ -237,25 +249,13 @@ php artisan lens:install    # Publish config
 php artisan migrate         # Create build state + migration log indexes
 ```
 
-> Requires [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) connection config. See [setup guide](https://elasticsearch.pdphilip.com/getting-started/configuration).
+> Requires a configured [Laravel-Elasticsearch](https://github.com/pdphilip/laravel-elasticsearch) connection. [Setup guide ->](https://elasticsearch.pdphilip.com/getting-started/configuration)
 
 ---
 
 ## Documentation
 
-Full documentation at **[elasticlens.pdphilip.com](https://elasticlens.pdphilip.com)**
-
-- [Getting Started](https://elasticlens.pdphilip.com/getting-started/)
-- [Index Models](https://elasticlens.pdphilip.com/index-model/)
-- [Field Mapping](https://elasticlens.pdphilip.com/field-mapping/)
-- [Full-Text Search](https://elasticlens.pdphilip.com/full-text-search/)
-- [Embedded Relations](https://elasticlens.pdphilip.com/embedded-relations/)
-- [Conditional Indexing](https://elasticlens.pdphilip.com/conditional-indexing/)
-- [Soft Deletes](https://elasticlens.pdphilip.com/soft-deletes/)
-- [Migrations](https://elasticlens.pdphilip.com/index-model-migrations/)
-- [Model Observers](https://elasticlens.pdphilip.com/model-observers/)
-- [CLI Tools](https://elasticlens.pdphilip.com/artisan-cli-tools/)
-- [Build States](https://elasticlens.pdphilip.com/build-migration-states/)
+Full docs at **[elasticlens.pdphilip.com](https://elasticlens.pdphilip.com)**
 
 ---
 
@@ -265,4 +265,4 @@ Full documentation at **[elasticlens.pdphilip.com](https://elasticlens.pdphilip.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). See [License File](LICENSE.md).
