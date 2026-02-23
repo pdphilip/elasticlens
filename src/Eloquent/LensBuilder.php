@@ -34,9 +34,8 @@ class LensBuilder extends Builder
     public function get($columns = ['*']): ElasticCollection|array
     {
         $results = parent::get($columns);
-
         if ($this->returnAsBase) {
-            return IndexModel::batchFetchBaseModels($results); // @phpstan-ignore return.type
+            return new ElasticCollection(IndexModel::batchFetchBaseModels($results)->all());
         }
 
         return $results;

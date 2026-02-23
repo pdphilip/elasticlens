@@ -7,18 +7,14 @@ namespace PDPhilip\ElasticLens\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use OmniTerm\Async\Spinner;
 use OmniTerm\HasOmniTerm;
 use PDPhilip\ElasticLens\Commands\Scripts\QualifyModel;
-use PDPhilip\ElasticLens\Config\IndexConfig;
-use PDPhilip\ElasticLens\Engine\BulkBuilder;
 use PDPhilip\ElasticLens\Index\LensState;
 use PDPhilip\ElasticLens\Lens;
-use PDPhilip\ElasticLens\Traits\Timer;
 
 class LensBuildCommand extends Command
 {
-    use HasOmniTerm, LensCommands, Timer;
+    use BuildsIndex, HasOmniTerm, LensCommands;
 
     public $signature = 'lens:build {model}';
 
@@ -29,20 +25,6 @@ class LensBuildCommand extends Command
     protected mixed $model = null;
 
     protected mixed $baseModel = null;
-
-    protected mixed $build = null;
-
-    protected int $chunkRate = 1000;
-
-    protected int $total = 0;
-
-    protected int $created = 0;
-
-    protected int $skipped = 0;
-
-    protected int $modified = 0;
-
-    protected int $failed = 0;
 
     /**
      * @throws Exception
@@ -63,16 +45,17 @@ class LensBuildCommand extends Command
         $name = Str::plural($this->model);
         $this->omni->titleBar('Rebuild '.$name, 'cyan');
         $this->newLine();
+
         $health = new LensState($this->indexModel);
         $this->baseModel = $health->baseModel;
+
         if (! $health->indexExists) {
             $this->omni->statusError('ERROR', $health->indexModelTable.' index not found');
-
             $this->migrate = null;
             $this->migrationStep();
         }
-        $health = new LensState($this->indexModel);
 
+        $health = new LensState($this->indexModel);
         if (! $health->indexExists) {
             $this->omni->statusError('ERROR', 'Index required', [
                 'Migrate to create the "'.$health->indexModelTable.'" index',
@@ -80,154 +63,9 @@ class LensBuildCommand extends Command
 
             return self::FAILURE;
         }
-        $this->setChunkRate($health);
-        $built = $this->processAsyncBuild($health, $this->model);
+
+        $built = $this->runBulkBuild($this->baseModel, $this->indexModel);
 
         return $built ? self::SUCCESS : self::FAILURE;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function processAsyncBuild($health, $model): bool
-    {
-        try {
-            $recordsCount = $health->baseModel::count();
-        } catch (Exception $e) {
-            $this->omni->statusError('ERROR', 'Base Model not found', [
-                $e->getMessage(),
-            ]);
-
-            return false;
-        }
-        if (! $recordsCount) {
-            $this->omni->statusWarning('BUILD SKIPPED', 'No records found for '.$health->baseModel);
-
-            return false;
-        }
-
-        $this->startTimer();
-        $name = Str::title($health->baseModelTable);
-        $title = 'Building '.$name.' ';
-        $task = $this->omni->liveTask($title, Spinner::Dots);
-        $task->row('Created', 0, 'text-sky-500');
-        $task->row('Updated', 0, 'text-emerald-500');
-        $task->row('Skipped', 0, 'text-amber-500');
-        $task->row('Failed', 0, 'text-rose-500');
-
-        $this->baseModel::chunk($this->chunkRate, function ($records) use ($task) {
-
-            $result = $task->run(function () use ($records) {
-                return $this->bulkInsertTask($records);
-            });
-
-            $task->increment('Created', $result['created']);
-            $task->increment('Updated', $result['modified']);
-            $task->increment('Skipped', $result['skipped']);
-            $task->increment('Failed', $result['failed']);
-
-            $this->created += $result['created'];
-            $this->modified += $result['modified'];
-        });
-
-        $task->finish('Build complete');
-        //        $async = $this->omni->async(function () {});
-        //        $async->render((string) view('elasticlens::cli.bulk', [
-        //            'screenWidth' => $async->getScreenWidth(),
-        //            'model' => $this->model,
-        //            'i' => $async->getInterval(),
-        //            'created' => $this->created,
-        //            'skipped' => $this->skipped,
-        //            'updated' => $this->modified,
-        //            'failed' => $this->failed,
-        //            'completed' => false,
-        //            'took' => false,
-        //        ]));
-        //        $this->baseModel::chunk($this->chunkRate, function ($records) use ($async) {
-        //            $result = $async->withTask(function () use ($records) {
-        //                return $this->bulkInsertTask($records);
-        //            })->run(function () use ($async) {
-        //                $async->render((string) view('elasticlens::cli.bulk', [
-        //                    'screenWidth' => $async->getScreenWidth(),
-        //                    'model' => $this->model,
-        //                    'i' => $async->getInterval(),
-        //                    'created' => $this->created,
-        //                    'skipped' => $this->skipped,
-        //                    'updated' => $this->modified,
-        //                    'failed' => $this->failed,
-        //                    'completed' => false,
-        //                    'took' => false,
-        //                ]));
-        //            });
-        //            $this->created += $result['created'];
-        //            $this->skipped += $result['skipped'];
-        //            $this->modified += $result['modified'];
-        //            $this->failed += $result['failed'];
-        //        });
-        //
-        //        $async->render((string) view('elasticlens::cli.bulk', [
-        //            'screenWidth' => $async->getScreenWidth(),
-        //            'model' => $model,
-        //            'i' => $async->getInterval(),
-        //            'created' => $this->created,
-        //            'skipped' => $this->skipped,
-        //            'updated' => $this->modified,
-        //            'failed' => $this->failed,
-        //            'completed' => true,
-        //        ]));
-
-        $this->newLine();
-        $name = Str::plural($model);
-        $total = $this->created + $this->modified;
-        $time = $this->getTime();
-        if ($total > 0) {
-            $total = number_format($total);
-            $this->omni->info('Indexed '.$total.' '.$name.' in '.$time['sec'].' seconds');
-        } else {
-            $this->omni->error('All indexes failed to build');
-        }
-
-        $this->newLine();
-
-        return true;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function bulkInsertTask($records): array
-    {
-        $bulk = new BulkBuilder($this->baseModel);
-        $bulk->setRecords($records)->build();
-        $result = $bulk->getResult();
-
-        return [
-            'total' => $result['results']['total'],
-            'created' => $result['results']['created'],
-            'skipped' => $result['results']['skipped'],
-            'modified' => $result['results']['modified'],
-            'failed' => $result['results']['failed'],
-        ];
-    }
-
-    public function setChunkRate(LensState $health): int
-    {
-        $config = IndexConfig::for($health->indexModel);
-        if ($config->buildChunkRate > 0) {
-            return $this->chunkRate = $config->buildChunkRate;
-        }
-        $relationships = count($config->relationships);
-        $chunk = $this->chunkRate;
-        if ($relationships > 3) {
-            $chunk = 750;
-        }
-        if ($relationships > 6) {
-            $chunk = 500;
-        }
-        if ($relationships > 9) {
-            $chunk = 250;
-        }
-
-        return $this->chunkRate = $chunk;
     }
 }
