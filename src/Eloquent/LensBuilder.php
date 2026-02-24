@@ -79,13 +79,11 @@ class LensBuilder extends Builder
      */
     public function first($columns = ['*'])
     {
-        $result = parent::first($columns);
-
-        if ($result && $this->returnAsBase) {
-            return $result->asBase(); // @phpstan-ignore method.notFound
+        if (! $this->returnAsBase) {
+            return parent::first($columns);
         }
 
-        return $result;
+        return $this->firstBase($columns);
     }
 
     /**
@@ -95,7 +93,7 @@ class LensBuilder extends Builder
      */
     public function firstIndex($columns = ['*'])
     {
-        return parent::first($columns);
+        return $this->firstAsIndex(fn () => parent::first($columns));
     }
 
     /**
@@ -105,9 +103,25 @@ class LensBuilder extends Builder
      */
     public function firstBase($columns = ['*'])
     {
-        $result = parent::first($columns);
+        $result = $this->firstAsIndex(fn () => parent::first($columns));
 
-        return $result?->asBase(); // @phpstan-ignore method.notFound
+        return $result?->asBase();
+    }
+
+    /**
+     * Runs a first callback with returnAsBase disabled so parent::first()
+     * returns an index model (since it internally calls $this->get()).
+     */
+    protected function firstAsIndex(callable $callback): mixed
+    {
+        $wasReturnAsBase = $this->returnAsBase;
+        $this->returnAsBase = false;
+
+        try {
+            return $callback();
+        } finally {
+            $this->returnAsBase = $wasReturnAsBase;
+        }
     }
 
     // ======================================================================
