@@ -17,6 +17,12 @@ parameters:
                 - src/IndexModel.php
                 - src/Models/IndexableBuild.php
         -
+            identifier: argument.type
+            message: '#Parameter \#1 \$view of function view expects view-string\|null, string given#'
+            paths:
+                - src/Commands/
+            reportUnmatched: false
+        -
             identifier: trait.unused
             paths:
                 - src/Indexable.php

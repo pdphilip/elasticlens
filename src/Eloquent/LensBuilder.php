@@ -130,19 +130,26 @@ class LensBuilder extends Builder
 
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null)
     {
-        if (! $this->returnAsBase) {
+        if ($this->returnAsBase) {
+            return $this->paginateBase($perPage ?? 15, $pageName, $page);
+        }
+
+        // Only forward $total when explicitly provided — L10 uses
+        // func_num_args() to detect the 5th argument and skips
+        // getCountForPagination() if 5 arguments are passed.
+        if ($total !== null) {
             return parent::paginate($perPage, $columns, $pageName, $page, $total);
         }
 
-        return $this->paginateBase($perPage ?? 15, $pageName, $page);
+        return parent::paginate($perPage, $columns, $pageName, $page);
     }
 
     /**
      * Always returns a paginator of index models, regardless of scope flag.
      */
-    public function paginateIndex($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null): LengthAwarePaginator
+    public function paginateIndex($perPage = null, $columns = ['*'], $pageName = 'page', $page = null): LengthAwarePaginator
     {
-        return $this->paginateAsIndex(fn () => parent::paginate($perPage, $columns, $pageName, $page, $total));
+        return $this->paginateAsIndex(fn () => parent::paginate($perPage, $columns, $pageName, $page));
     }
 
     /**
