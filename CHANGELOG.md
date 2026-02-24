@@ -2,6 +2,28 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v4.0.1
+
+### Added
+
+- `firstIndex()` and `firstBase()` methods on LensBuilder
+- `lens:errors {model}` command to inspect failed index builds with paginated output
+- `BuildsIndex` shared trait for bulk building (used by `lens:build` and `lens:migrate`)
+- 24 new LensBuilder integration tests covering all empty and populated query paths
+
+### Fixed
+
+- `viaIndex()->get()` TypeError on empty results (return type mismatch: `Collection` vs `ElasticCollection`)
+- `viaIndex()->first()` calling `asBase()` on an already-converted base model
+- `first()` / `firstBase()` now correctly disable `returnAsBase` before delegating to parent (same pattern as `paginateAsIndex`)
+- `updated_at` no longer leaks into index documents when not defined in the field map (`$timestamps = false` on IndexModel)
+
+### Changed
+
+- `lens:migrate` build step now uses bulk insert (was one-at-a-time `RecordBuilder::build()`)
+- `lens:build` refactored to use shared `BuildsIndex` trait
+- Removed stale PHPStan ignore rule for Blade `view()` calls in Commands
+
 ## v4.0.0
 
 This release is compatible with Laravel 10, 11 & 12
