@@ -10,7 +10,9 @@ use PDPhilip\ElasticLens\Watchers\EmbeddedModelTrigger;
 
 class ObserverRegistry
 {
-    public static function register($baseModel): void
+    private static array $pendingEmbedded = [];
+
+    public static function registerEmbedded($baseModel): void
     {
         $indexModel = Lens::fetchIndexModelClass($baseModel);
         if (! class_exists($indexModel)) {
@@ -19,20 +21,33 @@ class ObserverRegistry
 
         $config = IndexConfig::for($indexModel);
 
-        if (! empty($config->observers['base'])) {
-            $baseModel::observe(new BaseModelObserver);
-        }
-
         if (! empty($config->observers['embedded'])) {
             foreach ($config->observers['embedded'] as $settings) {
                 if ($settings['observe']) {
                     $embeddedModel = $settings['relation'];
                     if (! Lens::checkIfWatched($embeddedModel, $indexModel)) {
-                        self::watchEmbedded($embeddedModel, $settings, $config->baseModel);
+                        self::$pendingEmbedded[] = [$embeddedModel, $settings, $config->baseModel];
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Flush any queued embedded watchers.
+     * Called automatically before model events fire.
+     */
+    public static function flushPending(): void
+    {
+        while ($pending = array_shift(self::$pendingEmbedded)) {
+            self::watchEmbedded(...$pending);
+        }
+    }
+
+    /** @deprecated Use Indexable trait boot + registerEmbedded() */
+    public static function register($baseModel): void
+    {
+        self::registerEmbedded($baseModel);
     }
 
     public static function registerWatcher($watchedModel, $indexModel): void

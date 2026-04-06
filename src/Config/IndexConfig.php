@@ -84,10 +84,10 @@ final class IndexConfig
         $this->baseModel = $baseModel ?: '';
 
         if ($this->baseModel && class_exists($this->baseModel)) {
-            $baseInstance = new $this->baseModel;
+            $baseRef = (new \ReflectionClass($this->baseModel))->newInstanceWithoutConstructor();
             $this->baseModelName = class_basename($this->baseModel);
-            $this->baseModelTable = $baseInstance->getTable();
-            $this->baseModelPrimaryKey = $baseInstance->getKeyName();
+            $this->baseModelTable = $baseRef->getTable();
+            $this->baseModelPrimaryKey = $baseRef->getKeyName();
             $this->baseModelIndexable = method_exists($this->baseModel, 'indexModel');
         } else {
             $this->baseModelName = '';

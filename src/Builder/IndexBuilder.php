@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PDPhilip\ElasticLens\Builder;
 
 use Illuminate\Support\Str;
+use ReflectionClass;
 use RuntimeException;
 
 class IndexBuilder
@@ -195,20 +196,17 @@ class IndexBuilder
     {
 
         if ($type === 'base') {
-            $base = (new $baseModel);
-            $id = $base->getKeyName();
+            $id = $this->resolveKeyName($baseModel);
             $foreignKey = $id;
             $localKey = $id;
         }
 
         if ($type == 'belongsTo') {
             if (! $foreignKey) {
-                $base = (new $baseModel);
-                $foreignKey = $base->getKeyName();
+                $foreignKey = $this->resolveKeyName($baseModel);
             }
             if (! $localKey) {
-                $rel = (new $relation);
-                $table = $rel->getTable();
+                $table = $this->resolveTableName($relation);
                 $localKey = Str::singular($table).'_id';
             }
 
@@ -216,18 +214,26 @@ class IndexBuilder
 
         if (in_array($type, ['hasMany', 'hasOne'])) {
             if (! $foreignKey) {
-                $base = (new $baseModel);
-                $table = $base->getTable();
+                $table = $this->resolveTableName($baseModel);
                 $foreignKey = Str::singular($table).'_id';
 
             }
             if (! $localKey) {
-                $rel = (new $relation);
-                $localKey = $rel->getKeyName();
+                $localKey = $this->resolveKeyName($relation);
             }
 
         }
 
         return [$foreignKey, $localKey];
+    }
+
+    private function resolveKeyName(string $class): string
+    {
+        return (new ReflectionClass($class))->newInstanceWithoutConstructor()->getKeyName();
+    }
+
+    private function resolveTableName(string $class): string
+    {
+        return (new ReflectionClass($class))->newInstanceWithoutConstructor()->getTable();
     }
 }

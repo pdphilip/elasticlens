@@ -19,7 +19,13 @@ trait Indexable
      */
     public static function bootIndexable(): void
     {
-        ObserverRegistry::register(self::class);
+        $observer = new \PDPhilip\ElasticLens\Observers\BaseModelObserver;
+        static::saved(fn ($model) => $observer->saved($model));
+        static::deleting(fn ($model) => $observer->deleting($model));
+        static::deleted(fn ($model) => $observer->deleted($model));
+        static::restored(fn ($model) => $observer->restored($model));
+
+        ObserverRegistry::registerEmbedded(static::class);
     }
 
     public static function search(string $phrase): ?Collection

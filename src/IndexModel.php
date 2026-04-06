@@ -94,7 +94,7 @@ abstract class IndexModel extends Model
 
         $baseModelClass = $indexResults->first()->getBaseModel();
         $ids = $indexResults->pluck('id')->all();
-        $keyName = (new $baseModelClass)->getKeyName();
+        $keyName = (new \ReflectionClass($baseModelClass))->newInstanceWithoutConstructor()->getKeyName();
         $baseModels = $baseModelClass::whereIn($keyName, $ids)->get()->keyBy($keyName);
 
         return $indexResults->map(fn ($item) => $baseModels->get($item->id))->filter()->values();

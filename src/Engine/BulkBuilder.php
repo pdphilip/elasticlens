@@ -118,7 +118,7 @@ class BulkBuilder
 
         try {
             ($this->config->indexModel)::destroy($ids);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Stale records may not exist — safe to ignore
         }
     }
