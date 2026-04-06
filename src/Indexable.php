@@ -23,7 +23,10 @@ trait Indexable
         static::saved(fn ($model) => $observer->saved($model));
         static::deleting(fn ($model) => $observer->deleting($model));
         static::deleted(fn ($model) => $observer->deleted($model));
-        static::restored(fn ($model) => $observer->restored($model));
+
+        if (method_exists(static::class, 'restore')) {
+            static::restored(fn ($model) => $observer->restored($model));
+        }
 
         ObserverRegistry::registerEmbedded(static::class);
     }
