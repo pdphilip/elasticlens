@@ -14,6 +14,7 @@ class BaseModelObserver
 {
     public function saved($model): void
     {
+        ObserverRegistry::flushPending();
         $indexModel = Lens::fetchIndexModelClass($model);
         try {
             $config = IndexConfig::for($indexModel);

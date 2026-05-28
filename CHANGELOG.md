@@ -2,6 +2,29 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v4.1.0 - 2026-05-28
+
+This release is compatible with Laravel 11, 12 & 13
+
+### Added
+
+- Laravel 13 support (PHP ^8.3, Symfony ^7.4||^8.0, Testbench ^11, Pest ^4)
+- `test:l11`, `test:l12`, `test:l13`, `test:all` composer scripts for local matrix runs
+- CI matrix bumped to PHP 8.3/8.4 against Laravel 11, 12 & 13
+
+### Changed
+
+- Bumped `pdphilip/omniterm` to `^3.0` (drops L10/Symfony 6)
+- Bumped `pdphilip/elasticsearch` to `^5.6`
+- Bumped `illuminate/contracts` to `^11.0||^12.0||^13.0` (dropped L10)
+- PHP minimum is now `^8.3`
+- `Indexable::bootIndexable()` now wires the base-model observer via closures at boot time instead of instantiating `BaseModelObserver` through `ObserverRegistry::register()`. L13 throws `LogicException` when a model is instantiated during another model's boot, and the old path triggered exactly that via the `IndexConfig` resolution chain.
+- `ObserverRegistry::register()` deprecated in favour of `registerEmbedded()` + `flushPending()`. The embedded-watcher setup is now queued and flushed lazily so it doesn't fire during boot.
+
+### Fixed
+
+- `restored` event is only hooked when the base model actually supports soft deletes (guarded by `method_exists(static::class, 'restore')`)
+
 ## v4.0.1
 
 ### Added

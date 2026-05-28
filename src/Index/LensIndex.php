@@ -69,7 +69,7 @@ abstract class LensIndex
         $baseModel = $instance->getBaseModel();
         if ($baseModel) {
             $this->baseModel = $baseModel;
-            $this->baseModelInstance = (new $baseModel);
+            $this->baseModelInstance = (new \ReflectionClass($baseModel))->newInstanceWithoutConstructor();
             $this->baseModelName = class_basename($baseModel);
             $this->baseModelTable = $this->baseModelInstance->getTable();
             $this->baseModelPrimaryKey = $this->baseModelInstance->getKeyName();

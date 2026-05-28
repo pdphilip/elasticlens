@@ -7,6 +7,7 @@ namespace PDPhilip\ElasticLens;
 use Exception;
 use Illuminate\Support\Collection;
 use PDPhilip\ElasticLens\Eloquent\LensBuilder;
+use PDPhilip\ElasticLens\Observers\BaseModelObserver;
 use PDPhilip\ElasticLens\Observers\ObserverRegistry;
 
 /**
@@ -19,7 +20,16 @@ trait Indexable
      */
     public static function bootIndexable(): void
     {
-        ObserverRegistry::register(self::class);
+        $observer = new BaseModelObserver;
+        static::saved(fn ($model) => $observer->saved($model));
+        static::deleting(fn ($model) => $observer->deleting($model));
+        static::deleted(fn ($model) => $observer->deleted($model));
+
+        if (method_exists(static::class, 'restore')) {
+            static::restored(fn ($model) => $observer->restored($model));
+        }
+
+        ObserverRegistry::registerEmbedded(static::class);
     }
 
     public static function search(string $phrase): ?Collection
