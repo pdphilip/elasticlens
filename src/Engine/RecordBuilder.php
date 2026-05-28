@@ -177,8 +177,8 @@ class RecordBuilder
     {
         try {
             $config->indexModel::destroy($id);
-        } catch (\Exception $e) {
-            // Index record may not exist — safe to ignore
+        } catch (Exception $e) {
+            // Index record may not exist - safe to ignore
         }
     }
 

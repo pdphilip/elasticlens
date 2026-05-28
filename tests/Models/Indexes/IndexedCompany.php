@@ -13,7 +13,7 @@ class IndexedCompany extends IndexModel
 {
     protected $baseModel = Company::class;
 
-    // No fieldMap override — uses default (all attributes)
+    // No fieldMap override - uses default (all attributes)
 
     public static function executeSchema(): void
     {

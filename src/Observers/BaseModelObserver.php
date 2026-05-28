@@ -27,7 +27,7 @@ class BaseModelObserver
     {
         $indexModel = Lens::fetchIndexModelClass($model);
         try {
-            // Soft delete with index retention — skip deletion, let deleted() handle the rebuild
+            // Soft delete with index retention - skip deletion, let deleted() handle the rebuild
             if ($this->isSoftDelete($model)) {
                 $config = IndexConfig::for($indexModel);
                 if ($config->shouldIndexSoftDeletes()) {

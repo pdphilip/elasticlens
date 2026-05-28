@@ -23,7 +23,7 @@ afterEach(function () {
 });
 
 // ======================================================================
-// RecordBuilder — Excluded records
+// RecordBuilder - Excluded records
 // ======================================================================
 
 it('skips indexing when excludeIndex returns true', function () {
@@ -141,7 +141,7 @@ it('skips indexing via observer when model is excluded', function () {
 it('removes index via observer when model transitions to excluded', function () {
     User::$excludeIndexUsing = fn ($user) => $user->is_admin;
 
-    // Create non-excluded user — observer indexes it
+    // Create non-excluded user - observer indexes it
     $user = User::create([
         'name' => 'Soon Admin',
         'email' => 'soonadmin@test.com',
@@ -153,7 +153,7 @@ it('removes index via observer when model transitions to excluded', function () 
     sleep(2);
     expect(IndexedUser::find($user->id))->not->toBeNull();
 
-    // Promote to admin — observer triggers rebuild, exclusion kicks in
+    // Promote to admin - observer triggers rebuild, exclusion kicks in
     $user->update(['is_admin' => true]);
 
     sleep(2);
@@ -175,7 +175,7 @@ it('re-indexes via observer when model transitions from excluded to included', f
     sleep(1);
     expect(IndexedUser::find($admin->id))->toBeNull();
 
-    // Demote — no longer excluded
+    // Demote - no longer excluded
     $admin->update(['is_admin' => false]);
 
     sleep(1);

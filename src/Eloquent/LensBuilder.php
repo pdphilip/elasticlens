@@ -134,7 +134,7 @@ class LensBuilder extends Builder
             return $this->paginateBase($perPage ?? 15, $pageName, $page);
         }
 
-        // Only forward $total when explicitly provided — L10 uses
+        // Only forward $total when explicitly provided - L10 uses
         // func_num_args() to detect the 5th argument and skips
         // getCountForPagination() if 5 arguments are passed.
         if ($total !== null) {
@@ -160,7 +160,7 @@ class LensBuilder extends Builder
         $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
         $path = LengthAwarePaginator::resolveCurrentPath();
 
-        // parent::paginate() calls $this->get() internally — must disable
+        // parent::paginate() calls $this->get() internally - must disable
         // base conversion so we receive index models for the batch lookup
         $esResults = $this->paginateAsIndex(fn () => parent::paginate($perPage, ['*'], $pageName, $page));
         $items = collect($esResults->items());

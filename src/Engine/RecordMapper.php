@@ -30,7 +30,7 @@ class RecordMapper
     {
         $data = [];
         if (! $fields) {
-            // No field map — take all attributes from the model
+            // No field map - take all attributes from the model
             $data = $modelData->toArray();
             if ($modelData instanceof $config->baseModel) {
                 unset($data[$config->baseModelPrimaryKey]);

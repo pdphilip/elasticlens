@@ -150,7 +150,7 @@ it('finds soft-deleted models via withTrashed', function () {
     RecordBuilder::build(IndexedUser::class, $user->id, 'test');
     $user->delete();
 
-    // User is soft deleted — RecordBuilder should still find it
+    // User is soft deleted - RecordBuilder should still find it
     $result = RecordBuilder::build(IndexedUser::class, $user->id, 'test (soft deleted)');
 
     expect($result->success)->toBeTrue()

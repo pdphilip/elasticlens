@@ -69,12 +69,12 @@ final class IndexConfig
         $this->indexModelName = class_basename($indexModelClass);
         $this->indexModelTable = $instance->getTable();
 
-        // Field map — called once, extract fields + relationships
+        // Field map - called once, extract fields + relationships
         $builder = $instance->fieldMap();
         $this->fieldMap = $builder->getFieldMap();
         $this->relationships = $builder->getRelationships();
 
-        // Observer set — uses existing public API
+        // Observer set - uses existing public API
         // (internally calls fieldMap() again, but IndexConfig is cached per-request)
         $this->observers = $instance->getObserverSet();
 
