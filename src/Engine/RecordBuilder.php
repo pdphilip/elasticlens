@@ -22,7 +22,7 @@ class RecordBuilder
 
         if (! $migrationVersion) {
             $migrationVersion = IndexableMigrationLog::getLatestVersion($config->indexModelName)
-                ?: 'v' . $config->migrationMajorVersion . '.0';
+                ?: 'v'.$config->migrationMajorVersion.'.0';
         }
         $result->attachMigrationVersion($migrationVersion);
 
@@ -81,7 +81,7 @@ class RecordBuilder
             $callback();
             $result->successful('Custom Build Passed');
         } catch (Exception $e) {
-            $result->setMessage('Custom Build Failed', 'Exception: ' . $e->getMessage());
+            $result->setMessage('Custom Build Failed', 'Exception: '.$e->getMessage());
             $result->failed();
         }
 
@@ -126,7 +126,7 @@ class RecordBuilder
         }
         $model = $query->find($id);
         if (! $model) {
-            $result->setMessage('BaseModel not found', 'BaseModel ' . $config->baseModel . ' did not have a record for id: ' . $id);
+            $result->setMessage('BaseModel not found', 'BaseModel '.$config->baseModel.' did not have a record for id: '.$id);
 
             return false;
         }
@@ -134,14 +134,14 @@ class RecordBuilder
         try {
             $data = RecordMapper::map($model, $config);
         } catch (Exception $e) {
-            $result->setMessage('Record Mapping Error', 'Exception: ' . $e->getMessage());
+            $result->setMessage('Record Mapping Error', 'Exception: '.$e->getMessage());
 
             return false;
         }
 
         if ($data === null) {
             $result->skipped = true;
-            $result->setMessage('BaseModel excluded', 'BaseModel ' . $config->baseModel . ' has excludeIndex() set to true');
+            $result->setMessage('BaseModel excluded', 'BaseModel '.$config->baseModel.' has excludeIndex() set to true');
 
             return false;
         }

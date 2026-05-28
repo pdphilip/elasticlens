@@ -33,15 +33,15 @@ class BulkBuilder
         $this->config = IndexConfig::for($indexModel);
 
         if (! $this->config->baseModel) {
-            throw new Exception('BulkIndexing not available for "' . $indexModel . '": BaseModel not set');
+            throw new Exception('BulkIndexing not available for "'.$indexModel.'": BaseModel not set');
         }
 
         if (! $this->config->baseModelIndexable) {
-            throw new Exception('BulkIndexing not available for "' . $indexModel . '": Base model not indexable');
+            throw new Exception('BulkIndexing not available for "'.$indexModel.'": Base model not indexable');
         }
 
         $this->migrationVersion = IndexableMigrationLog::getLatestVersion($this->config->indexModelName)
-            ?: 'v' . $this->config->migrationMajorVersion . '.0';
+            ?: 'v'.$this->config->migrationMajorVersion.'.0';
         $this->startTime = microtime(true);
     }
 
