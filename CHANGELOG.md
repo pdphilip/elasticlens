@@ -2,6 +2,22 @@
 
 All notable changes to `elasticlens` will be documented in this file.
 
+## v4.1.1 - 2026-08-20
+
+This release is compatible with Laravel 11, 12 & 13
+
+### Fixed
+
+- **`getBase()` handed back a different collection type when nothing matched** - a plain `Collection`
+  on empty results and an `ElasticCollection` otherwise. Base models now always come back as an
+  `ElasticCollection`, empty results included, which is what `paginateBase()` and the `asBase()`
+  collection macro return as well
+
+### Changed
+
+- Requires `pdphilip/elasticsearch` `^5.7.1`, where `ElasticCollection`'s meta getters stopped
+  fataling on collections that did not come from a query
+
 ## v4.1.0 - 2026-05-28
 
 This release is compatible with Laravel 11, 12 & 13

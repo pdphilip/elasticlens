@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PDPhilip\ElasticLens\Eloquent;
 
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use PDPhilip\ElasticLens\IndexModel;
 use PDPhilip\Elasticsearch\Eloquent\Builder;
 use PDPhilip\Elasticsearch\Eloquent\ElasticCollection;
@@ -35,7 +34,7 @@ class LensBuilder extends Builder
     {
         $results = parent::get($columns);
         if ($this->returnAsBase) {
-            return new ElasticCollection(IndexModel::batchFetchBaseModels($results)->all());
+            return IndexModel::batchFetchBaseModels($results);
         }
 
         return $results;
@@ -56,15 +55,9 @@ class LensBuilder extends Builder
      *
      * @param  array|string  $columns
      */
-    public function getBase($columns = ['*']): Collection
+    public function getBase($columns = ['*']): ElasticCollection
     {
-        $results = parent::get($columns);
-
-        if ($results->isEmpty()) {
-            return collect();
-        }
-
-        return IndexModel::batchFetchBaseModels($results);
+        return IndexModel::batchFetchBaseModels(parent::get($columns));
     }
 
     // ======================================================================
@@ -163,18 +156,9 @@ class LensBuilder extends Builder
         // parent::paginate() calls $this->get() internally - must disable
         // base conversion so we receive index models for the batch lookup
         $esResults = $this->paginateAsIndex(fn () => parent::paginate($perPage, ['*'], $pageName, $page));
-        $items = collect($esResults->items());
+        $baseItems = IndexModel::batchFetchBaseModels($esResults->getCollection());
 
-        if ($items->isEmpty()) {
-            return new LengthAwarePaginator(collect(), 0, $perPage, $page, $options + ['path' => $path]);
-        }
-
-        $baseItems = IndexModel::batchFetchBaseModels($items);
-
-        $paginator = new LengthAwarePaginator($baseItems, $esResults->total(), $perPage, $page, $options);
-        $paginator->setPath($path);
-
-        return $paginator;
+        return new LengthAwarePaginator($baseItems, $esResults->total(), $perPage, $page, $options + ['path' => $path]);
     }
 
     /**

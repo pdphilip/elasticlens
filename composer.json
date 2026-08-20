@@ -20,7 +20,7 @@
   "require": {
     "php": "^8.3",
     "illuminate/contracts": "^11.0||^12.0||^13.0",
-    "pdphilip/elasticsearch": "^5.6",
+    "pdphilip/elasticsearch": "^5.7.1",
     "pdphilip/omniterm": "^3.0",
     "spatie/laravel-package-tools": "^1.16"
   },

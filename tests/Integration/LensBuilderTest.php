@@ -273,3 +273,26 @@ it('viaIndex paginate returns base models', function () {
         ->and($results->total())->toBe(3)
         ->and($results->items()[0])->toBeInstanceOf(User::class);
 });
+
+// ======================================================================
+// Collection type
+// ======================================================================
+
+it('returns base models as an ElasticCollection when nothing matches', function () {
+    $paginated = IndexedUser::query()->paginateBase(10);
+
+    expect(IndexedUser::query()->getBase())->toBeInstanceOf(ElasticCollection::class)
+        ->and(User::viaIndex()->get())->toBeInstanceOf(ElasticCollection::class)
+        ->and(IndexedUser::query()->getIndex()->asBase())->toBeInstanceOf(ElasticCollection::class)
+        ->and($paginated->getCollection())->toBeInstanceOf(ElasticCollection::class);
+});
+
+it('returns base models as an ElasticCollection when there are results', function () {
+    seedUsers(3);
+    $paginated = IndexedUser::query()->paginateBase(10);
+
+    expect(IndexedUser::query()->getBase())->toBeInstanceOf(ElasticCollection::class)
+        ->and(User::viaIndex()->get())->toBeInstanceOf(ElasticCollection::class)
+        ->and(IndexedUser::query()->getIndex()->asBase())->toBeInstanceOf(ElasticCollection::class)
+        ->and($paginated->getCollection())->toBeInstanceOf(ElasticCollection::class);
+});

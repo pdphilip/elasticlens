@@ -16,17 +16,18 @@ use PDPhilip\ElasticLens\Index\MigrationValidator;
 use PDPhilip\ElasticLens\Models\IndexableBuild;
 use PDPhilip\ElasticLens\Models\IndexableMigrationLog;
 use PDPhilip\Elasticsearch\Eloquent\Builder;
+use PDPhilip\Elasticsearch\Eloquent\ElasticCollection;
 use PDPhilip\Elasticsearch\Eloquent\Model;
 
 /**
  * @property string $id
  *
  * @method static LensBuilder query()
- * @method Collection getBase($columns = ['*'])
- * @method \PDPhilip\Elasticsearch\Eloquent\ElasticCollection|array getIndex($columns = ['*'])
+ * @method ElasticCollection getBase($columns = ['*'])
+ * @method ElasticCollection|array getIndex($columns = ['*'])
  * @method \Illuminate\Pagination\LengthAwarePaginator paginateBase(int $perPage = 15, string $pageName = 'page', ?int $page = null, array $options = [])
  * @method \Illuminate\Pagination\LengthAwarePaginator paginateIndex($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null)
- * @method static Collection asBase() This method should only be called on a Collection of index model results.
+ * @method static ElasticCollection asBase() This method should only be called on a Collection of index model results.
  *
  * @phpstan-consistent-constructor
  */
@@ -74,30 +75,25 @@ abstract class IndexModel extends Model
         }
         self::$collectionMacroRegistered = true;
 
-        Collection::macro('asBase', function () {
-            if ($this->isEmpty()) {
-                return collect();
-            }
-
-            return IndexModel::batchFetchBaseModels($this);
-        });
+        Collection::macro('asBase', fn () => IndexModel::batchFetchBaseModels($this));
     }
 
     /**
      * Batch-fetch base models for a collection of index results using a single whereIn query.
      */
-    public static function batchFetchBaseModels(Collection $indexResults): Collection
+    public static function batchFetchBaseModels(Collection $indexResults): ElasticCollection
     {
         if ($indexResults->isEmpty()) {
-            return collect();
+            return new ElasticCollection;
         }
 
         $baseModelClass = $indexResults->first()->getBaseModel();
         $ids = $indexResults->pluck('id')->all();
         $keyName = (new \ReflectionClass($baseModelClass))->newInstanceWithoutConstructor()->getKeyName();
         $baseModels = $baseModelClass::whereIn($keyName, $ids)->get()->keyBy($keyName);
+        $ordered = $indexResults->map(fn ($item) => $baseModels->get($item->id))->filter()->values();
 
-        return $indexResults->map(fn ($item) => $baseModels->get($item->id))->filter()->values();
+        return new ElasticCollection($ordered->all());
     }
 
     // ======================================================================
